@@ -118,18 +118,18 @@ function CreditPurchaseForm() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-      <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+    <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md">
+      <h3 className="text-xl font-semibold mb-3 sm:mb-4 text-gray-800 dark:text-white">
         Credit Balance
       </h3>
-      <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900 rounded-md">
-        <p className="text-lg font-medium text-blue-700 dark:text-blue-300">
+      <div className="mb-5 sm:mb-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900 rounded-md">
+        <p className="text-base sm:text-lg font-medium text-blue-700 dark:text-blue-300">
           Current Balance:{" "}
           <span className="font-bold">{creditBalance} credits</span>
         </p>
       </div>
 
-      <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+      <h3 className="text-xl font-semibold mb-3 sm:mb-4 text-gray-800 dark:text-white">
         Purchase Credits
       </h3>
 
@@ -191,7 +191,7 @@ function CreditPurchaseForm() {
               className="stripe-card-element"
             />
           </div>
-          <div className="mt-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 p-3 rounded-md">
+          <div className="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 p-2 sm:p-3 rounded-md">
             <p className="font-medium mb-1">
               ⚠️ Test Mode - Use Test Cards Only
             </p>
@@ -199,18 +199,24 @@ function CreditPurchaseForm() {
               This payment form is in test mode. Please use one of these test
               card numbers:
             </p>
-            <ul className="list-disc pl-5 mt-1 space-y-1">
+            <ul className="list-disc pl-4 sm:pl-5 mt-1 space-y-1">
               <li>
-                <span className="font-mono">4242 4242 4242 4242</span> -
-                Successful payment
+                <span className="font-mono text-xs sm:text-sm">
+                  4242 4242 4242 4242
+                </span>{" "}
+                - Successful payment
               </li>
               <li>
-                <span className="font-mono">4000 0000 0000 0002</span> -
-                Declined (generic)
+                <span className="font-mono text-xs sm:text-sm">
+                  4000 0000 0000 0002
+                </span>{" "}
+                - Declined (generic)
               </li>
               <li>
-                <span className="font-mono">4000 0000 0000 9995</span> -
-                Declined (insufficient funds)
+                <span className="font-mono text-xs sm:text-sm">
+                  4000 0000 0000 9995
+                </span>{" "}
+                - Declined (insufficient funds)
               </li>
             </ul>
             <p className="mt-1">
@@ -250,7 +256,7 @@ function CreditPurchaseForm() {
           <button
             type="submit"
             disabled={!stripe || loading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed"
+            className="w-full flex justify-center py-2 sm:py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed"
           >
             {loading ? "Processing..." : `Purchase Credits ($${amount}.00)`}
           </button>

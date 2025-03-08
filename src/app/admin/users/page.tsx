@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface User {
   id: number;
@@ -221,26 +222,40 @@ export default function UsersPage() {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-muted">
-                <th className="p-3 text-left">ID</th>
-                <th className="p-3 text-left">Username</th>
-                <th className="p-3 text-left">Email</th>
-                <th className="p-3 text-left">Role</th>
-                <th className="p-3 text-left">Credits</th>
-                <th className="p-3 text-left">Created</th>
-                <th className="p-3 text-left">Actions</th>
+                <th className="p-3 text-left text-muted-foreground font-medium">
+                  ID
+                </th>
+                <th className="p-3 text-left text-muted-foreground font-medium">
+                  Username
+                </th>
+                <th className="p-3 text-left text-muted-foreground font-medium">
+                  Email
+                </th>
+                <th className="p-3 text-left text-muted-foreground font-medium">
+                  Role
+                </th>
+                <th className="p-3 text-left text-muted-foreground font-medium">
+                  Credits
+                </th>
+                <th className="p-3 text-left text-muted-foreground font-medium">
+                  Created
+                </th>
+                <th className="p-3 text-left text-muted-foreground font-medium">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
               {users.length === 0 ? (
-                <tr>
+                <tr key="no-users">
                   <td colSpan={7} className="p-3 text-center">
                     No users found.
                   </td>
                 </tr>
               ) : (
-                users.map((user) => (
+                users.map((user, index) => (
                   <tr
-                    key={user.id}
+                    key={`user-${user.id}-${index}`}
                     className="border-b border-border hover:bg-muted/50"
                   >
                     <td className="p-3">{user.id}</td>

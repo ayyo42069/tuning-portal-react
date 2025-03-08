@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface TuningRequest {
   id: number;
@@ -13,7 +14,7 @@ interface TuningRequest {
   manufacturer_name: string;
   model_name: string;
   production_year: number;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   created_at: string;
   updated_at: string;
   admin_message: string | null;
@@ -29,9 +30,11 @@ export default function TuningRequestsPage() {
   const [requests, setRequests] = useState<TuningRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedRequest, setSelectedRequest] = useState<TuningRequest | null>(null);
-  const [statusUpdate, setStatusUpdate] = useState<string>('');
-  const [adminMessage, setAdminMessage] = useState<string>('');
+  const [selectedRequest, setSelectedRequest] = useState<TuningRequest | null>(
+    null
+  );
+  const [statusUpdate, setStatusUpdate] = useState<string>("");
+  const [adminMessage, setAdminMessage] = useState<string>("");
   const [processingFile, setProcessingFile] = useState<File | null>(null);
   const router = useRouter();
 
@@ -42,13 +45,13 @@ export default function TuningRequestsPage() {
   const fetchTuningRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/tuning-requests', {
-        credentials: 'include',
+      const response = await fetch("/api/admin/tuning-requests", {
+        credentials: "include",
       });
 
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
-          router.push('/auth/login');
+          router.push("/auth/login");
           return;
         }
         throw new Error(`Failed to fetch tuning requests: ${response.status}`);
@@ -57,8 +60,8 @@ export default function TuningRequestsPage() {
       const data = await response.json();
       setRequests(data.requests || []);
     } catch (err) {
-      setError('Failed to load tuning requests. Please try again later.');
-      console.error('Error fetching tuning requests:', err);
+      setError("Failed to load tuning requests. Please try again later.");
+      console.error("Error fetching tuning requests:", err);
     } finally {
       setLoading(false);
     }
@@ -66,23 +69,23 @@ export default function TuningRequestsPage() {
 
   const handleDownload = async (id: number) => {
     try {
-      window.open(`/api/ecu/download?id=${id}`, '_blank');
+      window.open(`/api/ecu/download?id=${id}`, "_blank");
     } catch (err) {
-      console.error('Error downloading file:', err);
-      setError('Failed to download file. Please try again.');
+      console.error("Error downloading file:", err);
+      setError("Failed to download file. Please try again.");
     }
   };
 
   const handleStatusUpdate = async (id: number) => {
     if (!statusUpdate) return;
-    
+
     try {
       const response = await fetch(`/api/admin/tuning-requests/${id}/status`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify({
           status: statusUpdate,
           message: adminMessage,
@@ -96,11 +99,11 @@ export default function TuningRequestsPage() {
       // Refresh the list
       fetchTuningRequests();
       setSelectedRequest(null);
-      setStatusUpdate('');
-      setAdminMessage('');
+      setStatusUpdate("");
+      setAdminMessage("");
     } catch (err) {
-      console.error('Error updating status:', err);
-      setError('Failed to update status. Please try again.');
+      console.error("Error updating status:", err);
+      setError("Failed to update status. Please try again.");
     }
   };
 
@@ -109,11 +112,11 @@ export default function TuningRequestsPage() {
 
     try {
       const formData = new FormData();
-      formData.append('file', processingFile);
+      formData.append("file", processingFile);
 
       const response = await fetch(`/api/admin/tuning-requests/${id}/upload`, {
-        method: 'POST',
-        credentials: 'include',
+        method: "POST",
+        credentials: "include",
         body: formData,
       });
 
@@ -125,12 +128,12 @@ export default function TuningRequestsPage() {
       fetchTuningRequests();
       setSelectedRequest(null);
       setProcessingFile(null);
-      setStatusUpdate('completed');
+      setStatusUpdate("completed");
       // Auto-update status to completed
       handleStatusUpdate(id);
     } catch (err) {
-      console.error('Error uploading processed file:', err);
-      setError('Failed to upload processed file. Please try again.');
+      console.error("Error uploading processed file:", err);
+      setError("Failed to upload processed file. Please try again.");
     }
   };
 
@@ -138,175 +141,321 @@ export default function TuningRequestsPage() {
     return new Date(dateString).toLocaleString();
   };
 
+  const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100";
+      case "processing":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100";
+      case "completed":
+        return "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100";
+      case "failed":
+        return "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100";
+    }
+  };
+
   if (loading) {
-    return <div className="flex justify-center p-8">Loading tuning requests...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" message="Loading tuning requests..." />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-red-500 p-8">{error}</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-400 text-red-700 rounded-md">
+            <p>{error}</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">Tuning Requests</h1>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Tuning Requests
+          </h1>
+        </div>
 
-      {selectedRequest ? (
-        <div className="bg-card p-6 rounded-lg shadow-sm mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold">
-              Request #{selectedRequest.id}: {selectedRequest.file_name}
-            </h2>
-            <button
-              onClick={() => setSelectedRequest(null)}
-              className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80"
-            >
-              Back to List
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <h3 className="text-lg font-medium mb-2">Vehicle Information</h3>
-              <p><strong>Manufacturer:</strong> {selectedRequest.manufacturer_name}</p>
-              <p><strong>Model:</strong> {selectedRequest.model_name}</p>
-              <p><strong>Year:</strong> {selectedRequest.production_year}</p>
-              <p><strong>Status:</strong> <span className={`font-semibold ${selectedRequest.status === 'completed' ? 'text-green-500' : selectedRequest.status === 'failed' ? 'text-red-500' : 'text-yellow-500'}`}>{selectedRequest.status}</span></p>
-              <p><strong>Created:</strong> {formatDate(selectedRequest.created_at)}</p>
+        {selectedRequest ? (
+          <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg mb-8">
+            <div className="px-4 py-5 sm:px-6 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  Request #{selectedRequest.id}: {selectedRequest.file_name}
+                </h2>
+                <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
+                  Created on {formatDate(selectedRequest.created_at)}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedRequest(null)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+              >
+                Back to List
+              </button>
             </div>
 
-            <div>
-              <h3 className="text-lg font-medium mb-2">Tuning Options</h3>
-              <ul className="list-disc pl-5">
-                {selectedRequest.tuning_options.map(option => (
-                  <li key={option.id}>
-                    {option.name} - {option.credit_cost} credits
+            <div className="border-b border-gray-200 dark:border-gray-700">
+              <dl>
+                <div className="bg-gray-50 dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Vehicle Information
+                  </dt>
+                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+                    {selectedRequest.manufacturer_name}{" "}
+                    {selectedRequest.model_name}, Year:{" "}
+                    {selectedRequest.production_year}
+                  </dd>
+                </div>
+                <div className="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Status
+                  </dt>
+                  <dd className="mt-1 text-sm sm:mt-0 sm:col-span-2">
+                    <span
+                      className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(
+                        selectedRequest.status
+                      )}`}
+                    >
+                      {selectedRequest.status.charAt(0).toUpperCase() +
+                        selectedRequest.status.slice(1)}
+                    </span>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                Tuning Options
+              </h3>
+              <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                {selectedRequest.tuning_options.map((option) => (
+                  <li key={option.id} className="py-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {option.name}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {option.description}
+                        </p>
+                      </div>
+                      <div className="ml-2 flex-shrink-0">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                          {option.credit_cost} credits
+                        </span>
+                      </div>
+                    </div>
                   </li>
                 ))}
               </ul>
             </div>
-          </div>
 
-          <div className="border-t border-border pt-4 mb-6">
-            <h3 className="text-lg font-medium mb-2">File Management</h3>
-            <div className="flex flex-wrap gap-4">
-              <button
-                onClick={() => handleDownload(selectedRequest.id)}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80"
-              >
-                Download Original File
-              </button>
-
-              <div>
-                <label className="block mb-2">Upload Processed File:</label>
-                <input
-                  type="file"
-                  accept=".bin"
-                  onChange={(e) => setProcessingFile(e.target.files?.[0] || null)}
-                  className="mb-2"
-                />
+            <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                File Management
+              </h3>
+              <div className="flex flex-wrap gap-4">
                 <button
-                  onClick={() => handleProcessedFileUpload(selectedRequest.id)}
-                  disabled={!processingFile}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
+                  onClick={() => handleDownload(selectedRequest.id)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
                 >
-                  Upload Processed File
+                  Download Original File
                 </button>
+
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Upload Processed File:
+                  </label>
+                  <div className="flex gap-4">
+                    <input
+                      type="file"
+                      accept=".bin"
+                      onChange={(e) =>
+                        setProcessingFile(e.target.files?.[0] || null)
+                      }
+                      className="block w-full text-sm text-gray-500 dark:text-gray-400
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-md file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-blue-50 file:text-blue-700
+                        dark:file:bg-blue-900 dark:file:text-blue-200
+                        hover:file:bg-blue-100 dark:hover:file:bg-blue-800"
+                    />
+                    <button
+                      onClick={() =>
+                        handleProcessedFileUpload(selectedRequest.id)
+                      }
+                      disabled={!processingFile}
+                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    >
+                      Upload
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="border-t border-border pt-4">
-            <h3 className="text-lg font-medium mb-2">Update Status</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block mb-2">Status:</label>
-                <select
-                  value={statusUpdate}
-                  onChange={(e) => setStatusUpdate(e.target.value)}
-                  className="w-full p-2 border border-input rounded-md bg-background"
-                >
-                  <option value="">Select Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="processing">Processing</option>
-                  <option value="completed">Completed</option>
-                  <option value="failed">Failed</option>
-                </select>
+            <div className="px-4 py-5 sm:px-6">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                Update Status
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Status:
+                  </label>
+                  <select
+                    value={statusUpdate}
+                    onChange={(e) => setStatusUpdate(e.target.value)}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Select Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="completed">Completed</option>
+                    <option value="failed">Failed</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Admin Message:
+                  </label>
+                  <textarea
+                    value={adminMessage}
+                    onChange={(e) => setAdminMessage(e.target.value)}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    rows={3}
+                    placeholder="Optional message to the user"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block mb-2">Admin Message:</label>
-                <textarea
-                  value={adminMessage}
-                  onChange={(e) => setAdminMessage(e.target.value)}
-                  className="w-full p-2 border border-input rounded-md bg-background"
-                  rows={3}
-                  placeholder="Optional message to the user"
-                />
-              </div>
+              <button
+                onClick={() => handleStatusUpdate(selectedRequest.id)}
+                disabled={!statusUpdate}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              >
+                Update Status
+              </button>
             </div>
-
-            <button
-              onClick={() => handleStatusUpdate(selectedRequest.id)}
-              disabled={!statusUpdate}
-              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 disabled:opacity-50"
-            >
-              Update Status
-            </button>
           </div>
-        </div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-muted">
-                <th className="p-3 text-left">ID</th>
-                <th className="p-3 text-left">File Name</th>
-                <th className="p-3 text-left">Vehicle</th>
-                <th className="p-3 text-left">Status</th>
-                <th className="p-3 text-left">Created</th>
-                <th className="p-3 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {requests.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-3 text-center">
-                    No tuning requests found.
-                  </td>
-                </tr>
-              ) : (
-                requests.map((request) => (
-                  <tr key={request.id} className="border-b border-border hover:bg-muted/50">
-                    <td className="p-3">{request.id}</td>
-                    <td className="p-3">{request.file_name}</td>
-                    <td className="p-3">{request.vehicle_info}</td>
-                    <td className="p-3">
-                      <span className={`inline-block px-2 py-1 rounded-full text-xs ${request.status === 'completed' ? 'bg-green-100 text-green-800' : request.status === 'failed' ? 'bg-red-100 text-red-800' : request.status === 'processing' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                        {request.status}
-                      </span>
-                    </td>
-                    <td className="p-3">{formatDate(request.created_at)}</td>
-                    <td className="p-3">
-                      <button
-                        onClick={() => setSelectedRequest(request)}
-                        className="px-3 py-1 bg-primary text-primary-foreground rounded-md hover:bg-primary/80 mr-2"
-                      >
-                        View
-                      </button>
-                      <button
-                        onClick={() => handleDownload(request.id)}
-                        className="px-3 py-1 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80"
-                      >
-                        Download
-                      </button>
-                    </td>
+        ) : (
+          <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-700">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                    >
+                      ID
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                    >
+                      File Name
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                    >
+                      Vehicle
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                    >
+                      Status
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                    >
+                      Created
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                    >
+                      Actions
+                    </th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  {requests.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400"
+                      >
+                        No tuning requests found.
+                      </td>
+                    </tr>
+                  ) : (
+                    requests.map((request) => (
+                      <tr
+                        key={request.id}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                          {request.id}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                          {request.file_name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          {request.vehicle_info}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(
+                              request.status
+                            )}`}
+                          >
+                            {request.status.charAt(0).toUpperCase() +
+                              request.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          {formatDate(request.created_at)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                          <button
+                            onClick={() => setSelectedRequest(request)}
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                          >
+                            View
+                          </button>
+                          <button
+                            onClick={() => handleDownload(request.id)}
+                            className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
+                          >
+                            Download
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

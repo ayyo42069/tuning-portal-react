@@ -1,8 +1,73 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, Car, CarFront, Calendar, Settings, MessageSquare, Loader2 } from "lucide-react";
+import {
+  Upload,
+  Car,
+  CarFront,
+  Calendar,
+  Settings,
+  MessageSquare,
+  Loader2,
+  HelpCircle,
+} from "lucide-react";
+import {
+  useFloating,
+  useInteractions,
+  useHover,
+  offset,
+  flip,
+  shift,
+  arrow,
+  FloatingArrow,
+  FloatingPortal,
+} from "@floating-ui/react";
+
+interface TooltipProps {
+  content: string;
+  children: React.ReactNode;
+}
+
+function CustomTooltip({ content, children }: TooltipProps) {
+  const arrowRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const { refs, floatingStyles, context } = useFloating({
+    open: isOpen,
+    onOpenChange: setIsOpen,
+    placement: "top",
+    middleware: [offset(8), flip(), shift(), arrow({ element: arrowRef })],
+  });
+
+  const hover = useHover(context);
+  const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
+
+  return (
+    <>
+      <div ref={refs.setReference} {...getReferenceProps()}>
+        {children}
+      </div>
+      {isOpen && (
+        <FloatingPortal>
+          <div
+            ref={refs.setFloating}
+            style={floatingStyles}
+            className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md z-50"
+            {...getFloatingProps()}
+          >
+            {content}
+            <FloatingArrow
+              ref={arrowRef}
+              context={context}
+              className="fill-gray-900"
+            />
+          </div>
+        </FloatingPortal>
+      )}
+    </>
+  );
+}
 
 interface Manufacturer {
   id: number;
@@ -36,6 +101,7 @@ export default function ECUUploadForm() {
   const [message, setMessage] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     // Fetch manufacturers
@@ -144,7 +210,9 @@ export default function ECUUploadForm() {
         setSelectedModel(0);
         setSelectedOptions([]);
         setMessage("");
-        // Show success message or redirect
+        // Show success message
+        setShowSuccessModal(true);
+        // Refresh the page to update recent activity
         router.refresh();
       } else {
         const data = await response.json();
@@ -158,6 +226,11 @@ export default function ECUUploadForm() {
     }
   };
 
+  // Function to close the success modal
+  const closeSuccessModal = () => {
+    setShowSuccessModal(false);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
@@ -166,96 +239,157 @@ export default function ECUUploadForm() {
         </div>
       )}
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full shadow-xl">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                <svg
+                  className="h-6 w-6 text-green-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-2">
+                Upload Successful!
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Your ECU file has been uploaded successfully. You can view it in
+                your tuning history.
+              </p>
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={closeSuccessModal}
+                  className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-500"
+                >
+                  Got it, thanks!
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+        <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
           <div className="flex items-center">
-            <Upload className="w-4 h-4 mr-2" />
-            ECU File (.bin)
+            <Upload className="w-5 h-5 mr-2 text-blue-600" />
+            ECU File Upload
+            <CustomTooltip content="Upload your ECU binary file (.bin format)">
+              <HelpCircle className="w-4 h-4 ml-2 text-blue-500 cursor-help" />
+            </CustomTooltip>
           </div>
         </label>
-        <input
-          type="file"
-          accept=".bin"
-          onChange={handleFileChange}
-          className="mt-1 block w-full text-sm text-gray-500
-            file:mr-4 file:py-2 file:px-4
-            file:rounded-md file:border-0
-            file:text-sm file:font-semibold
-            file:bg-blue-50 file:text-blue-700
-            hover:file:bg-blue-100"
-        />
+        <div className="mt-2 bg-gray-50 dark:bg-gray-700 p-4 rounded-md">
+          <input
+            type="file"
+            accept=".bin"
+            onChange={handleFileChange}
+            className="mt-1 block w-full text-sm text-gray-500
+              file:mr-4 file:py-2 file:px-3 sm:file:py-3 sm:file:px-4
+              file:rounded-md file:border-0
+              file:text-sm file:font-semibold
+              file:bg-blue-50 file:text-blue-700 dark:file:bg-blue-900 dark:file:text-blue-200
+              hover:file:bg-blue-100 dark:hover:file:bg-blue-800
+              transition-colors duration-200"
+          />
+          {file && (
+            <div className="mt-2 text-sm text-green-600 dark:text-green-400 flex items-center">
+              <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+              File selected: {file.name}
+            </div>
+          )}
+        </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          <div className="flex items-center">
-            <Car className="w-4 h-4 mr-2" />
-            Manufacturer
-          </div>
-        </label>
-        <select
-          value={selectedManufacturer}
-          onChange={(e) => setSelectedManufacturer(Number(e.target.value))}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-        >
-          <option value={0}>Select Manufacturer</option>
-          {manufacturers.map((manufacturer) => (
-            <option key={manufacturer.id} value={manufacturer.id}>
-              {manufacturer.name}
-            </option>
-          ))}
-        </select>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6">
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
+            <div className="flex items-center">
+              <Car className="w-5 h-5 mr-2 text-indigo-600" />
+              Manufacturer
+            </div>
+          </label>
+          <select
+            value={selectedManufacturer}
+            onChange={(e) => setSelectedManufacturer(Number(e.target.value))}
+            className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2.5"
+          >
+            <option value={0}>Select Manufacturer</option>
+            {manufacturers.map((manufacturer) => (
+              <option key={manufacturer.id} value={manufacturer.id}>
+                {manufacturer.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
+            <div className="flex items-center">
+              <CarFront className="w-5 h-5 mr-2 text-indigo-600" />
+              Model
+            </div>
+          </label>
+          <select
+            value={selectedModel}
+            onChange={(e) => setSelectedModel(Number(e.target.value))}
+            className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2.5"
+            disabled={!selectedManufacturer}
+          >
+            <option value={0}>Select Model</option>
+            {models.map((model) => (
+              <option key={model.id} value={model.id}>
+                {model.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
+            <div className="flex items-center">
+              <Calendar className="w-5 h-5 mr-2 text-indigo-600" />
+              Production Year
+            </div>
+          </label>
+          <input
+            type="number"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            min={1990}
+            max={new Date().getFullYear()}
+            className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2.5"
+          />
+        </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+      <div className="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
           <div className="flex items-center">
-            <CarFront className="w-4 h-4 mr-2" />
-            Model
-          </div>
-        </label>
-        <select
-          value={selectedModel}
-          onChange={(e) => setSelectedModel(Number(e.target.value))}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-          disabled={!selectedManufacturer}
-        >
-          <option value={0}>Select Model</option>
-          {models.map((model) => (
-            <option key={model.id} value={model.id}>
-              {model.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          <div className="flex items-center">
-            <Calendar className="w-4 h-4 mr-2" />
-            Production Year
-          </div>
-        </label>
-        <input
-          type="number"
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(Number(e.target.value))}
-          min={1990}
-          max={new Date().getFullYear()}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          <div className="flex items-center">
-            <Settings className="w-4 h-4 mr-2" />
+            <Settings className="w-5 h-5 mr-2 text-indigo-600" />
             Tuning Options
+            <CustomTooltip content="Select the tuning options you want to apply to your ECU file">
+              <HelpCircle className="w-4 h-4 ml-2 text-blue-500 cursor-help" />
+            </CustomTooltip>
           </div>
         </label>
-        <div className="mt-2 space-y-2">
+        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-gray-50 dark:bg-gray-700 p-3 sm:p-4 rounded-md">
           {tuningOptions.map((option) => (
-            <label key={option.id} className="flex items-center">
+            <label
+              key={option.id}
+              className="flex items-start p-2 sm:p-3 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transition-colors duration-200"
+            >
               <input
                 type="checkbox"
                 value={option.id}
@@ -269,52 +403,57 @@ export default function ECUUploadForm() {
                     );
                   }
                 }}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-0.5"
               />
-              <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                {option.name} - {option.description} ({option.credit_cost}{" "}
-                credits)
-              </span>
+              <div className="ml-3">
+                <span className="block text-sm font-medium text-gray-800 dark:text-white">
+                  {option.name}
+                </span>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {option.description}
+                </p>
+                <div className="mt-1 text-xs font-medium text-blue-600 dark:text-blue-400">
+                  {option.credit_cost} credits
+                </div>
+              </div>
             </label>
           ))}
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+      <div className="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
           <div className="flex items-center">
-            <MessageSquare className="w-4 h-4 mr-2" />
-            Message (Optional)
+            <MessageSquare className="w-5 h-5 mr-2 text-indigo-600" />
+            Additional Notes
+            <CustomTooltip content="Add any specific instructions or notes for the tuning process">
+              <HelpCircle className="w-4 h-4 ml-2 text-blue-500 cursor-help" />
+            </CustomTooltip>
           </div>
         </label>
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-          placeholder="Add any additional information for the tuning process..."
+          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-2.5"
+          placeholder="Enter any specific requirements or details about your tuning request..."
         />
       </div>
 
-      <div>
+      <div className="flex justify-center sm:justify-end">
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300"
+          className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 focus:ring-offset-blue-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <div className="flex items-center justify-center">
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Uploading...
-              </>
-            ) : (
-              <>
-                <Upload className="w-4 h-4 mr-2" />
-                Upload ECU File
-              </>
-            )}
-          </div>
+          {loading ? (
+            <>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            <>Submit ECU File</>
+          )}
         </button>
       </div>
     </form>

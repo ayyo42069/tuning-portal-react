@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface TuningOption {
   id: number;
@@ -52,38 +53,47 @@ export default function TuningFileDetailsPage({
     getFileId();
   }, [params]);
 
+  // Define the fetch function outside useEffect so we can reuse it for polling
+  const fetchTuningFileDetails = async () => {
+    if (!fileId) return;
+
+    try {
+      const response = await fetch(`/api/tuning/file?id=${fileId}`, {
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          router.push("/auth/login");
+          return;
+        }
+        throw new Error(
+          `Failed to fetch tuning file details: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      setTuningFile(data.tuningFile);
+    } catch (error) {
+      console.error("Error fetching tuning file details:", error);
+      setError("Failed to load tuning file details. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Only fetch when fileId is available
     if (!fileId) return;
 
-    // Fetch tuning file details
-    const fetchTuningFileDetails = async () => {
-      try {
-        const response = await fetch(`/api/tuning/file?id=${fileId}`, {
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            router.push("/auth/login");
-            return;
-          }
-          throw new Error(
-            `Failed to fetch tuning file details: ${response.status}`
-          );
-        }
-
-        const data = await response.json();
-        setTuningFile(data.tuningFile);
-      } catch (error) {
-        console.error("Error fetching tuning file details:", error);
-        setError("Failed to load tuning file details. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTuningFileDetails();
+
+    // Set up polling interval - check for updates every 30 seconds
+    // This is especially useful for files in 'pending' or 'processing' status
+    const intervalId = setInterval(fetchTuningFileDetails, 30000);
+
+    // Clean up interval on component unmount or when fileId changes
+    return () => clearInterval(intervalId);
   }, [fileId, router]); // Use fileId in dependency array
 
   const getStatusBadgeClass = (status: string) => {
@@ -108,9 +118,7 @@ export default function TuningFileDetailsPage({
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-xl">Loading...</p>
-        </div>
+        <LoadingSpinner size="lg" message="Loading file details..." />
       </div>
     );
   }

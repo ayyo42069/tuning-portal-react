@@ -2,86 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { executeQuery } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 
-export async function POST(request: NextRequest) {
-  try {
-    // Verify authentication
-    const token = request.cookies.get("auth_token")?.value;
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
-    const user = await verifyToken(token);
-    if (!user) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
-
-    // Check if user is admin
-    if (user.role !== "admin") {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 }
-      );
-    }
-
-    // Parse request body
-    const body = await request.json().catch(() => ({}));
-    const { title, message, type } = body;
-
-    // Validate required fields
-    if (!title || typeof title !== "string" || title.trim().length === 0) {
-      return NextResponse.json(
-        { error: "Title is required and must be a non-empty string" },
-        { status: 400 }
-      );
-    }
-
-    if (
-      !message ||
-      typeof message !== "string" ||
-      message.trim().length === 0
-    ) {
-      return NextResponse.json(
-        { error: "Message is required and must be a non-empty string" },
-        { status: 400 }
-      );
-    }
-
-    // Validate notification type
-    const validTypes = ["system", "admin_message"] as const;
-    if (!type || !validTypes.includes(type as (typeof validTypes)[number])) {
-      return NextResponse.json(
-        {
-          error:
-            'Invalid notification type. Must be either "system" or "admin_message"',
-        },
-        { status: 400 }
-      );
-    }
-
-    // Create global notification
-    const result = await executeQuery<{ insertId: number }>(
-      `INSERT INTO notifications (title, message, type, is_global) 
-       VALUES (?, ?, ?, true)`,
-      [title, message, type]
-    );
-
-    return NextResponse.json({
-      success: true,
-      message: "Notification sent successfully",
-      notificationId: result.insertId,
-    });
-  } catch (error) {
-    console.error("Error sending notification:", error);
-    return NextResponse.json(
-      { error: "An error occurred while sending the notification" },
-      { status: 500 }
-    );
-  }
-}
-
 export async function GET(request: NextRequest) {
   try {
     // Verify authentication
@@ -98,38 +18,95 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
+    // Fetch notifications for the user
+    const notifications = await executeQuery<any[]>(
+      `SELECT 
+        n.id,
+        n.title,
+        n.message,
+        n.type,
+        n.reference_id as referenceId,
+        n.reference_type as referenceType,
+        n.is_read as isRead,
+        n.is_global as isGlobal,
+        n.created_at as createdAt
+      FROM notifications n
+      WHERE (n.user_id = ? OR n.is_global = true)
+      ORDER BY n.created_at DESC
+      LIMIT 50`,
+      [user.id]
+    );
+
+    return NextResponse.json({ notifications });
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch notifications" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    // Verify authentication and admin role
+    const token = request.cookies.get("auth_token")?.value;
+    if (!token) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const user = await verifyToken(token);
+    if (!user) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
+
     // Check if user is admin
     if (user.role !== "admin") {
       return NextResponse.json(
-        { error: "Admin access required" },
+        { error: "Admin privileges required" },
         { status: 403 }
       );
     }
 
-    // Get all global notifications
-    const notifications = await executeQuery<any[]>(
-      `SELECT 
-        id,
-        title,
-        message,
-        type,
-        is_global as isGlobal,
-        created_at as createdAt,
-        (SELECT COUNT(*) FROM notifications WHERE is_read = true AND id = n.id) as readCount
-      FROM notifications n
-      WHERE is_global = true
-      ORDER BY created_at DESC
-      LIMIT 50`
+    // Parse request body
+    const { title, message, type, userId, isGlobal = false, referenceId = null, referenceType = null } = await request.json();
+
+    // Validate required fields
+    if (!title || !message || !type) {
+      return NextResponse.json(
+        { error: "Title, message, and type are required" },
+        { status: 400 }
+      );
+    }
+
+    // If not global, userId is required
+    if (!isGlobal && !userId) {
+      return NextResponse.json(
+        { error: "User ID is required for non-global notifications" },
+        { status: 400 }
+      );
+    }
+
+    // Insert notification into database
+    const result = await executeQuery(
+      `INSERT INTO notifications 
+        (title, message, type, user_id, is_global, reference_id, reference_type, created_at) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+      [title, message, type, isGlobal ? null : userId, isGlobal, referenceId, referenceType]
     );
 
-    return NextResponse.json({
-      success: true,
-      notifications,
+    return NextResponse.json({ 
+      success: true, 
+      message: "Notification sent successfully",
+      notificationId: (result as any).insertId 
     });
   } catch (error) {
-    console.error("Error fetching notifications:", error);
+    console.error("Error sending notification:", error);
     return NextResponse.json(
-      { error: "An error occurred while fetching notifications" },
+      { error: "Failed to send notification" },
       { status: 500 }
     );
   }
