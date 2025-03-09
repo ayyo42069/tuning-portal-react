@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
     }
 
     query += ` ORDER BY cm.created_at DESC LIMIT ?`;
-    queryParams.push(limit);
+    queryParams.push(String(limit)); // Convert limit to string to avoid type mismatch with prepared statement
 
     const messages = await executeQuery<any[]>(query, queryParams);
 
