@@ -13,6 +13,7 @@ interface User {
   email: string;
   password: string;
   role: 'user' | 'admin';
+  email_verified: boolean;
 }
 
 export async function POST(request: NextRequest) {
@@ -47,6 +48,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Invalid username or password' },
         { status: 401 }
+      );
+    }
+    
+    // Check if email is verified
+    if (!user.email_verified) {
+      return NextResponse.json(
+        { 
+          error: 'Please verify your email before logging in', 
+          emailVerificationRequired: true,
+          email: user.email 
+        },
+        { status: 403 }
       );
     }
 

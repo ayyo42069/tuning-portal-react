@@ -613,6 +613,7 @@ const ChatBox = ({ currentUser }: ChatBoxProps) => {
       } else if (moderationAction === "mute") {
         payload.duration = parseInt(moderationDuration);
       }
+      // No additional payload needed for unban or unmute actions
 
       const response = await fetch("/api/admin/chat/moderation", {
         method: "POST",
@@ -1299,8 +1300,8 @@ const ChatBox = ({ currentUser }: ChatBoxProps) => {
                                   {message.senderUsername}
                                   {message.senderRole === "admin" && (
                                     <span className="ml-1 text-xs bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 px-1 py-0.5 rounded-full text-[10px]">
-                                    admin
-                                  </span>
+                                      admin
+                                    </span>
                                   )}
                                 </span>
                                 <span className="ml-1 text-xs bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200 px-1 py-0.5 rounded-full text-[10px]">

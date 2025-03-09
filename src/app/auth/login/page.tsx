@@ -3,7 +3,7 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { User, Lock, LogIn, Home, Loader2 } from "lucide-react";
+import { User, Lock, LogIn, Home, Loader2, Mail, AlertCircle } from "lucide-react";
 
 export default function Login() {
   const router = useRouter();
@@ -13,6 +13,10 @@ export default function Login() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showVerificationAlert, setShowVerificationAlert] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
+  const [resendingEmail, setResendingEmail] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -25,6 +29,8 @@ export default function Login() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
+    setShowVerificationAlert(false);
+    setResendSuccess(false);
     setLoading(true);
 
     try {
@@ -39,15 +45,50 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Login failed");
+        if (response.status === 403 && data.emailVerificationRequired) {
+          setShowVerificationAlert(true);
+          setUnverifiedEmail(data.email);
+          setError(""); // Clear general error when showing the verification alert
+        } else {
+          throw new Error(data.error || "Login failed");
+        }
+      } else {
+        // Redirect to dashboard on successful login
+        router.push("/dashboard");
       }
-
-      // Redirect to dashboard on successful login
-      router.push("/dashboard");
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!unverifiedEmail || resendingEmail) return;
+    
+    setResendingEmail(true);
+    setResendSuccess(false);
+    
+    try {
+      const response = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: unverifiedEmail }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to resend verification email");
+      }
+
+      setResendSuccess(true);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setResendingEmail(false);
     }
   };
 
@@ -114,7 +155,58 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
+            <div className="rounded-md bg-red-50 dark:bg-red-900/30 p-4 mb-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <AlertCircle className="h-5 w-5 text-red-400" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-red-800 dark:text-red-200">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showVerificationAlert && (
+            <div className="rounded-md bg-yellow-50 dark:bg-yellow-900/30 p-4 mb-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <Mail className="h-5 w-5 text-yellow-400" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                    Please verify your email address before logging in.
+                  </p>
+                  <div className="mt-2">
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                      A verification email was sent to <strong>{unverifiedEmail}</strong>.
+                      {resendSuccess && (
+                        <span className="block mt-1 text-green-600 dark:text-green-400">
+                          Verification email resent successfully!
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      onClick={handleResendVerification}
+                      disabled={resendingEmail}
+                      className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-yellow-700 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-800 dark:text-yellow-100 dark:hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {resendingEmail ? (
+                        <>
+                          <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        "Resend verification email"
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
 
           <div>

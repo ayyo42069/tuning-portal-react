@@ -1,7 +1,7 @@
-import { hash, compare } from "bcryptjs";
 import { sign, verify } from "jsonwebtoken";
 import { serialize, parse } from "cookie";
 import { executeQuery, getRow } from "./db";
+import { encryptMessage, decryptMessage } from "./encryption";
 
 interface User {
   id: number;
@@ -16,17 +16,23 @@ interface Session {
   expires_at: Date;
 }
 
-// Password hashing
+// Password encryption using AES-256
 export async function hashPassword(password: string): Promise<string> {
-  return await hash(password, 10);
+  return encryptMessage(password);
 }
 
-// Password verification
+// Password verification using AES-256
 export async function verifyPassword(
   password: string,
-  hashedPassword: string
+  encryptedPassword: string
 ): Promise<boolean> {
-  return await compare(password, hashedPassword);
+  try {
+    const decryptedPassword = decryptMessage(encryptedPassword);
+    return password === decryptedPassword;
+  } catch (error) {
+    console.error("Password verification error:", error);
+    return false;
+  }
 }
 
 // JWT token generation

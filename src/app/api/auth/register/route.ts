@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/lib/db';
 import { hashPassword, generateToken, setAuthCookie } from '@/lib/auth';
+import { generateVerificationToken, sendVerificationEmail } from '@/lib/email';
 
 interface RegisterRequest {
   username: string;
@@ -47,12 +48,21 @@ export async function POST(request: NextRequest) {
 
     // Insert new user
     const result = await executeQuery<any>(
-      'INSERT INTO users (username, email, password, full_name) VALUES (?, ?, ?, ?)',
+      'INSERT INTO users (username, email, password, full_name, email_verified) VALUES (?, ?, ?, ?, FALSE)',
       [username, email, hashedPassword, fullName || null]
     );
 
     // Get the inserted user ID
     const userId = result.insertId;
+
+    // Generate verification token and send verification email
+    const verificationToken = await generateVerificationToken(userId);
+    const emailSent = await sendVerificationEmail(email, verificationToken);
+
+    if (!emailSent) {
+      console.error('Failed to send verification email to:', email);
+      // Continue with registration even if email fails, but log the error
+    }
 
     // Generate JWT token
     const user: User = {
@@ -67,10 +77,12 @@ export async function POST(request: NextRequest) {
     // Set cookie with the token
     const cookieHeader = setAuthCookie(token);
 
-    // Return success response
+    // Return success response with verification token
     const response = NextResponse.json({
       success: true,
-      user
+      user,
+      emailVerificationSent: emailSent,
+      verificationToken: verificationToken // Include the token for the verification modal
     }, { status: 201 });
     
     // Add the cookie to the response

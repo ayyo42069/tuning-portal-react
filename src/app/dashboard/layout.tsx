@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Home,
   History,
@@ -11,6 +12,7 @@ import {
   Settings,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
@@ -31,7 +33,17 @@ export default function DashboardLayout({
 }) {
   const [user, setUser] = useState<User | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
+  const router = useRouter();
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+      router.push("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -55,16 +67,16 @@ export default function DashboardLayout({
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
       if (sidebarOpen && window.innerWidth < 768) {
-        const sidebar = document.getElementById('sidebar');
+        const sidebar = document.getElementById("sidebar");
         if (sidebar && !sidebar.contains(event.target as Node)) {
           setSidebarOpen(false);
         }
       }
     };
 
-    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener("mousedown", handleOutsideClick);
     return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener("mousedown", handleOutsideClick);
     };
   }, [sidebarOpen]);
 
@@ -87,9 +99,11 @@ export default function DashboardLayout({
         </div>
 
         {/* Sidebar */}
-        <div 
+        <div
           id="sidebar"
-          className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:static z-40 w-72 min-h-screen bg-white dark:bg-gray-800 shadow-lg transition-transform duration-300 ease-in-out`}
+          className={`${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0 fixed md:static z-40 w-72 min-h-screen bg-white dark:bg-gray-800 shadow-lg transition-transform duration-300 ease-in-out`}
         >
           <div className="p-6">
             <div className="flex items-center justify-between mb-8">
@@ -135,7 +149,9 @@ export default function DashboardLayout({
                 <Link
                   href="/admin"
                   className="flex items-center px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
-                  onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+                  onClick={() =>
+                    window.innerWidth < 768 && setSidebarOpen(false)
+                  }
                 >
                   <Settings className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
                   Admin Portal
@@ -170,6 +186,13 @@ export default function DashboardLayout({
               <div className="flex items-center space-x-4">
                 <NotificationBell />
                 <ThemeToggle />
+                <button
+                  onClick={handleLogout}
+                  className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  aria-label="Logout"
+                >
+                  <LogOut className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </button>
               </div>
             </div>
           </header>

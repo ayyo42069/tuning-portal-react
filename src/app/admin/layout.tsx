@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Home, FileText, Users, CreditCard, Bell } from "lucide-react";
+import { Home, FileText, Users, CreditCard, Bell, LogOut } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 
@@ -22,6 +22,17 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+      router.push("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -147,6 +158,13 @@ export default function AdminLayout({
               <div className="flex items-center space-x-4">
                 <NotificationBell />
                 <ThemeToggle />
+                <button
+                  onClick={handleLogout}
+                  className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  aria-label="Logout"
+                >
+                  <LogOut className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </button>
               </div>
             </div>
           </header>
