@@ -65,6 +65,19 @@ const PrivateConversationList: React.FC<PrivateConversationListProps> = ({
               </button>
             </div>
           )}
+          {currentUser.role !== "admin" && (
+            <div className="mt-2">
+              <p className="text-xs mb-1">
+                Wait for an admin to message you or
+              </p>
+              <button
+                onClick={() => setShowUserList(true)}
+                className="text-xs text-blue-600 hover:underline"
+              >
+                Click here to start a private conversation with an admin
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

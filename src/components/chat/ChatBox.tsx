@@ -243,7 +243,7 @@ const ChatBox = ({ currentUser }: ChatBoxProps) => {
       const payload: any = { message: newMessage };
 
       // Add private message details if applicable
-      if (privateRecipient && currentUser.role === "admin") {
+      if (privateRecipient) {
         payload.recipientId = privateRecipient.id;
         payload.isPrivate = true;
       } else if (activeTab === "private" && selectedConversationUserId) {
