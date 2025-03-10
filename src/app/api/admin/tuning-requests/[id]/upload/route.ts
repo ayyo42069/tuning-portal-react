@@ -1,10 +1,75 @@
 import { NextRequest, NextResponse } from "next/server";
 import { executeQuery } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
+import { mkdir } from "fs/promises";
 import { join } from "path";
 import { v4 as uuidv4 } from "uuid";
+import multer from "multer";
+import { Readable } from "stream";
+
+// Define custom request type for multer
+interface MulterRequest extends Request {
+  storedFilename?: string;
+  file?: any;
+}
+
+// Configure multer storage
+const uploadDir = join(process.cwd(), "uploads");
+
+// Create a multer storage configuration
+const storage = multer.diskStorage({
+  destination: async function (req, file, cb) {
+    // Create uploads directory if it doesn't exist
+    if (!existsSync(uploadDir)) {
+      try {
+        await mkdir(uploadDir, { recursive: true });
+      } catch (error) {
+        return cb(new Error("Failed to create upload directory"), "");
+      }
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueFilename = `processed_${uuidv4()}.bin`;
+    // Store the filename on the request object to access it later
+    (req as unknown as MulterRequest).storedFilename = uniqueFilename;
+    cb(null, uniqueFilename);
+  },
+});
+
+// Configure multer upload
+const upload = multer({
+  storage: storage,
+  fileFilter: function (req, file, cb) {
+    // Accept only .bin files
+    if (!file.originalname.endsWith(".bin")) {
+      return cb(new Error("Only .bin files are allowed"));
+    }
+    cb(null, true);
+  },
+});
+
+// Helper function to convert NextRequest to Node's IncomingMessage
+function bufferToStream(buffer: Buffer) {
+  const readable = new Readable();
+  readable._read = () => {}; // _read is required but you can noop it
+  readable.push(buffer);
+  readable.push(null);
+  return readable;
+}
+
+// Promisify multer middleware
+function runMiddleware(req: any, res: any, fn: any) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result: any) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+      return resolve(result);
+    });
+  });
+}
 
 export async function POST(
   req: NextRequest,
@@ -48,49 +113,71 @@ export async function POST(
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
-    // Parse form data
-    const formData = await req.formData();
-    const file = formData.get("file") as File;
+    // Create a mock request and response for multer
+    const buffer = await req.arrayBuffer();
+    const stream = bufferToStream(Buffer.from(buffer));
+    const mockReq: any = {
+      headers: Object.fromEntries(req.headers),
+      method: req.method,
+      url: req.url,
+      body: {},
+    };
 
-    if (!file || !(file instanceof File)) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
-    }
+    // Add the stream to the request
+    mockReq.pipe = function () {
+      return stream.pipe.apply(
+        stream,
+        arguments as unknown as [NodeJS.WritableStream]
+      );
+    };
+    mockReq.unpipe = function () {
+      // Convert IArguments to an array and cast to the expected type
+      const args = Array.from(arguments) as unknown as [NodeJS.WritableStream?];
+      return stream.unpipe.apply(stream, args);
+    };
+    mockReq.on = stream.on.bind(stream);
+    mockReq.headers["content-type"] = req.headers.get("content-type") || "";
 
-    // Validate file type
-    if (!file.name.endsWith(".bin")) {
+    const mockRes: any = {
+      setHeader: () => {},
+      status: () => mockRes,
+      json: () => mockRes,
+      send: () => mockRes,
+      end: () => {},
+    };
+
+    try {
+      // Run multer middleware
+      await runMiddleware(mockReq, mockRes, upload.single("file"));
+
+      // If we get here, file upload was successful
+      const file = mockReq.file;
+
+      if (!file) {
+        return NextResponse.json(
+          { error: "No file uploaded" },
+          { status: 400 }
+        );
+      }
+
+      // Update file record in database
+      await executeQuery(
+        `UPDATE ecu_files 
+         SET processed_filename = ?, status = 'completed', updated_at = NOW() 
+         WHERE id = ?`,
+        [file.filename, fileId]
+      );
+
+      return NextResponse.json({
+        success: true,
+        message: "Processed file uploaded successfully",
+      });
+    } catch (multerError: any) {
       return NextResponse.json(
-        { error: "Only .bin files are allowed" },
+        { error: multerError.message || "File upload failed" },
         { status: 400 }
       );
     }
-
-    // Generate unique filename for processed file
-    const uniqueFilename = `processed_${uuidv4()}.bin`;
-    const uploadDir = join(process.cwd(), "uploads");
-
-    // Create uploads directory if it doesn't exist
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
-    }
-
-    const filePath = join(uploadDir, uniqueFilename);
-
-    // Save file to disk
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(filePath, buffer);
-
-    // Update file record in database
-    await executeQuery(
-      `UPDATE ecu_files 
-       SET processed_filename = ?, status = 'completed', updated_at = NOW() 
-       WHERE id = ?`,
-      [uniqueFilename, fileId]
-    );
-
-    return NextResponse.json({
-      success: true,
-      message: "Processed file uploaded successfully",
-    });
   } catch (error) {
     console.error("Error uploading processed file:", error);
     return NextResponse.json(
