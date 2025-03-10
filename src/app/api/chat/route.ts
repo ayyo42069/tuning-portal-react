@@ -88,8 +88,11 @@ export async function GET(request: NextRequest) {
       }
     } else {
       // Public messages or private messages involving the current user
-      query += ` AND (cm.is_private = false OR cm.sender_id = ? OR cm.recipient_id = ?)`;
-      queryParams.push(user.id, user.id);
+      query += ` AND cm.is_private = true AND (
+          (cm.sender_id = ? AND cm.recipient_id = ?) OR 
+          (cm.sender_id = ? AND cm.recipient_id = ?)
+        )`;
+      queryParams.push(user.id, privateUserId, privateUserId, user.id);
     }
 
     // Pagination using message ID
