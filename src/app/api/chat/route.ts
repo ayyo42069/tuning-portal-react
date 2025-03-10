@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
 
     // Decrypt all messages
     if (messages && messages.length > 0) {
-      messages.forEach(msg => {
+      messages.forEach((msg) => {
         msg.message = safeDecryptMessage(msg.message);
       });
     }
@@ -193,12 +193,24 @@ export async function POST(request: NextRequest) {
 
     // Check private message permissions
     if (isPrivate) {
-      // Only admins can send private messages
+      // Only admins can initiate private messages
       if (user.role !== "admin") {
-        return NextResponse.json(
-          { error: "Only admins can send private messages" },
-          { status: 403 }
+        // Check if this is a response to an admin message
+        const previousMessages = await executeQuery<any[]>(
+          `SELECT * FROM chat_messages WHERE recipient_id = ? AND sender_id = ? AND is_private = true ORDER BY created_at DESC LIMIT 1`,
+          [user.id, recipientId]
         );
+
+        if (
+          !previousMessages ||
+          previousMessages.length === 0 ||
+          previousMessages[0].sender_id !== recipientId
+        ) {
+          return NextResponse.json(
+            { error: "Only admins can initiate private messages" },
+            { status: 403 }
+          );
+        }
       }
 
       // Recipient is required for private messages
