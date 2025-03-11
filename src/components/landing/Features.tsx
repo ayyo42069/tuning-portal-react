@@ -1,7 +1,26 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
-import { ChartBarIcon, CogIcon, SparklesIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
+
+// Dynamically import icons
+const ChartBarIcon = dynamic(
+  () => import("@heroicons/react/24/outline").then((mod) => mod.ChartBarIcon),
+  { ssr: false }
+);
+const CogIcon = dynamic(
+  () => import("@heroicons/react/24/outline").then((mod) => mod.CogIcon),
+  { ssr: false }
+);
+const SparklesIcon = dynamic(
+  () => import("@heroicons/react/24/outline").then((mod) => mod.SparklesIcon),
+  { ssr: false }
+);
+const ShieldCheckIcon = dynamic(
+  () =>
+    import("@heroicons/react/24/outline").then((mod) => mod.ShieldCheckIcon),
+  { ssr: false }
+);
 
 interface FeaturesProps {
   inView: boolean;
@@ -13,7 +32,7 @@ export const Features = ({ inView }: FeaturesProps) => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2,
+        staggerChildren: 0.1, // Reduced from 0.2 for faster animation
       },
     },
   };
@@ -23,7 +42,7 @@ export const Features = ({ inView }: FeaturesProps) => {
     visible: {
       y: 0,
       opacity: 1,
-      transition: { duration: 0.5 },
+      transition: { duration: 0.3 }, // Reduced from 0.5 for faster animation
     },
   };
 
@@ -31,22 +50,26 @@ export const Features = ({ inView }: FeaturesProps) => {
     {
       icon: ChartBarIcon,
       title: "Performance Optimization",
-      description: "Unlock your vehicle's full potential with our advanced ECU tuning solutions.",
+      description:
+        "Unlock your vehicle's full potential with our advanced ECU tuning solutions.",
     },
     {
       icon: CogIcon,
       title: "Custom Tuning",
-      description: "Tailored solutions to meet your specific performance goals and requirements.",
+      description:
+        "Tailored solutions to meet your specific performance goals and requirements.",
     },
     {
       icon: SparklesIcon,
       title: "Enhanced Efficiency",
-      description: "Improve fuel efficiency while maintaining optimal performance levels.",
+      description:
+        "Improve fuel efficiency while maintaining optimal performance levels.",
     },
     {
       icon: ShieldCheckIcon,
       title: "Safety First",
-      description: "All tunes are thoroughly tested to ensure reliability and engine safety.",
+      description:
+        "All tunes are thoroughly tested to ensure reliability and engine safety.",
     },
   ];
 
@@ -59,9 +82,12 @@ export const Features = ({ inView }: FeaturesProps) => {
         className="container mx-auto px-4"
       >
         <motion.div variants={itemVariants} className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Us</h2>
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Why Choose Us
+          </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Experience the perfect blend of performance, efficiency, and reliability
+            Experience the perfect blend of performance, efficiency, and
+            reliability
           </p>
         </motion.div>
 

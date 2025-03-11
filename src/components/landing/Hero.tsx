@@ -2,7 +2,18 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ChevronRightIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
+import dynamic from "next/dynamic";
+
+// Dynamically import icons
+const ChevronRightIcon = dynamic(
+  () =>
+    import("@heroicons/react/24/outline").then((mod) => mod.ChevronRightIcon),
+  { ssr: false }
+);
+const ArrowRightIcon = dynamic(
+  () => import("@heroicons/react/24/outline").then((mod) => mod.ArrowRightIcon),
+  { ssr: false }
+);
 
 interface HeroProps {
   inView: boolean;
@@ -14,7 +25,7 @@ export const Hero = ({ inView }: HeroProps) => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2,
+        staggerChildren: 0.1, // Reduced from 0.2 for faster animation
       },
     },
   };
@@ -24,17 +35,17 @@ export const Hero = ({ inView }: HeroProps) => {
     visible: {
       y: 0,
       opacity: 1,
-      transition: { duration: 0.5 },
+      transition: { duration: 0.3 }, // Reduced from 0.5 for faster animation
     },
   };
 
   return (
     <section className="bg-gradient-to-b from-blue-900 to-blue-800 text-white py-20 lg:py-32 relative overflow-hidden">
-      {/* Animated background elements */}
+      {/* Animated background elements - with will-change optimization */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
-        <div className="absolute w-96 h-96 rounded-full bg-blue-500 opacity-20 -top-20 -left-20 animate-blob"></div>
-        <div className="absolute w-96 h-96 rounded-full bg-indigo-500 opacity-20 top-1/3 -right-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute w-96 h-96 rounded-full bg-purple-500 opacity-20 bottom-0 left-1/3 animate-blob animation-delay-4000"></div>
+        <div className="absolute w-96 h-96 rounded-full bg-blue-500 opacity-20 -top-20 -left-20 animate-blob will-change-transform"></div>
+        <div className="absolute w-96 h-96 rounded-full bg-indigo-500 opacity-20 top-1/3 -right-20 animate-blob animation-delay-2000 will-change-transform"></div>
+        <div className="absolute w-96 h-96 rounded-full bg-purple-500 opacity-20 bottom-0 left-1/3 animate-blob animation-delay-4000 will-change-transform"></div>
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
@@ -59,8 +70,8 @@ export const Hero = ({ inView }: HeroProps) => {
               variants={itemVariants}
               className="text-xl text-blue-100 max-w-lg"
             >
-              Professional ECU tuning solutions to enhance performance,
-              improve fuel efficiency, and customize your driving experience.
+              Professional ECU tuning solutions to enhance performance, improve
+              fuel efficiency, and customize your driving experience.
             </motion.p>
 
             <motion.div

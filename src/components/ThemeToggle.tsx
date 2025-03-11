@@ -9,9 +9,9 @@ export default function ThemeToggle() {
     <button
       onClick={toggleTheme}
       className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-      aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+      aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
     >
-      {theme === 'light' ? (
+      {theme === "light" ? (
         // Moon icon for dark mode
         <svg
           xmlns="http://www.w3.org/2000/svg"

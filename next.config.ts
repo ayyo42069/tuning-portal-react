@@ -17,6 +17,45 @@ const nextConfig: NextConfig = {
   },
   // Ensure server-side rendering for authentication pages
   reactStrictMode: true,
+
+  // Performance optimizations
+  images: {
+    domains: ["tuning-portal.eu"],
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    minimumCacheTTL: 60,
+  },
+
+  // Enable compression
+  compress: true,
+
+  // Next.js 13+ uses SWC by default for minification
+  // No need to explicitly set swcMinify anymore
+
+  // Configure caching headers
+  async headers() {
+    return [
+      {
+        source: "/(.*)\\.(jpg|jpeg|png|gif|webp|svg|ico|ttf|woff|woff2)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/(.*)\\.(css|js)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

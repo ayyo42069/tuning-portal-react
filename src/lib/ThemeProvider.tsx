@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useMemo } from "react";
 
 type Theme = "light" | "dark";
 
@@ -13,31 +13,57 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("light");
+  const [mounted, setMounted] = useState(false);
 
   // Initialize theme from localStorage on component mount
   useEffect(() => {
-    const storedTheme = localStorage.getItem("theme") as Theme | null;
-    if (storedTheme) {
-      setTheme(storedTheme);
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark");
+    // Only run this on the client side
+    setMounted(true);
+    
+    // Use try-catch to handle potential localStorage errors
+    try {
+      const storedTheme = localStorage.getItem("theme") as Theme | null;
+      if (storedTheme) {
+        setTheme(storedTheme);
+      } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        setTheme("dark");
+      }
+    } catch (error) {
+      console.error("Error accessing localStorage:", error);
     }
   }, []);
 
   // Update HTML class when theme changes
   useEffect(() => {
+    if (!mounted) return;
+    
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
     root.classList.add(theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+    
+    try {
+      localStorage.setItem("theme", theme);
+    } catch (error) {
+      console.error("Error writing to localStorage:", error);
+    }
+  }, [theme, mounted]);
 
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
-  };
+  // Memoize the toggle function to prevent unnecessary re-renders
+  const toggleTheme = useMemo(
+    () => () => {
+      setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
+    },
+    []
+  );
+
+  // Memoize the context value
+  const contextValue = useMemo(
+    () => ({ theme, toggleTheme }),
+    [theme, toggleTheme]
+  );
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );
