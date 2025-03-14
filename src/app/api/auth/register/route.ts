@@ -8,6 +8,8 @@ interface RegisterRequest {
   email: string;
   password: string;
   fullName?: string;
+  emailConsent?: boolean;
+  deviceInfo?: any;
 }
 
 interface User {
@@ -20,7 +22,7 @@ interface User {
 export async function POST(request: NextRequest) {
   try {
     const body: RegisterRequest = await request.json();
-    const { username, email, password, fullName } = body;
+    const { username, email, password, fullName, emailConsent = false, deviceInfo } = body;
 
     // Validate input
     if (!username || !email || !password) {
@@ -46,14 +48,41 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await hashPassword(password);
 
-    // Insert new user
+    // Insert new user with consent tracking
+    const consentDate = emailConsent ? new Date() : null;
     const result = await executeQuery<any>(
-      'INSERT INTO users (username, email, password, full_name, email_verified) VALUES (?, ?, ?, ?, FALSE)',
-      [username, email, hashedPassword, fullName || null]
+      'INSERT INTO users (username, email, password, full_name, email_verified, email_consent, email_consent_date) VALUES (?, ?, ?, ?, FALSE, ?, ?)',
+      [username, email, hashedPassword, fullName || null, emailConsent, consentDate]
     );
 
     // Get the inserted user ID
     const userId = result.insertId;
+
+    // Log device info if available (for fraud prevention and compliance)
+    if (deviceInfo) {
+      try {
+        await executeQuery(
+          'INSERT INTO user_activity_logs (user_id, activity_type, details) VALUES (?, ?, ?)',
+          [userId, 'registration', JSON.stringify(deviceInfo)]
+        );
+      } catch (error) {
+        console.error('Failed to log device info:', error);
+        // Continue with registration even if logging fails
+      }
+    }
+
+    // Log consent if provided
+    if (emailConsent) {
+      try {
+        await executeQuery(
+          'INSERT INTO user_activity_logs (user_id, activity_type, details) VALUES (?, ?, ?)',
+          [userId, 'email_consent', 'User consented to receive emails during registration']
+        );
+      } catch (error) {
+        console.error('Failed to log email consent:', error);
+        // Continue with registration even if logging fails
+      }
+    }
 
     // Generate verification token and send verification email
     const verificationToken = await generateVerificationToken(userId);
@@ -82,7 +111,8 @@ export async function POST(request: NextRequest) {
       success: true,
       user,
       emailVerificationSent: emailSent,
-      verificationToken: verificationToken // Include the token for the verification modal
+      verificationToken: verificationToken, // Include the token for the verification modal
+      requiresVerification: true // Indicate that email verification is required
     }, { status: 201 });
     
     // Add the cookie to the response
