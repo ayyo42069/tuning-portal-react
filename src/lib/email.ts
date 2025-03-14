@@ -6,16 +6,16 @@ import { executeQuery, executeTransaction } from "./db";
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: Number(process.env.EMAIL_PORT),
-  secure: true, // true for 465, false for other ports
+  secure: false, // true for 465, false for other ports
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
   tls: {
     rejectUnauthorized: true,
-    minVersion: 'TLSv1.2',
-    ciphers: 'HIGH:!MEDIUM:!LOW:!aNULL:!NULL:!SHA',
-    timeout: 60000 // 60 seconds timeout for TLS handshake
+    minVersion: "TLSv1.2",
+    ciphers: "HIGH:!MEDIUM:!LOW:!aNULL:!NULL:!SHA",
+    timeout: 60000, // 60 seconds timeout for TLS handshake
   },
   connectionTimeout: 60000, // 60 seconds connection timeout
   greetingTimeout: 30000, // 30 seconds greeting timeout
@@ -142,33 +142,44 @@ export async function sendVerificationEmail(
         try {
           // Create a timeout promise that rejects after specified time
           const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error(`Email sending timed out after ${timeout/1000}s`)), timeout);
+            setTimeout(
+              () =>
+                reject(
+                  new Error(`Email sending timed out after ${timeout / 1000}s`)
+                ),
+              timeout
+            );
           });
-          
+
           // Race the email sending against the timeout
-          const info = await Promise.race([
+          const info = (await Promise.race([
             transporter.sendMail(mailOptions),
-            timeoutPromise
-          ]) as any;
-          
-          console.log(`Verification email sent successfully on attempt ${attempt}: ${info.messageId}, tracking ID: ${emailTrackingId}`);
+            timeoutPromise,
+          ])) as any;
+
+          console.log(
+            `Verification email sent successfully on attempt ${attempt}: ${info.messageId}, tracking ID: ${emailTrackingId}`
+          );
           return info;
         } catch (error) {
-          console.error(`Email sending attempt ${attempt}/${attempts} failed:`, error);
-          
+          console.error(
+            `Email sending attempt ${attempt}/${attempts} failed:`,
+            error
+          );
+
           // If this was the last attempt, throw the error
           if (attempt === attempts) throw error;
-          
+
           // Otherwise wait before retrying (exponential backoff)
           const backoffTime = Math.min(Math.pow(2, attempt) * 500, 5000); // 1s, 2s, 4s up to max 5s
-          console.log(`Retrying in ${backoffTime/1000}s...`);
-          await new Promise(resolve => setTimeout(resolve, backoffTime));
+          console.log(`Retrying in ${backoffTime / 1000}s...`);
+          await new Promise((resolve) => setTimeout(resolve, backoffTime));
         }
       }
       // This should never be reached due to the throw in the last attempt
-      throw new Error('All email sending attempts failed');
+      throw new Error("All email sending attempts failed");
     };
-    
+
     // Execute the send with retry function
     const info = await sendWithRetry();
 
