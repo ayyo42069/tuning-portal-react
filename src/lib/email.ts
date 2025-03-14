@@ -234,8 +234,8 @@ export async function verifyEmailToken(
     // Use a transaction to ensure data consistency
     await executeTransaction(
       [
-        // Mark user as verified - use a far future date instead of NULL for verification_token_expires
-        "UPDATE users SET email_verified = TRUE, verification_token = NULL, verification_token_expires = '2099-12-31 23:59:59' WHERE id = ?",
+        // Mark user as verified and set verification_token_expires to current timestamp
+        "UPDATE users SET email_verified = TRUE, verification_token = NULL, verification_token_expires = CURRENT_TIMESTAMP WHERE id = ?",
         // Delete the used token
         "DELETE FROM email_verification_tokens WHERE token = ?",
       ],
