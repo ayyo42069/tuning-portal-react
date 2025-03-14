@@ -130,10 +130,28 @@ export async function POST(request: NextRequest) {
       // Generate verification token
       verificationToken = await generateVerificationToken(userId);
 
-      // Send verification email
-      const emailSent = await sendVerificationEmail(email, verificationToken);
+      // Send verification email with retry mechanism
+      let retries = 0;
+      const maxRetries = 3;
+      let emailSent = false;
 
-      // If email fails, throw error to trigger transaction rollback
+      while (!emailSent && retries < maxRetries) {
+        try {
+          emailSent = await sendVerificationEmail(email, verificationToken);
+          if (emailSent) break;
+        } catch (error) {
+          console.error(`Email sending attempt ${retries + 1} failed:`, error);
+        }
+
+        retries++;
+        if (retries < maxRetries) {
+          // Exponential backoff: 1s, 2s, 4s
+          const backoffTime = Math.pow(2, retries - 1) * 1000;
+          await new Promise((resolve) => setTimeout(resolve, backoffTime));
+        }
+      }
+
+      // If email fails after all retries, throw error to trigger transaction rollback
       if (!emailSent) {
         throw new Error(`Failed to send verification email to: ${email}`);
       }

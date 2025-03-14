@@ -13,7 +13,13 @@ const transporter = nodemailer.createTransport({
   },
   tls: {
     rejectUnauthorized: true,
+    minVersion: 'TLSv1.2',
+    ciphers: 'HIGH:!MEDIUM:!LOW:!aNULL:!NULL:!SHA',
+    timeout: 60000 // 60 seconds timeout for TLS handshake
   },
+  connectionTimeout: 60000, // 60 seconds connection timeout
+  greetingTimeout: 30000, // 30 seconds greeting timeout
+  socketTimeout: 60000, // 60 seconds socket timeout
 });
 
 // Verify connection configuration
@@ -130,14 +136,41 @@ export async function sendVerificationEmail(
       `Sending verification email to ${email} with tracking ID ${emailTrackingId}`
     );
 
-    // Send the email with timeout to prevent hanging
-    const emailPromise = transporter.sendMail(mailOptions);
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error("Email sending timed out")), 30000); // 30 second timeout
-    });
-
-    // Race the email sending against the timeout
-    const info = (await Promise.race([emailPromise, timeoutPromise])) as any;
+    // Send the email with improved timeout and retry mechanism
+    const sendWithRetry = async (attempts = 3, timeout = 30000) => {
+      for (let attempt = 1; attempt <= attempts; attempt++) {
+        try {
+          // Create a timeout promise that rejects after specified time
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error(`Email sending timed out after ${timeout/1000}s`)), timeout);
+          });
+          
+          // Race the email sending against the timeout
+          const info = await Promise.race([
+            transporter.sendMail(mailOptions),
+            timeoutPromise
+          ]) as any;
+          
+          console.log(`Verification email sent successfully on attempt ${attempt}: ${info.messageId}, tracking ID: ${emailTrackingId}`);
+          return info;
+        } catch (error) {
+          console.error(`Email sending attempt ${attempt}/${attempts} failed:`, error);
+          
+          // If this was the last attempt, throw the error
+          if (attempt === attempts) throw error;
+          
+          // Otherwise wait before retrying (exponential backoff)
+          const backoffTime = Math.min(Math.pow(2, attempt) * 500, 5000); // 1s, 2s, 4s up to max 5s
+          console.log(`Retrying in ${backoffTime/1000}s...`);
+          await new Promise(resolve => setTimeout(resolve, backoffTime));
+        }
+      }
+      // This should never be reached due to the throw in the last attempt
+      throw new Error('All email sending attempts failed');
+    };
+    
+    // Execute the send with retry function
+    const info = await sendWithRetry();
 
     console.log(
       `Verification email sent successfully: ${info.messageId}, tracking ID: ${emailTrackingId}`
@@ -190,8 +223,8 @@ export async function verifyEmailToken(
     // Use a transaction to ensure data consistency
     await executeTransaction(
       [
-        // Mark user as verified
-        "UPDATE users SET email_verified = TRUE, verification_token = NULL, verification_token_expires = NULL WHERE id = ?",
+        // Mark user as verified - use a far future date instead of NULL for verification_token_expires
+        "UPDATE users SET email_verified = TRUE, verification_token = NULL, verification_token_expires = '2099-12-31 23:59:59' WHERE id = ?",
         // Delete the used token
         "DELETE FROM email_verification_tokens WHERE token = ?",
       ],
