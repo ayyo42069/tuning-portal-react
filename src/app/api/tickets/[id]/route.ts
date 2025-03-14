@@ -6,7 +6,7 @@ import { DecodedToken, TicketDB, Ticket } from "../types";
 // GET /api/tickets/[id] - Get a specific ticket by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get the auth token from cookies
@@ -29,6 +29,7 @@ export async function GET(
 
     const userId = decodedToken.id;
     const userRole = decodedToken.role;
+    const params = await context.params;
     const ticketId = parseInt(params.id);
 
     // Validate ticket ID
@@ -89,7 +90,7 @@ export async function GET(
 // PUT /api/tickets/[id] - Update a specific ticket
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get the auth token from cookies
@@ -112,6 +113,7 @@ export async function PUT(
 
     const userId = decodedToken.id;
     const userRole = decodedToken.role;
+    const params = await context.params;
     const ticketId = parseInt(params.id);
 
     // Validate ticket ID
@@ -202,7 +204,7 @@ export async function PUT(
 // DELETE /api/tickets/[id] - Delete a specific ticket
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get the auth token from cookies
@@ -225,6 +227,7 @@ export async function DELETE(
 
     const userId = decodedToken.id;
     const userRole = decodedToken.role;
+    const params = await context.params;
     const ticketId = parseInt(params.id);
 
     // Validate ticket ID

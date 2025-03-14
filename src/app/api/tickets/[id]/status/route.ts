@@ -6,7 +6,7 @@ import { DecodedToken, TicketDB } from "../../types";
 // PUT /api/tickets/[id]/status - Update ticket status
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get the auth token from cookies
@@ -29,6 +29,7 @@ export async function PUT(
 
     const userId = decodedToken.id;
     const userRole = decodedToken.role;
+    const params = await context.params;
     const ticketId = parseInt(params.id);
 
     // Validate ticket ID

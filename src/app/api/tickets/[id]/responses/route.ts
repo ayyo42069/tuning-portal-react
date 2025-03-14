@@ -9,9 +9,9 @@ import {
 } from "../../types";
 
 // GET /api/tickets/[id]/responses - Get responses for a specific ticket
-export async function GET(
+export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get the auth token from cookies
@@ -34,6 +34,7 @@ export async function GET(
 
     const userId = decodedToken.id;
     const userRole = decodedToken.role;
+    const params = await context.params;
     const ticketId = parseInt(params.id);
 
     // Validate ticket ID
@@ -98,7 +99,7 @@ export async function GET(
 // POST /api/tickets/[id]/responses - Add a response to a ticket
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get the auth token from cookies
@@ -121,6 +122,7 @@ export async function POST(
 
     const userId = decodedToken.id;
     const userRole = decodedToken.role;
+    const params = await context.params;
     const ticketId = parseInt(params.id);
 
     // Validate ticket ID
