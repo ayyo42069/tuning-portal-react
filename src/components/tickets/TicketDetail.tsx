@@ -1,0 +1,339 @@
+import React, { useState } from "react";
+import { Ticket, TicketResponse, User } from "./types";
+
+type TicketDetailProps = {
+  ticket: Ticket;
+  responses: TicketResponse[];
+  currentUser: User;
+  onAddResponse: (
+    ticketId: number,
+    message: string,
+    isInternal: boolean
+  ) => void;
+  onUpdateStatus: (ticketId: number, status: Ticket["status"]) => void;
+  onAssign: (ticketId: number, userId: number) => void;
+  onUpdatePriority: (ticketId: number, priority: Ticket["priority"]) => void;
+  loading: boolean;
+};
+
+const TicketDetail: React.FC<TicketDetailProps> = ({
+  ticket,
+  responses,
+  currentUser,
+  onAddResponse,
+  onUpdateStatus,
+  onAssign,
+  onUpdatePriority,
+  loading,
+}) => {
+  const [newResponse, setNewResponse] = useState("");
+  const [isInternal, setIsInternal] = useState(false);
+  const [assignUserId, setAssignUserId] = useState("");
+
+  // Format date to a readable format
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString();
+  };
+
+  // Helper function to get status color
+  const getStatusColor = (status: Ticket["status"]) => {
+    switch (status) {
+      case "open":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
+      case "in_progress":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300";
+      case "resolved":
+        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
+      case "closed":
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300";
+    }
+  };
+
+  // Helper function to get priority color
+  const getPriorityColor = (priority: Ticket["priority"]) => {
+    switch (priority) {
+      case "low":
+        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
+      case "medium":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
+      case "high":
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300";
+      case "urgent":
+        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
+      default:
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
+    }
+  };
+
+  const handleSubmitResponse = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newResponse.trim()) return;
+
+    onAddResponse(ticket.id, newResponse, isInternal);
+    setNewResponse("");
+    setIsInternal(false);
+  };
+
+  const handleAssign = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!assignUserId) return;
+
+    onAssign(ticket.id, parseInt(assignUserId));
+    setAssignUserId("");
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Ticket Header */}
+      <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="font-medium text-gray-900 dark:text-white">
+            #{ticket.id}: {ticket.subject}
+          </h3>
+          <div className="flex space-x-2">
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                ticket.status
+              )}`}
+            >
+              {ticket.status.replace("_", " ")}
+            </span>
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
+                ticket.priority
+              )}`}
+            >
+              {ticket.priority}
+            </span>
+          </div>
+        </div>
+
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+          {ticket.description}
+        </p>
+
+        <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+          <div>
+            <span className="font-medium">Created by:</span> {ticket.username}
+          </div>
+          <div>
+            {ticket.assignedUsername ? (
+              <>
+                <span className="font-medium">Assigned to:</span>{" "}
+                {ticket.assignedUsername}
+              </>
+            ) : (
+              <span className="italic">Unassigned</span>
+            )}
+          </div>
+          <div>
+            <span className="font-medium">Created:</span>{" "}
+            {formatDate(ticket.createdAt)}
+          </div>
+        </div>
+      </div>
+
+      {/* Admin Controls */}
+      {currentUser.role === "admin" && (
+        <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <h4 className="font-medium text-sm text-gray-900 dark:text-white mb-2">
+            Admin Controls
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Status Update */}
+            <div>
+              <label className="block text-xs text-gray-700 dark:text-gray-300 mb-1">
+                Update Status
+              </label>
+              <select
+                value={ticket.status}
+                onChange={(e) =>
+                  onUpdateStatus(ticket.id, e.target.value as Ticket["status"])
+                }
+                className="w-full p-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="open">Open</option>
+                <option value="in_progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+
+            {/* Priority Update */}
+            <div>
+              <label className="block text-xs text-gray-700 dark:text-gray-300 mb-1">
+                Update Priority
+              </label>
+              <select
+                value={ticket.priority}
+                onChange={(e) =>
+                  onUpdatePriority(
+                    ticket.id,
+                    e.target.value as Ticket["priority"]
+                  )
+                }
+                className="w-full p-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+
+            {/* Assign Ticket */}
+            <div>
+              <form onSubmit={handleAssign} className="flex space-x-1">
+                <div className="flex-1">
+                  <label className="block text-xs text-gray-700 dark:text-gray-300 mb-1">
+                    Assign to User ID
+                  </label>
+                  <input
+                    type="text"
+                    value={assignUserId}
+                    onChange={(e) => setAssignUserId(e.target.value)}
+                    placeholder="Enter user ID"
+                    className="w-full p-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={!assignUserId || loading}
+                  className="mt-5 px-2 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Assign
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Responses */}
+      <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <h4 className="font-medium text-sm text-gray-900 dark:text-white mb-3">
+          Responses
+        </h4>
+
+        <div className="space-y-3 max-h-[250px] overflow-y-auto mb-3">
+          {responses.length === 0 ? (
+            <div className="text-center text-gray-500 dark:text-gray-400 py-3 text-xs">
+              No responses yet.
+            </div>
+          ) : (
+            responses.map((response) => (
+              <div
+                key={response.id}
+                className={`p-2 rounded-lg ${
+                  response.isInternal && currentUser.role === "admin"
+                    ? "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800"
+                    : "bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700"
+                }`}
+              >
+                <div className="flex justify-between items-start mb-1">
+                  <div className="flex items-center">
+                    <span
+                      className={`font-medium text-xs ${
+                        response.userRole === "admin"
+                          ? "text-red-600 dark:text-red-400"
+                          : "text-gray-900 dark:text-white"
+                      }`}
+                    >
+                      {response.username}
+                      {response.userRole === "admin" && (
+                        <span className="ml-1 text-xs bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 px-1 py-0.5 rounded-full text-[10px]">
+                          admin
+                        </span>
+                      )}
+                    </span>
+                    {response.isInternal && currentUser.role === "admin" && (
+                      <span className="ml-1 text-xs bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 px-1 py-0.5 rounded-full text-[10px]">
+                        internal note
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-gray-500 dark:text-gray-400 text-xs">
+                    {formatDate(response.createdAt)}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-600 dark:text-gray-300 whitespace-pre-wrap">
+                  {response.message}
+                </p>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Add Response Form */}
+        <form onSubmit={handleSubmitResponse} className="space-y-2">
+          <textarea
+            value={newResponse}
+            onChange={(e) => setNewResponse(e.target.value)}
+            placeholder="Type your response..."
+            className="w-full p-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white min-h-[80px]"
+            disabled={loading}
+          />
+
+          {currentUser.role === "admin" && (
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="internal-note"
+                checked={isInternal}
+                onChange={(e) => setIsInternal(e.target.checked)}
+                className="mr-1"
+              />
+              <label
+                htmlFor="internal-note"
+                className="text-xs text-gray-700 dark:text-gray-300"
+              >
+                Internal note (only visible to admins)
+              </label>
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={!newResponse.trim() || loading}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {loading ? (
+                <span className="flex items-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-1 h-3 w-3 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Send
+                </span>
+              ) : (
+                "Send"
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default TicketDetail;

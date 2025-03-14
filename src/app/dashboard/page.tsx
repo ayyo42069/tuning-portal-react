@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import ECUUploadForm from "./components/ECUUploadForm";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import ChatBoxWrapper from "@/components/ChatBox";
+import TicketSystemWrapper from "@/components/TicketSystem";
 import { BarChart3, Clock, LogOut, Upload, MessageSquare } from "lucide-react";
 
 interface User {
@@ -329,7 +329,7 @@ export default function Dashboard() {
               <MessageSquare className="w-6 h-6 mr-2 text-green-500" />
               Chat Support
             </h3>
-            <ChatBoxWrapper />
+            <TicketSystemWrapper />
           </div>
         </div>
       </div>

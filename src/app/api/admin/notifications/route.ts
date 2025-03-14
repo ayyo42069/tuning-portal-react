@@ -72,7 +72,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse request body
-    const { title, message, type, userId, isGlobal = false, referenceId = null, referenceType = null } = await request.json();
+    const {
+      title,
+      message,
+      type,
+      userId,
+      isGlobal = false,
+      referenceId = null,
+      referenceType = null,
+    } = await request.json();
 
     // Validate required fields
     if (!title || !message || !type) {
@@ -95,13 +103,21 @@ export async function POST(request: NextRequest) {
       `INSERT INTO notifications 
         (title, message, type, user_id, is_global, reference_id, reference_type, created_at) 
        VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
-      [title, message, type, isGlobal ? null : userId, isGlobal, referenceId, referenceType]
+      [
+        title,
+        message,
+        type,
+        isGlobal ? null : userId,
+        isGlobal,
+        referenceId,
+        referenceType,
+      ]
     );
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: "Notification sent successfully",
-      notificationId: (result as any).insertId 
+      notificationId: (result as any).insertId,
     });
   } catch (error) {
     console.error("Error sending notification:", error);
