@@ -113,8 +113,13 @@ export async function GET(request: NextRequest) {
     // This is the key fix - we need to create a separate array so we don't modify the original one
     // that's used for the count query
     const paginatedQueryParams = [...queryParams];
-    paginatedQueryParams.push(limit);
-    paginatedQueryParams.push((page - 1) * limit);
+    // Ensure limit and offset are passed as numbers, not strings
+    paginatedQueryParams.push(Number(limit));
+    paginatedQueryParams.push(Number((page - 1) * limit));
+
+    // Log the query and parameters for debugging
+    console.log("Query:", query);
+    console.log("Parameters:", paginatedQueryParams);
 
     const tickets = await executeQuery<TicketDB[]>(query, paginatedQueryParams);
 
