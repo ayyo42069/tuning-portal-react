@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       LEFT JOIN users u2 ON t.assigned_to = u2.id
     `;
 
-    const queryParams: (string | number)[] = [];
+    const queryParams = [];
 
     // Apply filters based on user role and filter parameter
     if (userRole !== "admin") {
@@ -108,11 +108,15 @@ export async function GET(request: NextRequest) {
 
     // Add sorting and pagination
     query += " ORDER BY t.created_at DESC LIMIT ? OFFSET ?";
-    // Convert limit and offset to numbers explicitly
-    queryParams.push(Number(limit));
-    queryParams.push(Number((page - 1) * limit));
 
-    const tickets = await executeQuery<TicketDB[]>(query, queryParams);
+    // Create a new array for the query with pagination params as numbers
+    // This is the key fix - we need to create a separate array so we don't modify the original one
+    // that's used for the count query
+    const paginatedQueryParams = [...queryParams];
+    paginatedQueryParams.push(limit);
+    paginatedQueryParams.push((page - 1) * limit);
+
+    const tickets = await executeQuery<TicketDB[]>(query, paginatedQueryParams);
 
     // Transform database column names to camelCase for frontend
     const formattedTickets = tickets.map((ticket: TicketDB) => ({
