@@ -108,8 +108,9 @@ export async function GET(request: NextRequest) {
 
     // Add sorting and pagination
     query += " ORDER BY t.created_at DESC LIMIT ? OFFSET ?";
-    queryParams.push(limit);
-    queryParams.push((page - 1) * limit);
+    // Convert limit and offset to numbers explicitly
+    queryParams.push(Number(limit));
+    queryParams.push(Number((page - 1) * limit));
 
     const tickets = await executeQuery<TicketDB[]>(query, queryParams);
 
