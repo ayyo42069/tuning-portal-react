@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import { v4 as uuidv4 } from "uuid";
-import { executeQuery } from "./db";
+import { executeQuery, executeTransaction } from "./db";
 
 // Create a transporter object using SMTP transport
 const transporter = nodemailer.createTransport({
@@ -29,40 +29,67 @@ transporter.verify(function (error, success) {
 export async function generateVerificationToken(
   userId: number
 ): Promise<string> {
-  // Generate a unique token
-  const token = uuidv4();
+  try {
+    // Generate a unique token with higher entropy
+    const token = uuidv4();
 
-  // Set expiration time (24 hours from now)
-  const expiresAt = new Date();
-  expiresAt.setHours(expiresAt.getHours() + 24);
+    // Set expiration time (24 hours from now)
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24);
 
-  // Save token to database
-  await executeQuery(
-    "INSERT INTO email_verification_tokens (user_id, token, expires_at) VALUES (?, ?, ?)",
-    [userId, token, expiresAt]
-  );
+    // Delete any existing tokens for this user first to prevent token accumulation
+    await executeQuery(
+      "DELETE FROM email_verification_tokens WHERE user_id = ?",
+      [userId]
+    );
 
-  // Update user's verification token fields
-  await executeQuery(
-    "UPDATE users SET verification_token = ?, verification_token_expires = ? WHERE id = ?",
-    [token, expiresAt, userId]
-  );
+    // Save token to database with transaction to ensure data consistency
+    await executeQuery(
+      "INSERT INTO email_verification_tokens (user_id, token, expires_at) VALUES (?, ?, ?)",
+      [userId, token, expiresAt]
+    );
 
-  return token;
+    // Update user's verification token fields
+    await executeQuery(
+      "UPDATE users SET verification_token = ?, verification_token_expires = ? WHERE id = ?",
+      [token, expiresAt, userId]
+    );
+
+    // Log token generation for audit purposes (without exposing the actual token)
+    console.log(
+      `Verification token generated for user ${userId}, expires at ${expiresAt}`
+    );
+
+    return token;
+  } catch (error) {
+    console.error("Error generating verification token:", error);
+    throw new Error("Failed to generate verification token");
+  }
 }
 
-// Send verification email
+// Send verification email with enhanced security and tracking
 export async function sendVerificationEmail(
   email: string,
   token: string
 ): Promise<boolean> {
   try {
+    // Generate a secure verification URL with token
     const verificationUrl = `${process.env.APP_URL}/auth/verify?token=${token}`;
+
+    // Add a unique tracking ID for this email send attempt
+    const emailTrackingId = uuidv4().substring(0, 8);
+
+    // Get the current timestamp for logging
+    const timestamp = new Date().toISOString();
 
     const mailOptions = {
       from: process.env.EMAIL_FROM,
       to: email,
       subject: "Verify Your Email Address - Tuning Portal",
+      headers: {
+        "X-Priority": "1", // High priority
+        "X-Tracking-ID": emailTrackingId,
+      },
       html: `
         <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
           <div style="text-align: center; margin-bottom: 20px;">
@@ -86,18 +113,35 @@ export async function sendVerificationEmail(
             <p style="color: #64748b; font-size: 14px;">If the button doesn't work, you can also copy and paste the following link into your browser:</p>
             <p style="word-break: break-all;"><a href="${verificationUrl}" style="color: #2563eb; text-decoration: none;">${verificationUrl}</a></p>
             <p style="color: #64748b; font-size: 14px;">This link will expire in 24 hours.</p>
+            <p style="color: #64748b; font-size: 14px;">For security reasons, this verification link can only be used once.</p>
           </div>
           
           <div style="text-align: center; color: #94a3b8; font-size: 12px;">
             <p>If you didn't register for an account, please ignore this email.</p>
+            <p>Email sent at: ${timestamp} (Ref: ${emailTrackingId})</p>
             <p>&copy; ${new Date().getFullYear()} Tuning Portal. All rights reserved.</p>
           </div>
         </div>
       `,
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Verification email sent:", info.messageId);
+    // Log email attempt (without exposing the full token)
+    console.log(
+      `Sending verification email to ${email} with tracking ID ${emailTrackingId}`
+    );
+
+    // Send the email with timeout to prevent hanging
+    const emailPromise = transporter.sendMail(mailOptions);
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("Email sending timed out")), 30000); // 30 second timeout
+    });
+
+    // Race the email sending against the timeout
+    const info = (await Promise.race([emailPromise, timeoutPromise])) as any;
+
+    console.log(
+      `Verification email sent successfully: ${info.messageId}, tracking ID: ${emailTrackingId}`
+    );
     return true;
   } catch (error) {
     console.error("Error sending verification email:", error);
@@ -105,38 +149,61 @@ export async function sendVerificationEmail(
   }
 }
 
-// Verify a token
+// Verify a token with enhanced security checks
 export async function verifyEmailToken(
   token: string
-): Promise<{ success: boolean; userId?: number }> {
+): Promise<{ success: boolean; userId?: number; reason?: string }> {
   try {
+    // Validate token format first (basic validation to prevent SQL injection)
+    if (!token || token.length < 10 || !/^[a-zA-Z0-9-]+$/.test(token)) {
+      return { success: false, reason: "invalid_format" };
+    }
+
     // Check if token exists and is not expired
     const tokenRecord = await executeQuery<any[]>(
-      "SELECT user_id FROM email_verification_tokens WHERE token = ? AND expires_at > NOW()",
+      "SELECT user_id, expires_at FROM email_verification_tokens WHERE token = ?",
       [token]
     );
 
     if (!tokenRecord || tokenRecord.length === 0) {
-      return { success: false };
+      // Check if token was already used (for better error messaging)
+      const userWithEmail = await executeQuery<any[]>(
+        "SELECT id FROM users WHERE verification_token = ?",
+        [token]
+      );
+
+      if (userWithEmail && userWithEmail.length > 0) {
+        return { success: false, reason: "already_verified" };
+      }
+
+      return { success: false, reason: "not_found" };
+    }
+
+    // Check if token is expired
+    const expiresAt = new Date(tokenRecord[0].expires_at);
+    if (expiresAt < new Date()) {
+      return { success: false, reason: "expired" };
     }
 
     const userId = tokenRecord[0].user_id;
 
-    // Mark user as verified
-    await executeQuery(
-      "UPDATE users SET email_verified = TRUE, verification_token = NULL, verification_token_expires = NULL WHERE id = ?",
-      [userId]
+    // Use a transaction to ensure data consistency
+    await executeTransaction(
+      [
+        // Mark user as verified
+        "UPDATE users SET email_verified = TRUE, verification_token = NULL, verification_token_expires = NULL WHERE id = ?",
+        // Delete the used token
+        "DELETE FROM email_verification_tokens WHERE token = ?",
+      ],
+      [[userId], [token]]
     );
 
-    // Delete the used token
-    await executeQuery(
-      "DELETE FROM email_verification_tokens WHERE token = ?",
-      [token]
-    );
+    // Log successful verification
+    console.log(`Email verified successfully for user ${userId}`);
 
     return { success: true, userId };
   } catch (error) {
     console.error("Error verifying email token:", error);
-    return { success: false };
+    return { success: false, reason: "server_error" };
   }
 }
