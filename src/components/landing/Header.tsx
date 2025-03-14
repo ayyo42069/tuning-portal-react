@@ -45,11 +45,15 @@ export const Header = () => {
             </Link>
           </div>
         </div>
-        
+
         <div className="mt-4 text-center text-white text-sm">
           <div className="flex justify-center space-x-6">
-            <Link href="/terms" className="hover:underline">Terms of Service</Link>
-            <Link href="/privacy" className="hover:underline">Privacy Policy</Link>
+            <Link href="/terms" className="hover:underline">
+              Terms of Service
+            </Link>
+            <Link href="/privacy" className="hover:underline">
+              Privacy Policy
+            </Link>
           </div>
         </div>
       </div>
