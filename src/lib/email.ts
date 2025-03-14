@@ -6,7 +6,7 @@ import { executeQuery } from "./db";
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: Number(process.env.EMAIL_PORT),
-  secure: false, // false for 587, true for 465
+  secure: true, // true for 465, false for other ports
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -24,50 +24,6 @@ transporter.verify(function (error, success) {
     console.log("Email server connection established");
   }
 });
-
-// Rate limiting for email sending
-const emailRateLimits = {
-  maxPerHour: 10, // Maximum emails per hour
-  maxPerDay: 50,  // Maximum emails per day
-  hourlyCount: 0,
-  dailyCount: 0,
-  lastHourReset: new Date(),
-  lastDayReset: new Date(),
-};
-
-// Check and reset rate limits if needed
-function checkRateLimits(): boolean {
-  const now = new Date();
-  
-  // Reset hourly count if an hour has passed
-  if (now.getTime() - emailRateLimits.lastHourReset.getTime() > 60 * 60 * 1000) {
-    emailRateLimits.hourlyCount = 0;
-    emailRateLimits.lastHourReset = now;
-  }
-  
-  // Reset daily count if a day has passed
-  if (now.getTime() - emailRateLimits.lastDayReset.getTime() > 24 * 60 * 60 * 1000) {
-    emailRateLimits.dailyCount = 0;
-    emailRateLimits.lastDayReset = now;
-  }
-  
-  // Check if we've hit the limits
-  if (emailRateLimits.hourlyCount >= emailRateLimits.maxPerHour) {
-    console.warn("Hourly email rate limit reached");
-    return false;
-  }
-  
-  if (emailRateLimits.dailyCount >= emailRateLimits.maxPerDay) {
-    console.warn("Daily email rate limit reached");
-    return false;
-  }
-  
-  // Increment counters
-  emailRateLimits.hourlyCount++;
-  emailRateLimits.dailyCount++;
-  
-  return true;
-}
 
 // Generate a verification token and save it to the database
 export async function generateVerificationToken(
@@ -95,18 +51,12 @@ export async function generateVerificationToken(
   return token;
 }
 
-// Send verification email with double opt-in confirmation
+// Send verification email
 export async function sendVerificationEmail(
   email: string,
   token: string
 ): Promise<boolean> {
   try {
-    // Check rate limits before sending
-    if (!checkRateLimits()) {
-      console.error("Email rate limit exceeded. Try again later.");
-      return false;
-    }
-    
     const verificationUrl = `${process.env.APP_URL}/auth/verify?token=${token}`;
 
     const mailOptions = {
@@ -136,21 +86,10 @@ export async function sendVerificationEmail(
             <p style="color: #64748b; font-size: 14px;">If the button doesn't work, you can also copy and paste the following link into your browser:</p>
             <p style="word-break: break-all;"><a href="${verificationUrl}" style="color: #2563eb; text-decoration: none;">${verificationUrl}</a></p>
             <p style="color: #64748b; font-size: 14px;">This link will expire in 24 hours.</p>
-            
-            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-              <p style="color: #334155; line-height: 1.5;"><strong>Important:</strong> By clicking the verification link, you are confirming that:</p>
-              <ul style="color: #334155; line-height: 1.5;">
-                <li>You have provided this email address directly to Tuning Portal</li>
-                <li>You consent to receive emails from Tuning Portal</li>
-                <li>You understand you can unsubscribe at any time using the link in our emails</li>
-              </ul>
-            </div>
           </div>
           
           <div style="text-align: center; color: #94a3b8; font-size: 12px;">
             <p>If you didn't register for an account, please ignore this email.</p>
-            <p>You're receiving this email because someone entered your email address on our website. If this wasn't you, no action is needed.</p>
-            <p><a href="${process.env.APP_URL}/unsubscribe?email=${encodeURIComponent(email)}" style="color: #64748b;">Unsubscribe</a> from all communications</p>
             <p>&copy; ${new Date().getFullYear()} Tuning Portal. All rights reserved.</p>
           </div>
         </div>
@@ -159,26 +98,10 @@ export async function sendVerificationEmail(
 
     const info = await transporter.sendMail(mailOptions);
     console.log("Verification email sent:", info.messageId);
-    
-    // Log email sending for compliance
-    await logEmailSent(email, "verification", info.messageId);
-    
     return true;
   } catch (error) {
     console.error("Error sending verification email:", error);
     return false;
-  }
-}
-
-// Log email sending for compliance and tracking
-async function logEmailSent(email: string, type: string, messageId: string): Promise<void> {
-  try {
-    await executeQuery(
-      "INSERT INTO email_logs (recipient_email, email_type, message_id, sent_at) VALUES (?, ?, ?, NOW())",
-      [email, type, messageId]
-    );
-  } catch (error) {
-    console.error("Error logging email:", error);
   }
 }
 
@@ -210,72 +133,10 @@ export async function verifyEmailToken(
       "DELETE FROM email_verification_tokens WHERE token = ?",
       [token]
     );
-    
-    // Log the successful verification
-    await logEmailVerification(userId);
 
     return { success: true, userId };
   } catch (error) {
     console.error("Error verifying email token:", error);
     return { success: false };
-  }
-}
-
-// Log successful email verification
-async function logEmailVerification(userId: number): Promise<void> {
-  try {
-    await executeQuery(
-      "INSERT INTO user_activity_logs (user_id, activity_type, details, created_at) VALUES (?, 'email_verification', 'Email successfully verified', NOW())",
-      [userId]
-    );
-  } catch (error) {
-    console.error("Error logging email verification:", error);
-  }
-}
-
-// Send a generic email with unsubscribe link and proper compliance
-export async function sendEmail(
-  to: string,
-  subject: string,
-  htmlContent: string,
-  emailType: string
-): Promise<boolean> {
-  try {
-    // Check rate limits before sending
-    if (!checkRateLimits()) {
-      console.error("Email rate limit exceeded. Try again later.");
-      return false;
-    }
-    
-    // Add unsubscribe link and footer to all emails
-    const unsubscribeUrl = `${process.env.APP_URL}/unsubscribe?email=${encodeURIComponent(to)}`;
-    
-    const completeHtmlContent = `
-      ${htmlContent}
-      
-      <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 12px;">
-        <p>You're receiving this email because you have an account with Tuning Portal.</p>
-        <p><a href="${unsubscribeUrl}" style="color: #64748b;">Unsubscribe</a> from all communications</p>
-        <p>&copy; ${new Date().getFullYear()} Tuning Portal. All rights reserved.</p>
-      </div>
-    `;
-    
-    const mailOptions = {
-      from: process.env.EMAIL_FROM,
-      to,
-      subject,
-      html: completeHtmlContent,
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`${emailType} email sent:`, info.messageId);
-    
-    // Log email sending for compliance
-    await logEmailSent(to, emailType, info.messageId);
-    
-    return true;
-  } catch (error) {
-    console.error(`Error sending ${emailType} email:`, error);
-    return false;
   }
 }
