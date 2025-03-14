@@ -57,7 +57,7 @@ export const Stats = ({ inView }: StatsProps) => {
   }, [inView, hasAnimated]);
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-white dark:bg-gray-800">
       <motion.div
         initial="hidden"
         animate={inView ? "visible" : "hidden"}
@@ -66,22 +66,22 @@ export const Stats = ({ inView }: StatsProps) => {
       >
         <div className="grid md:grid-cols-3 gap-8 text-center">
           <motion.div variants={itemVariants} className="p-6">
-            <div className="text-4xl font-bold text-blue-600 mb-2">
+            <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
               {count.users.toLocaleString()}+
             </div>
-            <div className="text-gray-600">Active Users</div>
+            <div className="text-gray-600 dark:text-gray-300">Active Users</div>
           </motion.div>
           <motion.div variants={itemVariants} className="p-6">
-            <div className="text-4xl font-bold text-blue-600 mb-2">
+            <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
               {count.files.toLocaleString()}+
             </div>
-            <div className="text-gray-600">Tuning Files Created</div>
+            <div className="text-gray-600 dark:text-gray-300">Tuning Files Created</div>
           </motion.div>
           <motion.div variants={itemVariants} className="p-6">
-            <div className="text-4xl font-bold text-blue-600 mb-2">
+            <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
               {count.satisfaction}%
             </div>
-            <div className="text-gray-600">Customer Satisfaction</div>
+            <div className="text-gray-600 dark:text-gray-300">Customer Satisfaction</div>
           </motion.div>
         </div>
       </motion.div>

@@ -74,7 +74,7 @@ export const Features = ({ inView }: FeaturesProps) => {
   ];
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20 bg-gray-50 dark:bg-gray-900">
       <motion.div
         initial="hidden"
         animate={inView ? "visible" : "hidden"}
@@ -82,10 +82,10 @@ export const Features = ({ inView }: FeaturesProps) => {
         className="container mx-auto px-4"
       >
         <motion.div variants={itemVariants} className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Why Choose Us
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Experience the perfect blend of performance, efficiency, and
             reliability
           </p>
@@ -96,13 +96,13 @@ export const Features = ({ inView }: FeaturesProps) => {
             <motion.div
               key={index}
               variants={itemVariants}
-              className="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+              className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
             >
-              <feature.icon className="w-12 h-12 text-blue-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <feature.icon className="w-12 h-12 text-blue-600 dark:text-blue-400 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 {feature.title}
               </h3>
-              <p className="text-gray-600">{feature.description}</p>
+              <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
             </motion.div>
           ))}
         </div>

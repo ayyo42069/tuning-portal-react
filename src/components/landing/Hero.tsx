@@ -40,12 +40,12 @@ export const Hero = ({ inView }: HeroProps) => {
   };
 
   return (
-    <section className="bg-gradient-to-b from-blue-900 to-blue-800 text-white py-20 lg:py-32 relative overflow-hidden">
+    <section className="bg-gradient-to-b from-blue-900 to-blue-800 dark:from-blue-950 dark:to-blue-900 text-white py-20 lg:py-32 relative overflow-hidden">
       {/* Animated background elements - with will-change optimization */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
-        <div className="absolute w-96 h-96 rounded-full bg-blue-500 opacity-20 -top-20 -left-20 animate-blob will-change-transform"></div>
-        <div className="absolute w-96 h-96 rounded-full bg-indigo-500 opacity-20 top-1/3 -right-20 animate-blob animation-delay-2000 will-change-transform"></div>
-        <div className="absolute w-96 h-96 rounded-full bg-purple-500 opacity-20 bottom-0 left-1/3 animate-blob animation-delay-4000 will-change-transform"></div>
+        <div className="absolute w-96 h-96 rounded-full bg-blue-500 dark:bg-blue-600 opacity-20 -top-20 -left-20 animate-blob will-change-transform"></div>
+        <div className="absolute w-96 h-96 rounded-full bg-indigo-500 dark:bg-indigo-600 opacity-20 top-1/3 -right-20 animate-blob animation-delay-2000 will-change-transform"></div>
+        <div className="absolute w-96 h-96 rounded-full bg-purple-500 dark:bg-purple-600 opacity-20 bottom-0 left-1/3 animate-blob animation-delay-4000 will-change-transform"></div>
       </div>
 
       <div className="container mx-auto px-4 relative z-10">

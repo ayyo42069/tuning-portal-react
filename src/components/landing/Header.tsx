@@ -6,7 +6,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 export const Header = () => {
   return (
     <header className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-700 to-purple-800 animate-gradient-x"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-700 to-purple-800 dark:from-blue-700 dark:via-indigo-800 dark:to-purple-900 animate-gradient-x"></div>
       <div className="absolute inset-0 opacity-20">
         <div className="absolute inset-0 bg-[url('/images/grid-pattern.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
       </div>
@@ -14,9 +14,9 @@ export const Header = () => {
       <div className="container mx-auto py-6 px-4 relative z-10">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center">
               <svg
-                className="w-6 h-6 text-blue-600"
+                className="w-6 h-6 text-blue-600 dark:text-blue-400"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -33,13 +33,13 @@ export const Header = () => {
             <ThemeToggle />
             <Link
               href="/auth/login"
-              className="px-4 py-2 rounded-md bg-white text-blue-600 hover:bg-opacity-90 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="px-4 py-2 rounded-md bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-opacity-90 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               Login
             </Link>
             <Link
               href="/auth/register"
-              className="px-4 py-2 rounded-md border-2 border-white text-white hover:bg-white hover:text-blue-600 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="px-4 py-2 rounded-md border-2 border-white dark:border-gray-600 text-white hover:bg-white hover:text-blue-600 dark:hover:bg-gray-800 dark:hover:text-blue-400 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               Register
             </Link>
