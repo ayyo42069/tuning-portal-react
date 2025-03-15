@@ -113,9 +113,12 @@ export async function GET(request: NextRequest) {
     // This is the key fix - we need to create a separate array so we don't modify the original one
     // that's used for the count query
     const paginatedQueryParams = [...queryParams];
-    // Ensure limit and offset are passed as numbers, not strings
-    paginatedQueryParams.push(Number(limit));
-    paginatedQueryParams.push(Number((page - 1) * limit));
+    // Ensure limit and offset are explicitly passed as integers
+    // MySQL prepared statements can be sensitive to parameter types
+    const limitValue = parseInt(String(limit), 10);
+    const offsetValue = parseInt(String((page - 1) * limit), 10);
+    paginatedQueryParams.push(limitValue);
+    paginatedQueryParams.push(offsetValue);
 
     // Log the query and parameters for debugging
     console.log("Query:", query);
