@@ -506,6 +506,19 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
           </div>
         )}
 
+        {currentUser.role === "admin" &&
+          !selectedTicket &&
+          !showNewTicketForm && (
+            <AdminPanel
+              tickets={tickets}
+              onUpdateStatus={handleUpdateTicketStatus}
+              onAssign={handleAssignTicket}
+              onUpdatePriority={handleUpdatePriority}
+              onSelectTicket={handleSelectTicket}
+              loading={loading}
+            />
+          )}
+
         {loading &&
         tickets.length === 0 &&
         !selectedTicket &&
