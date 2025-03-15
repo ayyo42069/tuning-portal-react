@@ -142,7 +142,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
       </div>
 
       {/* Status Controls for Regular Users */}
-      {currentUser.role !== "admin" &&
+      {currentUser.role.toLowerCase() !== "admin" &&
         ticket.status !== "closed" &&
         ticket.status !== "resolved" && (
           <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -206,7 +206,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
       )}
 
       {/* Admin Controls */}
-      {currentUser.role === "admin" && (
+      {currentUser.role.toLowerCase() === "admin" && (
         <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <h4 className="font-medium text-sm text-gray-900 dark:text-white mb-2">
             Admin Controls
@@ -297,7 +297,8 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
               <div
                 key={response.id}
                 className={`p-2 rounded-lg ${
-                  response.isInternal && currentUser.role === "admin"
+                  response.isInternal &&
+                  currentUser.role.toLowerCase() === "admin"
                     ? "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800"
                     : "bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700"
                 }`}
@@ -350,7 +351,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
             }
           />
 
-          {currentUser.role === "admin" && (
+          {currentUser.role.toLowerCase() === "admin" && (
             <div className="flex items-center">
               <input
                 type="checkbox"
