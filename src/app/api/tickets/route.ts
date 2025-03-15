@@ -109,22 +109,19 @@ export async function GET(request: NextRequest) {
     // Add sorting and pagination
     query += " ORDER BY t.created_at DESC LIMIT ? OFFSET ?";
 
-    // Create a new array for the query with pagination params as numbers
-    // This is the key fix - we need to create a separate array so we don't modify the original one
-    // that's used for the count query
-    const paginatedQueryParams = [...queryParams];
-    // Ensure limit and offset are explicitly passed as integers
-    // MySQL prepared statements can be sensitive to parameter types
-    const limitValue = parseInt(String(limit), 10);
-    const offsetValue = parseInt(String((page - 1) * limit), 10);
-    paginatedQueryParams.push(limitValue);
-    paginatedQueryParams.push(offsetValue);
+    // Calculate pagination values
+    const offset = (page - 1) * limit;
+
+    // Add pagination parameters to the query params array
+    // Explicitly convert to numbers to ensure proper type handling
+    queryParams.push(Number(limit));
+    queryParams.push(Number(offset));
 
     // Log the query and parameters for debugging
     console.log("Query:", query);
-    console.log("Parameters:", paginatedQueryParams);
+    console.log("Parameters:", queryParams);
 
-    const tickets = await executeQuery<TicketDB[]>(query, paginatedQueryParams);
+    const tickets = await executeQuery<TicketDB[]>(query, queryParams);
 
     // Transform database column names to camelCase for frontend
     const formattedTickets = tickets.map((ticket: TicketDB) => ({
