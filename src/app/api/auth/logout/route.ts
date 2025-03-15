@@ -1,31 +1,65 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { serialize } from 'cookie';
+import { NextRequest, NextResponse } from "next/server";
+import { serialize } from "cookie";
+import { verifyToken } from "@/lib/auth";
+import { executeQuery } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   try {
-    // Create a cookie that expires immediately to clear the auth token
-    const cookieHeader = serialize('auth_token', '', {
+    // Get the auth token and session ID from cookies
+    const authToken = request.cookies.get("auth_token")?.value;
+    const sessionId = request.cookies.get("session_id")?.value;
+
+    // If session ID exists, delete the session from the database
+    if (sessionId) {
+      await executeQuery("DELETE FROM sessions WHERE id = ?", [sessionId]);
+    }
+
+    // If auth token exists, get user ID and delete all sessions for this user
+    if (authToken) {
+      const decodedToken = verifyToken(authToken);
+      if (decodedToken && decodedToken.id) {
+        // Delete all sessions for this user for complete logout across devices
+        await executeQuery("DELETE FROM sessions WHERE user_id = ?", [
+          decodedToken.id,
+        ]);
+      }
+    }
+
+    // Create cookies that expire immediately to clear the auth token and session ID
+    const authCookieHeader = serialize("auth_token", "", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
       maxAge: -1, // Expire immediately
-      path: '/'
+      path: "/",
+    });
+
+    const sessionCookieHeader = serialize("session_id", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: -1, // Expire immediately
+      path: "/",
     });
 
     // Return success response
-    const response = NextResponse.json({
-      success: true,
-      message: 'Logged out successfully'
-    }, { status: 200 });
-    
-    // Add the cookie to the response
-    response.headers.set('Set-Cookie', cookieHeader);
-    
+    const response = NextResponse.json(
+      {
+        success: true,
+        message: "Logged out successfully",
+      },
+      { status: 200 }
+    );
+
+    // Add the cookies to the response
+    response.headers.append("Set-Cookie", authCookieHeader);
+    response.headers.append("Set-Cookie", sessionCookieHeader);
+
     return response;
   } catch (error) {
-    console.error('Logout error:', error);
+    console.error("Logout error:", error);
     return NextResponse.json(
-      { error: 'An error occurred during logout' },
+      { error: "An error occurred during logout" },
       { status: 500 }
     );
   }

@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { executeQuery, executeTransaction } from "@/lib/db";
-import { hashPassword, generateToken, setAuthCookie } from "@/lib/auth";
+import {
+  hashPassword,
+  generateToken,
+  setAuthCookie,
+  createSession,
+} from "@/lib/auth";
+import { serialize } from "cookie";
 import { generateVerificationToken, sendVerificationEmail } from "@/lib/email";
 import {
   rateLimitByIpAndIdentifier,
@@ -167,8 +173,20 @@ export async function POST(request: NextRequest) {
       // Generate JWT token
       const token = generateToken(user);
 
-      // Set cookie with the token
-      const cookieHeader = setAuthCookie(token);
+      // Create a session for the user
+      const sessionId = await createSession(userId);
+
+      // Set auth cookie with the token
+      const authCookieHeader = setAuthCookie(token);
+
+      // Set session cookie
+      const sessionCookieHeader = serialize("session_id", sessionId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        path: "/",
+      });
 
       // Return success response with verification token
       const response = NextResponse.json(
@@ -181,8 +199,9 @@ export async function POST(request: NextRequest) {
         { status: 201 }
       );
 
-      // Add the cookie to the response
-      response.headers.set("Set-Cookie", cookieHeader);
+      // Add the cookies to the response
+      response.headers.append("Set-Cookie", authCookieHeader);
+      response.headers.append("Set-Cookie", sessionCookieHeader);
 
       return response;
     } catch (error) {

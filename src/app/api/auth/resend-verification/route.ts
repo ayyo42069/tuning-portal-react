@@ -20,9 +20,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    // Apply rate limiting (1 requests per 30 minutes per email and IP)
+    // Apply rate limiting (3 requests per 30 minutes per email and IP)
     const rateLimitResult = await rateLimitByIpAndIdentifier(request, email, {
-      limit: 1,
+      limit: 3,
       windowMs: 30 * 60 * 1000, // 30 minutes
       identifier: "resend-verification",
       useDatabase: true, // Use database for persistence

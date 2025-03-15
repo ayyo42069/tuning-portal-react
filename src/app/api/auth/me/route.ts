@@ -1,58 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
-import { getRow } from "@/lib/db";
-
-// Define the user type from database
-interface UserDB {
-  id: number;
-  username: string;
-  email: string;
-  role: string;
-  created_at: string;
-}
+import { authenticateUser } from "@/lib/authMiddleware";
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the auth token from cookies
-    const authToken = request.cookies.get("auth_token")?.value;
+    // Use the authentication middleware to verify both JWT and session
+    const authResult = await authenticateUser(request);
 
-    if (!authToken) {
+    if (!authResult.success) {
       return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
+        { error: authResult.error },
+        { status: authResult.status }
       );
     }
 
-    // Verify the token
-    const decodedToken = verifyToken(authToken);
-    if (!decodedToken) {
-      return NextResponse.json(
-        { error: "Invalid authentication token" },
-        { status: 401 }
-      );
-    }
-
-    // Get user data from database with proper typing
-    const user = await getRow<UserDB>(
-      `SELECT id, username, email, role, created_at 
-       FROM users 
-       WHERE id = ?`,
-      [decodedToken.id]
-    );
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    // Return user data (excluding sensitive information)
+    // Return user data from the authentication result
     return NextResponse.json({
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        createdAt: user.created_at,
-      },
+      user: authResult.user,
     });
   } catch (error) {
     console.error("Error fetching current user:", error);

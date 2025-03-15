@@ -1,6 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getRow } from '@/lib/db';
-import { verifyPassword, generateToken, setAuthCookie } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import { getRow } from "@/lib/db";
+import {
+  verifyPassword,
+  generateToken,
+  setAuthCookie,
+  createSession,
+} from "@/lib/auth";
+import { serialize } from "cookie";
 
 interface LoginRequest {
   username: string;
@@ -12,7 +18,7 @@ interface User {
   username: string;
   email: string;
   password: string;
-  role: 'user' | 'admin';
+  role: "user" | "admin";
   email_verified: boolean;
 }
 
@@ -24,20 +30,19 @@ export async function POST(request: NextRequest) {
     // Validate input
     if (!username || !password) {
       return NextResponse.json(
-        { error: 'Username and password are required' },
+        { error: "Username and password are required" },
         { status: 400 }
       );
     }
 
     // Find user in database
-    const user = await getRow<User>(
-      'SELECT * FROM users WHERE username = ?',
-      [username]
-    );
+    const user = await getRow<User>("SELECT * FROM users WHERE username = ?", [
+      username,
+    ]);
 
     if (!user) {
       return NextResponse.json(
-        { error: 'Invalid username or password' },
+        { error: "Invalid username or password" },
         { status: 401 }
       );
     }
@@ -46,18 +51,18 @@ export async function POST(request: NextRequest) {
     const isPasswordValid = await verifyPassword(password, user.password);
     if (!isPasswordValid) {
       return NextResponse.json(
-        { error: 'Invalid username or password' },
+        { error: "Invalid username or password" },
         { status: 401 }
       );
     }
-    
+
     // Check if email is verified
     if (!user.email_verified) {
       return NextResponse.json(
-        { 
-          error: 'Please verify your email before logging in', 
+        {
+          error: "Please verify your email before logging in",
           emailVerificationRequired: true,
-          email: user.email 
+          email: user.email,
         },
         { status: 403 }
       );
@@ -68,11 +73,23 @@ export async function POST(request: NextRequest) {
       id: user.id,
       username: user.username,
       email: user.email,
-      role: user.role
+      role: user.role,
     });
 
-    // Set cookie with the token
-    const cookieHeader = setAuthCookie(token);
+    // Create a session for the user
+    const sessionId = await createSession(user.id);
+    
+    // Set auth cookie with the token
+    const authCookieHeader = setAuthCookie(token);
+    
+    // Set session cookie
+    const sessionCookieHeader = serialize('session_id', sessionId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/'
+    });
 
     // Return success response with user info (excluding password)
     const { password: _, ...userWithoutPassword } = user;
@@ -82,14 +99,15 @@ export async function POST(request: NextRequest) {
       user: userWithoutPassword
     }, { status: 200 });
     
-    // Add the cookie to the response
-    response.headers.set('Set-Cookie', cookieHeader);
-    
+    // Add the cookies to the response
+    response.headers.append('Set-Cookie', authCookieHeader);
+    response.headers.append('Set-Cookie', sessionCookieHeader);
+
     return response;
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     return NextResponse.json(
-      { error: 'An error occurred during login' },
+      { error: "An error occurred during login" },
       { status: 500 }
     );
   }
