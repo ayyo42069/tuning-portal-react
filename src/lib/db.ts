@@ -1,5 +1,4 @@
 import mysql from "mysql2/promise";
-import { performance } from "perf_hooks";
 
 // Enhanced database connection configuration
 const dbConfig = {
@@ -25,13 +24,20 @@ const pool = mysql.createPool(dbConfig);
 const queryCache = new Map<string, { result: any; timestamp: number }>();
 const CACHE_TTL = 60000; // 1 minute cache TTL
 
+const getPerformanceNow = () => {
+  if (typeof window !== "undefined") {
+    return window.performance.now();
+  }
+  return performance.now();
+};
+
 // Function to execute SQL queries with prepared statements and caching
 export async function executeQuery<T>(
   query: string,
   params: any[] = [],
   options: { cache?: boolean; cacheTTL?: number } = {}
 ): Promise<T> {
-  const startTime = performance.now();
+  const startTime = getPerformanceNow();
   const cacheKey = options.cache ? `${query}-${JSON.stringify(params)}` : "";
 
   // Check cache if caching is enabled
@@ -55,7 +61,7 @@ export async function executeQuery<T>(
       queryCache.set(cacheKey, { result: results, timestamp: Date.now() });
     }
 
-    const duration = performance.now() - startTime;
+    const duration = getPerformanceNow() - startTime;
     if (duration > 500) {
       // Log slow queries (>500ms)
       console.warn(
@@ -81,7 +87,7 @@ export async function executeTransaction<T>(
   let connection;
   let retries = 0;
 
-  const startTime = performance.now();
+  const startTime = getPerformanceNow();
 
   while (retries <= maxRetries) {
     try {
@@ -106,7 +112,7 @@ export async function executeTransaction<T>(
 
       await connection.commit();
 
-      const duration = performance.now() - startTime;
+      const duration = getPerformanceNow() - startTime;
       if (duration > 1000) {
         // Log slow transactions (>1s)
         console.warn(`Slow transaction (${duration.toFixed(2)}ms)`);
@@ -191,5 +197,3 @@ export function getPoolStats() {
     waitForConnections: pool.config.waitForConnections,
   };
 }
-
-export default pool;
