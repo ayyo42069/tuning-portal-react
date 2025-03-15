@@ -113,9 +113,9 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
 
     // Add pagination parameters to the query params array
-    // Explicitly convert to numbers to ensure proper type handling
-    queryParams.push(Number(limit));
-    queryParams.push(Number(offset));
+    // Convert to strings to avoid type mismatch with prepared statement
+    queryParams.push(String(limit));
+    queryParams.push(String(offset));
 
     // Log the query and parameters for debugging
     console.log("Query:", query);
