@@ -5,6 +5,7 @@ import { Ticket, TicketResponse, User, TicketSystemProps } from "./types";
 import TicketList from "./TicketList";
 import TicketDetail from "./TicketDetail";
 import NewTicketForm from "./NewTicketForm";
+import AdminPanel from "./AdminPanel";
 
 const TicketSystem = ({ currentUser }: TicketSystemProps) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -526,6 +527,15 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
             onUpdateStatus={handleUpdateTicketStatus}
             onAssign={handleAssignTicket}
             onUpdatePriority={handleUpdatePriority}
+            loading={loading}
+          />
+        ) : currentUser.role === "admin" && !showNewTicketForm ? (
+          <AdminPanel
+            tickets={tickets}
+            onUpdateStatus={handleUpdateTicketStatus}
+            onAssign={handleAssignTicket}
+            onUpdatePriority={handleUpdatePriority}
+            onSelectTicket={handleSelectTicket}
             loading={loading}
           />
         ) : (
