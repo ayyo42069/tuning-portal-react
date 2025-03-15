@@ -68,9 +68,14 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
     }
   };
 
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<Ticket["status"] | null>(
+    null
+  );
+
   const handleSubmitResponse = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newResponse.trim()) return;
+    if (!newResponse.trim() || ticket.status === "closed") return;
 
     onAddResponse(ticket.id, newResponse, isInternal);
     setNewResponse("");
@@ -135,6 +140,70 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Status Controls for Regular Users */}
+      {currentUser.role !== "admin" &&
+        ticket.status !== "closed" &&
+        ticket.status !== "resolved" && (
+          <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => {
+                  setPendingStatus("resolved");
+                  setShowConfirmDialog(true);
+                }}
+                className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition-colors"
+              >
+                Mark as Resolved
+              </button>
+              <button
+                onClick={() => {
+                  setPendingStatus("closed");
+                  setShowConfirmDialog(true);
+                }}
+                className="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium rounded-md transition-colors"
+              >
+                Close Ticket
+              </button>
+            </div>
+          </div>
+        )}
+
+      {/* Confirmation Dialog */}
+      {showConfirmDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg max-w-sm w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              Confirm Action
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              Are you sure you want to mark this ticket as{" "}
+              {pendingStatus?.replace("_", " ")}?
+              {pendingStatus === "closed" && " This action cannot be undone."}
+            </p>
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowConfirmDialog(false)}
+                className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-medium rounded-md transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (pendingStatus) {
+                    onUpdateStatus(ticket.id, pendingStatus);
+                  }
+                  setShowConfirmDialog(false);
+                  setPendingStatus(null);
+                }}
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Admin Controls */}
       {currentUser.role === "admin" && (
@@ -272,9 +341,13 @@ const TicketDetail: React.FC<TicketDetailProps> = ({
           <textarea
             value={newResponse}
             onChange={(e) => setNewResponse(e.target.value)}
-            placeholder="Type your response..."
             className="w-full p-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white min-h-[80px]"
-            disabled={loading}
+            disabled={loading || ticket.status === "closed"}
+            placeholder={
+              ticket.status === "closed"
+                ? "This ticket is closed"
+                : "Type your response..."
+            }
           />
 
           {currentUser.role === "admin" && (

@@ -529,14 +529,11 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
             onUpdatePriority={handleUpdatePriority}
             loading={loading}
           />
-        ) : currentUser.role === "admin" && !showNewTicketForm ? (
-          <AdminPanel
+        ) : !showNewTicketForm ? (
+          <TicketList
             tickets={tickets}
-            onUpdateStatus={handleUpdateTicketStatus}
-            onAssign={handleAssignTicket}
-            onUpdatePriority={handleUpdatePriority}
             onSelectTicket={handleSelectTicket}
-            loading={loading}
+            currentUser={currentUser}
           />
         ) : (
           <TicketList
