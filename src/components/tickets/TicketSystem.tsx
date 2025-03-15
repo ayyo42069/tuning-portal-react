@@ -41,14 +41,34 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
       }
 
       const response = await fetch(url);
-      const data = await response.json();
 
+      // Check if response is ok before trying to parse JSON
       if (!response.ok) {
-        setError(data.error || "Failed to fetch tickets");
+        const errorText = await response.text();
+        let errorMessage = "Failed to fetch tickets";
+
+        try {
+          // Try to parse error as JSON
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseErr) {
+          // If parsing fails, use status text
+          errorMessage = response.statusText || errorMessage;
+        }
+
+        setError(errorMessage);
         return;
       }
 
-      setTickets(data.tickets || []);
+      // Parse JSON response
+      let data;
+      try {
+        data = await response.json();
+        setTickets(data.tickets || []);
+      } catch (jsonErr) {
+        console.error("Error parsing JSON response:", jsonErr);
+        setError("Error parsing server response");
+      }
     } catch (err) {
       setError("Error connecting to server");
       console.error("Error fetching tickets:", err);
@@ -64,14 +84,34 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
       setError(null);
 
       const response = await fetch(`/api/tickets/${ticketId}/responses`);
-      const data = await response.json();
 
+      // Check if response is ok before trying to parse JSON
       if (!response.ok) {
-        setError(data.error || "Failed to fetch ticket responses");
+        const errorText = await response.text();
+        let errorMessage = "Failed to fetch ticket responses";
+
+        try {
+          // Try to parse error as JSON
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseErr) {
+          // If parsing fails, use status text
+          errorMessage = response.statusText || errorMessage;
+        }
+
+        setError(errorMessage);
         return;
       }
 
-      setTicketResponses(data.responses || []);
+      // Parse JSON response
+      let data;
+      try {
+        data = await response.json();
+        setTicketResponses(data.responses || []);
+      } catch (jsonErr) {
+        console.error("Error parsing JSON response:", jsonErr);
+        setError("Error parsing server response");
+      }
     } catch (err) {
       setError("Error connecting to server");
       console.error("Error fetching ticket responses:", err);
@@ -107,18 +147,39 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
         }),
       });
 
-      const data = await response.json();
-
+      // Check if response is ok before trying to parse JSON
       if (!response.ok) {
-        setError(data.error || "Failed to add response");
+        const errorText = await response.text();
+        let errorMessage = "Failed to add response";
+
+        try {
+          // Try to parse error as JSON
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseErr) {
+          // If parsing fails, use status text
+          errorMessage = response.statusText || errorMessage;
+        }
+
+        setError(errorMessage);
         return;
       }
 
-      // Add the new response to the list
-      setTicketResponses((prev) => [...prev, data.response]);
+      // Parse JSON response
+      let data;
+      try {
+        const data = await response.json();
+        // Add the new response to the list
+        if (data && data.response) {
+          setTicketResponses((prev) => [...prev, data.response]);
+        }
 
-      // Refresh the ticket to get updated status
-      fetchTickets(false);
+        // Refresh the ticket to get updated status
+        fetchTickets(false);
+      } catch (jsonErr) {
+        console.error("Error parsing JSON response:", jsonErr);
+        setError("Error parsing server response");
+      }
     } catch (err) {
       setError("Error connecting to server");
       console.error("Error adding response:", err);
@@ -149,16 +210,37 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
         }),
       });
 
-      const data = await response.json();
-
+      // Check if response is ok before trying to parse JSON
       if (!response.ok) {
-        setError(data.error || "Failed to create ticket");
+        const errorText = await response.text();
+        let errorMessage = "Failed to create ticket";
+
+        try {
+          // Try to parse error as JSON
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseErr) {
+          // If parsing fails, use status text
+          errorMessage = response.statusText || errorMessage;
+        }
+
+        setError(errorMessage);
         return;
       }
 
-      // Add the new ticket to the list
-      setTickets((prev) => [data.ticket, ...prev]);
-      setShowNewTicketForm(false);
+      // Parse JSON response
+      let data;
+      try {
+        const data = await response.json();
+        // Add the new ticket to the list
+        if (data && data.ticket) {
+          setTickets((prev) => [data.ticket, ...prev]);
+          setShowNewTicketForm(false);
+        }
+      } catch (jsonErr) {
+        console.error("Error parsing JSON response:", jsonErr);
+        setError("Error parsing server response");
+      }
     } catch (err) {
       setError("Error connecting to server");
       console.error("Error creating ticket:", err);
@@ -186,19 +268,38 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
         }),
       });
 
-      const data = await response.json();
-
+      // Check if response is ok before trying to parse JSON
       if (!response.ok) {
-        setError(data.error || "Failed to update ticket status");
+        const errorText = await response.text();
+        let errorMessage = "Failed to update ticket status";
+
+        try {
+          // Try to parse error as JSON
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseErr) {
+          // If parsing fails, use status text
+          errorMessage = response.statusText || errorMessage;
+        }
+
+        setError(errorMessage);
         return;
       }
 
-      // Update the ticket in the list
-      setTickets((prev) =>
-        prev.map((ticket) =>
-          ticket.id === ticketId ? { ...ticket, status: status } : ticket
-        )
-      );
+      // Parse JSON response
+      let data;
+      try {
+        data = await response.json();
+        // Update the ticket in the list
+        setTickets((prev) =>
+          prev.map((ticket) =>
+            ticket.id === ticketId ? { ...ticket, status: status } : ticket
+          )
+        );
+      } catch (jsonErr) {
+        console.error("Error parsing JSON response:", jsonErr);
+        setError("Error parsing server response");
+      }
 
       // Update the selected ticket if it's the one being modified
       if (selectedTicket && selectedTicket.id === ticketId) {
@@ -231,7 +332,11 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
         }),
       });
 
-      const data = await response.json();
+      const data: {
+        assignedTo: number;
+        assignedUsername: string;
+        error?: string;
+      } = await response.json();
 
       if (!response.ok) {
         setError(data.error || "Failed to assign ticket");
@@ -289,7 +394,11 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
         }),
       });
 
-      const data = await response.json();
+      const data: {
+        assignedTo: number;
+        assignedUsername: string;
+        error?: string;
+      } = await response.json();
 
       if (!response.ok) {
         setError(data.error || "Failed to update ticket priority");

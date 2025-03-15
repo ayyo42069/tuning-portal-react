@@ -9,7 +9,7 @@ import {
 } from "../../types";
 
 // GET /api/tickets/[id]/responses - Get responses for a specific ticket
-export async function PUT(
+export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
