@@ -7,6 +7,7 @@ import {
   createSession,
 } from "@/lib/auth";
 import { serialize } from "cookie";
+import { logAuthSuccess, logAuthFailure } from "@/lib/securityMiddleware";
 
 interface LoginRequest {
   username: string;
@@ -41,6 +42,8 @@ export async function POST(request: NextRequest) {
     ]);
 
     if (!user) {
+      // Log failed login attempt
+      await logAuthFailure(username, request, "User not found");
       return NextResponse.json(
         { error: "Invalid username or password" },
         { status: 401 }
@@ -50,6 +53,8 @@ export async function POST(request: NextRequest) {
     // Verify password
     const isPasswordValid = await verifyPassword(password, user.password);
     if (!isPasswordValid) {
+      // Log failed login attempt due to invalid password
+      await logAuthFailure(username, request, "Invalid password");
       return NextResponse.json(
         { error: "Invalid username or password" },
         { status: 401 }
@@ -78,30 +83,36 @@ export async function POST(request: NextRequest) {
 
     // Create a session for the user
     const sessionId = await createSession(user.id);
-    
+
     // Set auth cookie with the token
     const authCookieHeader = setAuthCookie(token);
-    
+
     // Set session cookie
-    const sessionCookieHeader = serialize('session_id', sessionId, {
+    const sessionCookieHeader = serialize("session_id", sessionId, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
       maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: '/'
+      path: "/",
     });
+
+    // Log successful login
+    await logAuthSuccess(user.id, request);
 
     // Return success response with user info (excluding password)
     const { password: _, ...userWithoutPassword } = user;
-    
-    const response = NextResponse.json({
-      success: true,
-      user: userWithoutPassword
-    }, { status: 200 });
-    
+
+    const response = NextResponse.json(
+      {
+        success: true,
+        user: userWithoutPassword,
+      },
+      { status: 200 }
+    );
+
     // Add the cookies to the response
-    response.headers.append('Set-Cookie', authCookieHeader);
-    response.headers.append('Set-Cookie', sessionCookieHeader);
+    response.headers.append("Set-Cookie", authCookieHeader);
+    response.headers.append("Set-Cookie", sessionCookieHeader);
 
     return response;
   } catch (error) {

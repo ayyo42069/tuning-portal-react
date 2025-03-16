@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { serialize } from "cookie";
 import { verifyToken } from "@/lib/auth";
 import { executeQuery } from "@/lib/db";
+import { logSessionEvent, logAuthFailure } from "@/lib/securityMiddleware";
+import { SecurityEventType } from "@/lib/securityLogging";
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,6 +20,16 @@ export async function POST(request: NextRequest) {
     if (authToken) {
       const decodedToken = verifyToken(authToken);
       if (decodedToken && decodedToken.id) {
+        // Log session invalidation event before deleting sessions
+        if (sessionId) {
+          await logSessionEvent(
+            decodedToken.id,
+            sessionId,
+            SecurityEventType.SESSION_INVALIDATED,
+            request
+          );
+        }
+
         // Delete all sessions for this user for complete logout across devices
         await executeQuery("DELETE FROM sessions WHERE user_id = ?", [
           decodedToken.id,

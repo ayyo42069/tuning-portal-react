@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { executeQuery } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
+import { logAdminAction, logSessionEvent } from "@/lib/securityMiddleware";
+import { SecurityEventType } from "@/lib/securityLogging";
 
 export async function PUT(
   request: NextRequest,
@@ -52,6 +54,20 @@ export async function PUT(
       role,
       userId,
     ]);
+
+    // Log admin action for role change
+    await logAdminAction(
+      user.id,
+      SecurityEventType.ADMIN_PERMISSION_CHANGE,
+      request,
+      {
+        action: "role_update",
+        targetUserId: userId,
+        oldRole: "unknown", // We don't have the previous role here
+        newRole: role,
+        timestamp: new Date().toISOString(),
+      }
+    );
 
     return NextResponse.json({
       success: true,

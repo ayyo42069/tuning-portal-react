@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRow } from "@/lib/db";
 import { verifyToken, getAuthCookie } from "@/lib/auth";
+import { logApiAccess } from "@/lib/securityMiddleware";
 
 interface User {
   id: number;
@@ -51,6 +52,14 @@ export async function GET(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
+
+    // Log API access for profile data (sensitive information)
+    await logApiAccess(
+      decoded.id,
+      request,
+      "/api/user/profile",
+      true // Mark as sensitive data
+    );
 
     // Return user data
     return NextResponse.json(
