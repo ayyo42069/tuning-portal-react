@@ -221,15 +221,6 @@ export default function SecurityDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Security Dashboard
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Monitor and manage security events and alerts
-        </p>
-      </div>
-
       {/* Tabs */}
       <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
         <ul className="flex flex-wrap -mb-px">

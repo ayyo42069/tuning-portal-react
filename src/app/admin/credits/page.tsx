@@ -2,6 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import {
+  CreditCard,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+} from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface CreditTransaction {
@@ -126,161 +135,183 @@ export default function CreditsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="p-6">
-        <h1 className="text-3xl font-bold mb-8 text-foreground">
-          Credit Transactions
-        </h1>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
+        <ul className="flex flex-wrap -mb-px">
+          <li className="mr-2">
+            <button className="inline-flex items-center px-4 py-2 rounded-t-lg border-b-2 border-blue-600 text-blue-600">
+              <CreditCard className="w-5 h-5 mr-2" />
+              Credit Transactions
+            </button>
+          </li>
+        </ul>
+      </div>
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/10 border-l-4 border-red-400 dark:border-red-400/50 text-red-700 dark:text-red-400 rounded-md">
-            <p>{error}</p>
+      {error && (
+        <div className="p-4 mb-6 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-red-900/30 dark:text-red-400">
+          {error}
+          <button
+            onClick={() => setError(null)}
+            className="float-right text-red-800 dark:text-red-400"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 mb-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+            <Filter className="h-6 w-6 text-blue-600 dark:text-blue-400" />
           </div>
-        )}
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Filters
+          </h2>
+        </div>
 
-        <div className="bg-card text-card-foreground p-6 rounded-lg shadow-sm mb-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+          <div className="flex flex-wrap gap-4">
             <div>
-              <h2 className="text-xl font-semibold">Filters</h2>
+              <label className="block text-sm mb-1 text-gray-600 dark:text-gray-400">
+                Transaction Type
+              </label>
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="all">All Transactions</option>
+                <option value="purchase">Purchases</option>
+                <option value="usage">Usage</option>
+                <option value="adjustment">Adjustments</option>
+              </select>
             </div>
-            <div className="flex flex-wrap gap-4">
-              <div>
-                <label className="block text-sm mb-1 text-muted-foreground">
-                  Transaction Type
-                </label>
-                <select
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                  className="p-2 border border-input rounded-md bg-background text-foreground hover:bg-accent hover:text-accent-foreground"
-                >
-                  <option value="all">All Transactions</option>
-                  <option value="purchase">Purchases</option>
-                  <option value="usage">Usage</option>
-                  <option value="adjustment">Adjustments</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm mb-1 text-muted-foreground">
-                  Start Date
-                </label>
-                <input
-                  type="date"
-                  value={dateRange.start}
-                  onChange={(e) =>
-                    setDateRange({ ...dateRange, start: e.target.value })
-                  }
-                  className="p-2 border border-input rounded-md bg-background text-foreground hover:bg-accent hover:text-accent-foreground"
-                />
-              </div>
-              <div>
-                <label className="block text-sm mb-1 text-muted-foreground">
-                  End Date
-                </label>
-                <input
-                  type="date"
-                  value={dateRange.end}
-                  onChange={(e) =>
-                    setDateRange({ ...dateRange, end: e.target.value })
-                  }
-                  className="p-2 border border-input rounded-md bg-background text-foreground hover:bg-accent hover:text-accent-foreground"
-                />
-              </div>
+            <div>
+              <label className="block text-sm mb-1 text-gray-600 dark:text-gray-400">
+                Start Date
+              </label>
+              <input
+                type="date"
+                value={dateRange.start}
+                onChange={(e) =>
+                  setDateRange({ ...dateRange, start: e.target.value })
+                }
+                className="p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-1 text-gray-600 dark:text-gray-400">
+                End Date
+              </label>
+              <input
+                type="date"
+                value={dateRange.end}
+                onChange={(e) =>
+                  setDateRange({ ...dateRange, end: e.target.value })
+                }
+                className="p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              />
             </div>
           </div>
+        </div>
 
-          <div className="mb-6 p-4 bg-muted/50 dark:bg-muted/20 rounded-md">
-            <div className="flex justify-between items-center">
-              <span className="font-medium text-muted-foreground">
+        <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+              <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+            </div>
+            <div className="flex justify-between items-center w-full">
+              <span className="font-medium text-gray-700 dark:text-gray-300">
                 Total Credits (filtered):
               </span>
-              <span className="text-xl font-bold text-foreground">
+              <span className="text-xl font-bold text-gray-900 dark:text-white">
                 {getTotalCredits()}
               </span>
             </div>
           </div>
+        </div>
 
-          <div className="overflow-x-auto rounded-md border border-border">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-muted/50 dark:bg-muted/20">
-                  <th className="p-3 text-left text-muted-foreground font-medium">
-                    ID
-                  </th>
-                  <th className="p-3 text-left text-muted-foreground font-medium">
-                    User
-                  </th>
-                  <th className="p-3 text-left text-muted-foreground font-medium">
-                    Type
-                  </th>
-                  <th className="p-3 text-left text-muted-foreground font-medium">
-                    Amount
-                  </th>
-                  <th className="p-3 text-left text-muted-foreground font-medium">
-                    Reason
-                  </th>
-                  <th className="p-3 text-left text-muted-foreground font-medium">
-                    Date
-                  </th>
+        <div className="overflow-x-auto rounded-md border border-gray-200 dark:border-gray-700">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-gray-50 dark:bg-gray-900">
+                <th className="p-3 text-left text-gray-600 dark:text-gray-400 font-medium">
+                  ID
+                </th>
+                <th className="p-3 text-left text-gray-600 dark:text-gray-400 font-medium">
+                  User
+                </th>
+                <th className="p-3 text-left text-gray-600 dark:text-gray-400 font-medium">
+                  Type
+                </th>
+                <th className="p-3 text-left text-gray-600 dark:text-gray-400 font-medium">
+                  Amount
+                </th>
+                <th className="p-3 text-left text-gray-600 dark:text-gray-400 font-medium">
+                  Reason
+                </th>
+                <th className="p-3 text-left text-gray-600 dark:text-gray-400 font-medium">
+                  Date
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {transactions.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="p-3 text-center text-gray-500 dark:text-gray-400"
+                  >
+                    No credit transactions found.
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {transactions.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="p-3 text-center text-muted-foreground"
+              ) : (
+                transactions.map((transaction) => {
+                  const typeInfo = getTransactionTypeLabel(
+                    transaction.transaction_type
+                  );
+                  return (
+                    <tr
+                      key={transaction.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors"
                     >
-                      No credit transactions found.
-                    </td>
-                  </tr>
-                ) : (
-                  transactions.map((transaction) => {
-                    const typeInfo = getTransactionTypeLabel(
-                      transaction.transaction_type
-                    );
-                    return (
-                      <tr
-                        key={transaction.id}
-                        className="hover:bg-muted/50 transition-colors"
-                      >
-                        <td className="p-3 text-foreground">
-                          {transaction.id}
-                        </td>
-                        <td className="p-3 text-foreground">
-                          {transaction.username}
-                        </td>
-                        <td className="p-3">
-                          <span
-                            className={`inline-block px-2 py-1 rounded-full text-xs ${typeInfo.className}`}
-                          >
-                            {typeInfo.label}
-                          </span>
-                        </td>
-                        <td className="p-3">
-                          <span
-                            className={
-                              transaction.amount >= 0
-                                ? "text-green-600 dark:text-green-400"
-                                : "text-red-600 dark:text-red-400"
-                            }
-                          >
-                            {transaction.amount >= 0 ? "+" : ""}
-                            {transaction.amount}
-                          </span>
-                        </td>
-                        <td className="p-3 text-foreground">
-                          {transaction.reason || "-"}
-                        </td>
-                        <td className="p-3 text-foreground">
-                          {formatDate(transaction.created_at)}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                      <td className="p-3 text-gray-900 dark:text-white">
+                        {transaction.id}
+                      </td>
+                      <td className="p-3 text-gray-900 dark:text-white">
+                        {transaction.username}
+                      </td>
+                      <td className="p-3">
+                        <span
+                          className={`inline-block px-2 py-1 rounded-full text-xs ${typeInfo.className}`}
+                        >
+                          {typeInfo.label}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <span
+                          className={
+                            transaction.amount >= 0
+                              ? "text-green-600 dark:text-green-400"
+                              : "text-red-600 dark:text-red-400"
+                          }
+                        >
+                          {transaction.amount >= 0 ? "+" : ""}
+                          {transaction.amount}
+                        </span>
+                      </td>
+                      <td className="p-3 text-gray-900 dark:text-white">
+                        {transaction.reason || "-"}
+                      </td>
+                      <td className="p-3 text-gray-900 dark:text-white">
+                        {formatDate(transaction.created_at)}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

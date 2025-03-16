@@ -2,6 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import {
+  FileText,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  CheckCircle,
+  AlertTriangle,
+} from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface TuningRequest {
@@ -166,296 +175,355 @@ export default function TuningRequestsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-400 text-red-700 rounded-md">
-            <p>{error}</p>
-          </div>
-        </div>
+      <div className="p-4 mb-6 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-red-900/30 dark:text-red-400">
+        {error}
+        <button
+          onClick={() => setError(null)}
+          className="float-right text-red-800 dark:text-red-400"
+        >
+          &times;
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Tuning Requests
-          </h1>
-        </div>
-
-        {selectedRequest ? (
-          <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg mb-8">
-            <div className="px-4 py-5 sm:px-6 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
-              <div>
-                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                  Request #{selectedRequest.id}: {selectedRequest.file_name}
-                </h2>
-                <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
-                  Created on {formatDate(selectedRequest.created_at)}
-                </p>
-              </div>
-              <button
-                onClick={() => setSelectedRequest(null)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-              >
-                Back to List
+    <div className="container mx-auto px-4 py-8">
+      {/* Tabs */}
+      <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
+        <ul className="flex flex-wrap -mb-px">
+          <li className="mr-2">
+            <button
+              onClick={() => setSelectedRequest(null)}
+              className={`inline-flex items-center px-4 py-2 rounded-t-lg ${
+                !selectedRequest
+                  ? "border-b-2 border-blue-600 text-blue-600"
+                  : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              }`}
+            >
+              <FileText className="w-5 h-5 mr-2" />
+              All Requests
+            </button>
+          </li>
+          {selectedRequest && (
+            <li>
+              <button className="inline-flex items-center px-4 py-2 rounded-t-lg border-b-2 border-blue-600 text-blue-600">
+                <Clock className="w-5 h-5 mr-2" />
+                Request Details
               </button>
-            </div>
+            </li>
+          )}
+        </ul>
+      </div>
 
-            <div className="border-b border-gray-200 dark:border-gray-700">
-              <dl>
-                <div className="bg-gray-50 dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    Vehicle Information
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
-                    {selectedRequest.manufacturer_name}{" "}
-                    {selectedRequest.model_name}, Year:{" "}
-                    {selectedRequest.production_year}
-                  </dd>
-                </div>
-                <div className="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    Status
-                  </dt>
-                  <dd className="mt-1 text-sm sm:mt-0 sm:col-span-2">
-                    <span
-                      className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(
-                        selectedRequest.status
-                      )}`}
-                    >
-                      {selectedRequest.status.charAt(0).toUpperCase() +
-                        selectedRequest.status.slice(1)}
-                    </span>
-                  </dd>
-                </div>
-              </dl>
-            </div>
+      {error && (
+        <div className="p-4 mb-6 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-red-900/30 dark:text-red-400">
+          {error}
+          <button
+            onClick={() => setError(null)}
+            className="float-right text-red-800 dark:text-red-400"
+          >
+            &times;
+          </button>
+        </div>
+      )}
 
-            <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+      {selectedRequest ? (
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 mb-8">
+          <div className="px-4 py-5 sm:px-6 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg mr-3">
+                <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                Request #{selectedRequest.id}: {selectedRequest.file_name}
+              </h2>
+            </div>
+            <button
+              onClick={() => setSelectedRequest(null)}
+              className="px-4 py-2 bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+            >
+              Back to List
+            </button>
+          </div>
+
+          <div className="border-b border-gray-200 dark:border-gray-700">
+            <dl>
+              <div className="bg-gray-50 dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Vehicle Information
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+                  {selectedRequest.manufacturer_name}{" "}
+                  {selectedRequest.model_name}, Year:{" "}
+                  {selectedRequest.production_year}
+                </dd>
+              </div>
+              <div className="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Status
+                </dt>
+                <dd className="mt-1 text-sm sm:mt-0 sm:col-span-2">
+                  <span
+                    className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(
+                      selectedRequest.status
+                    )}`}
+                  >
+                    {selectedRequest.status.charAt(0).toUpperCase() +
+                      selectedRequest.status.slice(1)}
+                  </span>
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center mb-4">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg mr-3">
+                <CheckCircle className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
                 Tuning Options
               </h3>
-              <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-                {selectedRequest.tuning_options.map((option) => (
-                  <li key={option.id} className="py-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          {option.name}
-                        </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {option.description}
-                        </p>
-                      </div>
-                      <div className="ml-2 flex-shrink-0">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
-                          {option.credit_cost} credits
-                        </span>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
             </div>
+            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+              {selectedRequest.tuning_options.map((option) => (
+                <li key={option.id} className="py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {option.name}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {option.description}
+                      </p>
+                    </div>
+                    <div className="ml-2 flex-shrink-0">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                        {option.credit_cost} credits
+                      </span>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+          <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center mb-4">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg mr-3">
+                <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
                 File Management
               </h3>
-              <div className="flex flex-wrap gap-4">
-                <button
-                  onClick={() => handleDownload(selectedRequest.id)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-                >
-                  Download Original File
-                </button>
+            </div>
+            <div className="flex flex-wrap gap-4">
+              <button
+                onClick={() => handleDownload(selectedRequest.id)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+              >
+                Download Original File
+              </button>
 
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Upload Processed File:
-                  </label>
-                  <div className="flex gap-4">
-                    <input
-                      type="file"
-                      accept=".bin"
-                      onChange={(e) =>
-                        setProcessingFile(e.target.files?.[0] || null)
-                      }
-                      className="block w-full text-sm text-gray-500 dark:text-gray-400
-                        file:mr-4 file:py-2 file:px-4
-                        file:rounded-md file:border-0
-                        file:text-sm file:font-semibold
-                        file:bg-blue-50 file:text-blue-700
-                        dark:file:bg-blue-900 dark:file:text-blue-200
-                        hover:file:bg-blue-100 dark:hover:file:bg-blue-800"
-                    />
-                    <button
-                      onClick={() =>
-                        handleProcessedFileUpload(selectedRequest.id)
-                      }
-                      disabled={!processingFile}
-                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                    >
-                      Upload
-                    </button>
-                  </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Upload Processed File:
+                </label>
+                <div className="flex gap-4">
+                  <input
+                    type="file"
+                    accept=".bin"
+                    onChange={(e) =>
+                      setProcessingFile(e.target.files?.[0] || null)
+                    }
+                    className="block w-full text-sm text-gray-500 dark:text-gray-400
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-md file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-blue-50 file:text-blue-700
+                      dark:file:bg-blue-900 dark:file:text-blue-200
+                      hover:file:bg-blue-100 dark:hover:file:bg-blue-800"
+                  />
+                  <button
+                    onClick={() =>
+                      handleProcessedFileUpload(selectedRequest.id)
+                    }
+                    disabled={!processingFile}
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  >
+                    Upload
+                  </button>
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="px-4 py-5 sm:px-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+          <div className="px-4 py-5 sm:px-6">
+            <div className="flex items-center mb-4">
+              <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg mr-3">
+                <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+              </div>
+              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
                 Update Status
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Status:
-                  </label>
-                  <select
-                    value={statusUpdate}
-                    onChange={(e) => setStatusUpdate(e.target.value)}
-                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="processing">Processing</option>
-                    <option value="completed">Completed</option>
-                    <option value="failed">Failed</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Admin Message:
-                  </label>
-                  <textarea
-                    value={adminMessage}
-                    onChange={(e) => setAdminMessage(e.target.value)}
-                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                    rows={3}
-                    placeholder="Optional message to the user"
-                  />
-                </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Status:
+                </label>
+                <select
+                  value={statusUpdate}
+                  onChange={(e) => setStatusUpdate(e.target.value)}
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="processing">Processing</option>
+                  <option value="completed">Completed</option>
+                  <option value="failed">Failed</option>
+                </select>
               </div>
 
-              <button
-                onClick={() => handleStatusUpdate(selectedRequest.id)}
-                disabled={!statusUpdate}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-              >
-                Update Status
-              </button>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Admin Message:
+                </label>
+                <textarea
+                  value={adminMessage}
+                  onChange={(e) => setAdminMessage(e.target.value)}
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  rows={3}
+                  placeholder="Optional message to the user"
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={() => handleStatusUpdate(selectedRequest.id)}
+              disabled={!statusUpdate}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              Update Status
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg mr-3">
+                <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Tuning Requests
+              </h2>
             </div>
           </div>
-        ) : (
-          <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-700">
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                  >
+                    ID
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                  >
+                    File Name
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                  >
+                    Vehicle
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                  >
+                    Status
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                  >
+                    Created
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                  >
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {requests.length === 0 ? (
                   <tr>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                    <td
+                      colSpan={6}
+                      className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400"
                     >
-                      ID
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      File Name
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      Vehicle
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      Status
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      Created
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      Actions
-                    </th>
+                      No tuning requests found.
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {requests.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={6}
-                        className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400"
-                      >
-                        No tuning requests found.
+                ) : (
+                  requests.map((request) => (
+                    <tr
+                      key={request.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                        {request.id}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                        {request.file_name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {request.vehicle_info}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(
+                            request.status
+                          )}`}
+                        >
+                          {request.status.charAt(0).toUpperCase() +
+                            request.status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {formatDate(request.created_at)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        <button
+                          onClick={() => setSelectedRequest(request)}
+                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleDownload(request.id)}
+                          className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
+                        >
+                          Download
+                        </button>
                       </td>
                     </tr>
-                  ) : (
-                    requests.map((request) => (
-                      <tr
-                        key={request.id}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200"
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                          {request.id}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                          {request.file_name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                          {request.vehicle_info}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(
-                              request.status
-                            )}`}
-                          >
-                            {request.status.charAt(0).toUpperCase() +
-                              request.status.slice(1)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                          {formatDate(request.created_at)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                          <button
-                            onClick={() => setSelectedRequest(request)}
-                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                          >
-                            View
-                          </button>
-                          <button
-                            onClick={() => handleDownload(request.id)}
-                            className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
-                          >
-                            Download
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
