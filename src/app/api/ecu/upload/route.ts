@@ -156,12 +156,35 @@ export async function POST(request: NextRequest) {
       }
 
       // Calculate total credit cost
-      const tuningOptionsQuery = await executeQuery<any>(
-        "SELECT SUM(credit_cost) as total_cost FROM tuning_options WHERE id IN (?)",
-        [data.tuningOptions.join(",")]
+      // Using FIND_IN_SET for proper handling of multiple IDs
+      let totalCreditCost = 0;
+
+      // If there are tuning options selected
+      if (data.tuningOptions && data.tuningOptions.length > 0) {
+        // Query each option individually to avoid IN clause issues with joined strings
+        for (const optionId of data.tuningOptions) {
+          const [option] = await executeQuery<any>(
+            "SELECT credit_cost FROM tuning_options WHERE id = ?",
+            [optionId]
+          );
+
+          if (option && option.credit_cost) {
+            totalCreditCost += parseInt(option.credit_cost);
+          }
+        }
+      }
+
+      // Log the calculation for debugging
+      console.log(
+        `Calculated credit cost for options ${JSON.stringify(
+          data.tuningOptions
+        )}: ${totalCreditCost}`
       );
 
-      const totalCreditCost = tuningOptionsQuery[0]?.total_cost || 0;
+      // Ensure minimum cost of 1 credit
+      if (totalCreditCost <= 0) {
+        totalCreditCost = 1;
+      }
 
       // Check if user has enough credits
       const [userCredits] = await executeQuery<any>(
@@ -215,10 +238,29 @@ export async function POST(request: NextRequest) {
           [totalCreditCost, user.id]
         );
 
-        // Record credit transaction
+        // Record credit transaction with detailed information
         await executeQuery(
-          "INSERT INTO credit_transactions (user_id, amount, transaction_type) VALUES (?, ?, ?)",
-          [user.id, -totalCreditCost, "usage"]
+          "INSERT INTO credit_transactions (user_id, amount, transaction_type, stripe_payment_id) VALUES (?, ?, ?, ?)",
+          [user.id, -totalCreditCost, "usage", `ecu_file_${fileId}`]
+        );
+
+        // Log the credit transaction for debugging
+        console.log(
+          `Deducted ${totalCreditCost} credits from user ${user.id} for ECU file ${fileId}`
+        );
+        console.log(
+          `Selected tuning options: ${JSON.stringify(data.tuningOptions)}`
+        );
+
+        // Verify the credit deduction was successful
+        const [verifyCredits] = await executeQuery<any>(
+          "SELECT credits FROM user_credits WHERE user_id = ?",
+          [user.id]
+        );
+        console.log(
+          `User ${user.id} now has ${
+            verifyCredits?.credits || 0
+          } credits remaining`
         );
 
         // Commit transaction

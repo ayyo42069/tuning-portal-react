@@ -53,6 +53,10 @@ export async function POST(request: NextRequest) {
       payment_method: paymentMethodId,
       confirm: true,
       return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`,
+      metadata: {
+        user_id: user.id.toString(),
+        credit_amount: amount.toString(),
+      },
     });
 
     if (paymentIntent.status === "succeeded") {
@@ -60,6 +64,28 @@ export async function POST(request: NextRequest) {
       await executeTransaction("START TRANSACTION");
 
       try {
+        // Check if this payment has already been processed
+        const [existingTransaction] = await executeQuery<any>(
+          "SELECT id FROM credit_transactions WHERE stripe_payment_id = ?",
+          [paymentIntent.id]
+        );
+
+        if (existingTransaction) {
+          console.log(
+            `Payment ${paymentIntent.id} already processed, returning success`
+          );
+          await executeTransaction("COMMIT");
+          return NextResponse.json({
+            success: true,
+            credits: amount,
+            message: "Credits already added to your account",
+          });
+        }
+
+        console.log(
+          `Processing payment ${paymentIntent.id} for user ${user.id}, adding ${amount} credits`
+        );
+
         // Add credits to user's account
         await executeQuery(
           "INSERT INTO credit_transactions (user_id, amount, transaction_type, stripe_payment_id) VALUES (?, ?, ?, ?)",
@@ -67,9 +93,17 @@ export async function POST(request: NextRequest) {
         );
 
         // Update user's credit balance
-        await executeQuery(
+        const updateResult = await executeQuery(
           "INSERT INTO user_credits (user_id, credits) VALUES (?, ?) ON DUPLICATE KEY UPDATE credits = credits + VALUES(credits)",
           [user.id, amount]
+        );
+
+        console.log(`Credit update result:`, updateResult);
+
+        // Get updated credit balance for confirmation
+        const [updatedCredits] = await executeQuery<any>(
+          "SELECT credits FROM user_credits WHERE user_id = ?",
+          [user.id]
         );
 
         // Commit transaction
@@ -78,6 +112,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           credits: amount,
+          totalCredits: updatedCredits?.credits || amount,
           message: "Credits purchased successfully",
         });
       } catch (error) {

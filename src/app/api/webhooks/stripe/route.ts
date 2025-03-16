@@ -58,8 +58,47 @@ export async function POST(request: NextRequest) {
         );
 
         // Process the successful payment
-        // This is handled in the purchase API, but we could add additional logic here
-        // such as sending confirmation emails or updating order status
+        // Check if this payment has already been processed
+        try {
+          const [existingTransaction] = await executeQuery<any>(
+            "SELECT id FROM credit_transactions WHERE stripe_payment_id = ?",
+            [paymentIntent.id]
+          );
+
+          // If transaction exists, payment was already processed
+          if (existingTransaction) {
+            console.log(
+              `Payment ${paymentIntent.id} already processed, skipping`
+            );
+            break;
+          }
+
+          // Get the metadata to determine the user and amount
+          const userId = paymentIntent.metadata?.user_id;
+          const creditAmount = paymentIntent.metadata?.credit_amount;
+
+          if (userId && creditAmount) {
+            // Add credits to user's account as a backup to the purchase API
+            await executeQuery(
+              "INSERT INTO credit_transactions (user_id, amount, transaction_type, stripe_payment_id) VALUES (?, ?, ?, ?)",
+              [userId, creditAmount, "purchase", paymentIntent.id]
+            );
+
+            // Update user's credit balance
+            await executeQuery(
+              "INSERT INTO user_credits (user_id, credits) VALUES (?, ?) ON DUPLICATE KEY UPDATE credits = credits + VALUES(credits)",
+              [userId, creditAmount]
+            );
+
+            console.log(
+              `Added ${creditAmount} credits to user ${userId} via webhook`
+            );
+          } else {
+            console.log("Missing user_id or credit_amount in payment metadata");
+          }
+        } catch (error) {
+          console.error("Error processing payment webhook:", error);
+        }
         break;
 
       case "charge.succeeded":
