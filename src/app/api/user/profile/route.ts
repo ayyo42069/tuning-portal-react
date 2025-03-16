@@ -41,12 +41,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user data from database including credits
+    // Adding cache: false to ensure we always get the latest credit balance
     const user = await getRow<User>(
       `SELECT u.id, u.username, u.email, u.role, COALESCE(uc.credits, 0) as credits 
        FROM users u 
        LEFT JOIN user_credits uc ON u.id = uc.user_id 
        WHERE u.id = ?`,
-      [decoded.id]
+      [decoded.id],
+      { cache: false }
     );
 
     if (!user) {
