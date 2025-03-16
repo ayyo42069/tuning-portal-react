@@ -94,8 +94,8 @@ export async function POST(request: NextRequest) {
 
         // Update user's credit balance
         const updateResult = await executeQuery(
-          "INSERT INTO user_credits (user_id, credits) VALUES (?, ?) ON DUPLICATE KEY UPDATE credits = credits + VALUES(credits)",
-          [user.id, amount]
+          "INSERT INTO user_credits (user_id, credits) VALUES (?, ?) ON DUPLICATE KEY UPDATE credits = credits + ?",
+          [user.id, amount, amount]
         );
 
         console.log(`Credit update result:`, updateResult);
