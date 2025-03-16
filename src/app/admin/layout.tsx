@@ -3,7 +3,15 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Home, FileText, Users, CreditCard, Bell, LogOut } from "lucide-react";
+import {
+  Home,
+  FileText,
+  Users,
+  CreditCard,
+  Bell,
+  LogOut,
+  Shield,
+} from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 
@@ -131,6 +139,13 @@ export default function AdminLayout({
               >
                 <Bell className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
                 Notifications
+              </Link>
+              <Link
+                href="/admin/security"
+                className="flex items-center px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
+              >
+                <Shield className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                Security
               </Link>
             </nav>
           </div>
