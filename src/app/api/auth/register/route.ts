@@ -188,6 +188,10 @@ export async function POST(request: NextRequest) {
         path: "/",
       });
 
+      // Log registration with geolocation tracking
+      const { logRegistration } = await import("@/lib/securityMiddleware");
+      await logRegistration(userId, request);
+
       // Return success response with verification token
       const response = NextResponse.json(
         {

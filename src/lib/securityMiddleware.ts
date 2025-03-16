@@ -400,3 +400,57 @@ async function checkBruteForceAttempts(
 }
 
 // The simulateGeolocation function has been moved to geoLocationService.ts
+
+/**
+ * Log user registration event with geolocation data
+ * @param userId The user ID
+ * @param request The Next.js request object
+ * @returns The event ID
+ */
+export async function logRegistration(
+  userId: number,
+  request: NextRequest
+): Promise<number> {
+  const ip = getClientIp(request);
+  const userAgent = getUserAgent(request);
+
+  // Get geolocation data for the IP
+  const geoData: GeolocationData = await getGeolocationData(ip);
+
+  // Log the registration event
+  const eventId = await logSecurityEvent({
+    user_id: userId,
+    event_type: SecurityEventType.REGISTRATION,
+    severity: SecurityEventSeverity.INFO,
+    ip_address: ip,
+    user_agent: userAgent,
+    details: {
+      geolocation: {
+        country: geoData.country,
+        region: geoData.region,
+        city: geoData.city,
+        latitude: geoData.latitude,
+        longitude: geoData.longitude,
+      },
+      timestamp: new Date().toISOString(),
+    },
+  });
+
+  // Record the access location
+  await executeQuery(
+    `INSERT INTO user_access_locations 
+     (user_id, ip_address, country, region, city, latitude, longitude, is_first_access) 
+     VALUES (?, ?, ?, ?, ?, ?, ?, TRUE)`,
+    [
+      userId,
+      ip,
+      geoData.country,
+      geoData.region,
+      geoData.city,
+      geoData.latitude,
+      geoData.longitude,
+    ]
+  );
+
+  return eventId;
+}

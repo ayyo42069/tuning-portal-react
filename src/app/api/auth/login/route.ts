@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
       path: "/",
     });
 
-    // Log successful login
+    // Log successful login with geolocation tracking
     await logAuthSuccess(user.id, request);
 
     // Return success response with user info (excluding password)
