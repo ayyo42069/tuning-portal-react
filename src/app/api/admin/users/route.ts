@@ -28,8 +28,9 @@ export async function GET(request: NextRequest) {
 
     // Get all users with their credits
     // Using GROUP BY to ensure each user appears only once with their total credits
+    // Using MAX() for credits to make it compatible with only_full_group_by mode
     const users = await executeQuery<any[]>(
-      `SELECT u.id, u.username, u.email, u.role, COALESCE(uc.credits, 0) as credits, u.created_at 
+      `SELECT u.id, u.username, u.email, u.role, COALESCE(MAX(uc.credits), 0) as credits, u.created_at 
        FROM users u
        LEFT JOIN user_credits uc ON u.id = uc.user_id 
        GROUP BY u.id, u.username, u.email, u.role, u.created_at
