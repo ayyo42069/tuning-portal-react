@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       `SELECT u.id, u.username, u.email, u.role, COALESCE(uc.credits, 0) as credits, u.created_at 
        FROM users u
        LEFT JOIN user_credits uc ON u.id = uc.user_id 
-       GROUP BY u.id
+       GROUP BY u.id, u.username, u.email, u.role, u.created_at
        ORDER BY u.created_at DESC`
     );
 

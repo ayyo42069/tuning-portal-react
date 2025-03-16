@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
        LEFT JOIN ecu_file_tuning_options efto ON ef.id = efto.ecu_file_id
        LEFT JOIN tuning_options to2 ON efto.tuning_option_id = to2.id
        WHERE ef.user_id = ?
-       GROUP BY ef.id
+       GROUP BY ef.id, ef.user_id, ef.original_filename, m.name, vm.name, ef.production_year, ef.status, ef.created_at, ef.updated_at
        ORDER BY ef.created_at DESC`,
       [user.id]
     );
