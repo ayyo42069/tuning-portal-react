@@ -85,10 +85,25 @@ export async function POST(request: NextRequest) {
             );
 
             // Update user's credit balance
-            await executeQuery(
-              "INSERT INTO user_credits (user_id, credits) VALUES (?, ?) ON DUPLICATE KEY UPDATE credits = credits + ?",
-              [userId, creditAmount, creditAmount]
+            // First check if the user already has a credit entry
+            const [existingCredit] = await executeQuery<any>(
+              "SELECT id FROM user_credits WHERE user_id = ?",
+              [userId]
             );
+
+            if (existingCredit) {
+              // Update existing credit record
+              await executeQuery(
+                "UPDATE user_credits SET credits = credits + ? WHERE user_id = ?",
+                [creditAmount, userId]
+              );
+            } else {
+              // Create new credit record
+              await executeQuery(
+                "INSERT INTO user_credits (user_id, credits) VALUES (?, ?)",
+                [userId, creditAmount]
+              );
+            }
 
             console.log(
               `Added ${creditAmount} credits to user ${userId} via webhook`

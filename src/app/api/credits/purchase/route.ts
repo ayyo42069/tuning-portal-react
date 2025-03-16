@@ -93,10 +93,26 @@ export async function POST(request: NextRequest) {
         );
 
         // Update user's credit balance
-        const updateResult = await executeQuery(
-          "INSERT INTO user_credits (user_id, credits) VALUES (?, ?) ON DUPLICATE KEY UPDATE credits = credits + ?",
-          [user.id, amount, amount]
+        // First check if the user already has a credit entry
+        const [existingCredit] = await executeQuery<any>(
+          "SELECT id FROM user_credits WHERE user_id = ?",
+          [user.id]
         );
+
+        let updateResult;
+        if (existingCredit) {
+          // Update existing credit record
+          updateResult = await executeQuery(
+            "UPDATE user_credits SET credits = credits + ? WHERE user_id = ?",
+            [amount, user.id]
+          );
+        } else {
+          // Create new credit record
+          updateResult = await executeQuery(
+            "INSERT INTO user_credits (user_id, credits) VALUES (?, ?)",
+            [user.id, amount]
+          );
+        }
 
         console.log(`Credit update result:`, updateResult);
 
