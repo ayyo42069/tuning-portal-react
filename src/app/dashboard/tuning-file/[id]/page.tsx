@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ECUStatusTimeline from "@/components/ECUStatusTimeline";
+import ECUFileDetailedProgress from "@/components/ECUFileDetailedProgress";
 import ECUFileComments from "@/components/ECUFileComments";
 
 interface TuningOption {
@@ -29,6 +30,7 @@ interface TuningFileDetails {
   updated_at: string;
   credits_used: number;
   admin_message: string | null;
+  priority: number;
   tuning_options: TuningOption[];
   user_id: number;
 }
@@ -309,10 +311,10 @@ export default function TuningFileDetailsPage({
                   </div>
                 </div>
               )}
-              
+
             {/* Comments Section */}
             <div className="px-4 py-5 sm:px-6 border-t border-gray-200 dark:border-gray-700">
-              <ECUFileComments 
+              <ECUFileComments
                 fileId={tuningFile.id}
                 currentUserId={tuningFile.user_id}
                 currentUserRole="user"

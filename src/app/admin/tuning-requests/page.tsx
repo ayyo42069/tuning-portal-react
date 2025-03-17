@@ -12,6 +12,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import EstimatedTimeSelector from "@/components/admin/EstimatedTimeSelector";
+import PriorityQueueManager from "@/components/admin/PriorityQueueManager";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface TuningRequest {
@@ -29,6 +30,7 @@ interface TuningRequest {
   updated_at: string;
   admin_message: string | null;
   estimated_time: string | null;
+  priority: number;
   tuning_options: {
     id: number;
     name: string;
@@ -49,6 +51,10 @@ export default function TuningRequestsPage() {
   const [estimatedTime, setEstimatedTime] = useState<string>("");
   const [processingFile, setProcessingFile] = useState<File | null>(null);
   const [isUpdatingTime, setIsUpdatingTime] = useState<boolean>(false);
+  const [isUpdatingPriority, setIsUpdatingPriority] = useState<boolean>(false);
+  const [updatingPriorityId, setUpdatingPriorityId] = useState<number | null>(
+    null
+  );
   const router = useRouter();
 
   useEffect(() => {
@@ -186,6 +192,48 @@ export default function TuningRequestsPage() {
     } catch (err) {
       console.error("Error uploading processed file:", err);
       setError("Failed to upload processed file. Please try again.");
+    }
+  };
+
+  const handlePriorityChange = async (id: number, priority: number) => {
+    try {
+      setIsUpdatingPriority(true);
+      setUpdatingPriorityId(id);
+
+      const response = await fetch(
+        `/api/admin/tuning-requests/${id}/priority`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            priority: priority,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to update priority: ${response.status}`);
+      }
+
+      // Refresh the list
+      fetchTuningRequests();
+
+      // Update the selected request with the new priority if it's currently selected
+      if (selectedRequest && selectedRequest.id === id) {
+        setSelectedRequest({
+          ...selectedRequest,
+          priority: priority,
+        });
+      }
+    } catch (err) {
+      console.error("Error updating priority:", err);
+      setError("Failed to update priority. Please try again.");
+    } finally {
+      setIsUpdatingPriority(false);
+      setUpdatingPriorityId(null);
     }
   };
 
@@ -530,6 +578,12 @@ export default function TuningRequestsPage() {
               </h2>
             </div>
           </div>
+
+          {/* Priority Queue Manager */}
+          <PriorityQueueManager
+            requests={requests}
+            onPriorityChange={handlePriorityChange}
+          />
 
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

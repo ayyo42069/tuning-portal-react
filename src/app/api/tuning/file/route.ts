@@ -71,6 +71,7 @@ export async function GET(
         ef.created_at,
         ef.updated_at,
         ef.message as admin_message,
+        COALESCE(ef.priority, 0) as priority,
         0 as credits_used
       FROM ecu_files ef
       JOIN manufacturers m ON ef.manufacturer_id = m.id

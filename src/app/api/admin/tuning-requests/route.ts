@@ -37,7 +37,8 @@ export async function GET(request: NextRequest) {
         ef.created_at,
         ef.updated_at,
         ef.message as admin_message,
-        ef.estimated_time
+        ef.estimated_time,
+        COALESCE(ef.priority, 0) as priority
       FROM ecu_files ef
       JOIN manufacturers m ON ef.manufacturer_id = m.id
       JOIN vehicle_models vm ON ef.model_id = vm.id
