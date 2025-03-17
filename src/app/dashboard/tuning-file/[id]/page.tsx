@@ -294,6 +294,21 @@ export default function TuningFileDetailsPage({
               />
             </div>
 
+            {/* Detailed Progress */}
+            <div className="px-4 py-5 sm:px-6 border-t border-gray-200 dark:border-gray-700">
+              <ECUFileDetailedProgress
+                currentStatus={tuningFile.status}
+                createdAt={tuningFile.created_at}
+                updatedAt={tuningFile.updated_at}
+                priority={tuningFile.priority}
+                showRefreshButton={true}
+                onRefresh={fetchTuningFileDetails}
+                estimatedCompletionTime={
+                  tuningFile.status === "processing" ? "1-2 hours" : undefined
+                }
+              />
+            </div>
+
             {/* Download section - only show if file is completed */}
             {tuningFile.status === "completed" &&
               tuningFile.processed_filename && (

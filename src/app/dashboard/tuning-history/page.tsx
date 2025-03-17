@@ -224,13 +224,19 @@ export default function TuningHistoryPage() {
                         {file.credits_used || 0}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <Link
+                          href={`/dashboard/tuning-file/${file.id}`}
+                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-4"
+                        >
+                          View Details
+                        </Link>
                         {file.status === "completed" && (
-                          <Link
-                            href={`/dashboard/tuning-file/${file.id}`}
-                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                          <a
+                            href={`/api/tuning/download?id=${file.id}`}
+                            className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
                           >
                             Download
-                          </Link>
+                          </a>
                         )}
                       </td>
                     </tr>
