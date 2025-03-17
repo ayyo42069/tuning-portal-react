@@ -53,12 +53,63 @@ export async function PUT(
       );
     }
 
+    // Get the file details to get user_id
+    const [fileDetails] = await executeQuery<any[]>(
+      `SELECT user_id, original_filename FROM ecu_files WHERE id = ?`,
+      [fileId]
+    );
+
+    if (!fileDetails) {
+      return NextResponse.json({ error: "File not found" }, { status: 404 });
+    }
+
     // Update file status in database
     await executeQuery(
       `UPDATE ecu_files 
        SET status = ?, message = ?, updated_at = NOW() 
        WHERE id = ?`,
       [status, message || null, fileId]
+    );
+
+    // Create notification for the user
+    let notificationTitle = "";
+    let notificationMessage = "";
+
+    switch (status) {
+      case "processing":
+        notificationTitle = "Tuning File Processing Started";
+        notificationMessage = `Your file ${fileDetails.original_filename} is now being processed by our tuning experts.`;
+        break;
+      case "completed":
+        notificationTitle = "Tuning File Completed";
+        notificationMessage = `Great news! Your file ${fileDetails.original_filename} has been successfully tuned and is ready for download.`;
+        break;
+      case "failed":
+        notificationTitle = "Tuning Process Failed";
+        notificationMessage = `We encountered an issue with your file ${
+          fileDetails.original_filename
+        }. ${message || "Please contact support for assistance."}`;
+        break;
+      default:
+        notificationTitle = "Tuning File Status Updated";
+        notificationMessage = `The status of your file ${fileDetails.original_filename} has been updated to ${status}.`;
+    }
+
+    // Insert notification into database
+    await executeQuery(
+      `INSERT INTO notifications 
+        (user_id, title, message, type, reference_id, reference_type, is_read, is_global) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        fileDetails.user_id,
+        notificationTitle,
+        notificationMessage,
+        "file_status",
+        fileId,
+        "ecu_file",
+        false,
+        false,
+      ]
     );
 
     return NextResponse.json({

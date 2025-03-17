@@ -44,12 +44,39 @@ export async function PUT(
       );
     }
 
+    // Get the file details to get user_id and filename
+    const [fileDetails] = await executeQuery<any[]>(
+      `SELECT user_id, original_filename FROM ecu_files WHERE id = ?`,
+      [fileId]
+    );
+
+    if (!fileDetails) {
+      return NextResponse.json({ error: "File not found" }, { status: 404 });
+    }
+
     // Update estimated time in database
     await executeQuery(
       `UPDATE ecu_files 
        SET estimated_time = ?, updated_at = NOW() 
        WHERE id = ?`,
       [estimatedTime, fileId]
+    );
+
+    // Create notification for the user
+    await executeQuery(
+      `INSERT INTO notifications 
+        (user_id, title, message, type, reference_id, reference_type, is_read, is_global) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        fileDetails.user_id,
+        "Estimated Completion Time Updated",
+        `The estimated completion time for your file ${fileDetails.original_filename} has been updated to ${estimatedTime}.`,
+        "file_status",
+        fileId,
+        "ecu_file",
+        false,
+        false,
+      ]
     );
 
     return NextResponse.json({

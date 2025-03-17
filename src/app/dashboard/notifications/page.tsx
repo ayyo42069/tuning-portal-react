@@ -35,9 +35,18 @@ export default function NotificationsPage() {
   const handleNotificationClick = async (notification: Notification) => {
     await markAsRead(notification.id);
 
-    // Navigate based on notification type
-    if (notification.type === "file_status" && notification.referenceId) {
-      router.push(`/dashboard/tuning-file/${notification.referenceId}`);
+    // Navigate based on notification type and reference
+    if (notification.referenceId) {
+      if (notification.type === "file_status") {
+        router.push(`/dashboard/tuning-file/${notification.referenceId}`);
+      } else if (notification.type === "credit_transaction") {
+        router.push("/dashboard/credits");
+      } else if (notification.type === "admin_message") {
+        // If it's an admin message with a reference to a file
+        if (notification.referenceType === "ecu_file") {
+          router.push(`/dashboard/tuning-file/${notification.referenceId}`);
+        }
+      }
     }
   };
 

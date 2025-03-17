@@ -62,16 +62,33 @@ export async function PUT(
       [priority, fileId]
     );
 
+    // Get the file details to get user_id and filename
+    const [fileDetails] = await executeQuery<any[]>(
+      `SELECT user_id, original_filename FROM ecu_files WHERE id = ?`,
+      [fileId]
+    );
+
+    if (!fileDetails) {
+      return NextResponse.json({ error: "File not found" }, { status: 404 });
+    }
+
     // Create notification for the file owner
     const priorityLevel =
       priority >= 3 ? "high" : priority >= 1 ? "medium" : "low";
     await executeQuery(
-      `INSERT INTO notifications (user_id, title, message, type, reference_id, reference_type)
-       SELECT user_id, 'Tuning Request Priority Updated', 
-       CONCAT('Your tuning request has been set to ', ?, ' priority.'), 
-       'file_status', id, 'ecu_file'
-       FROM ecu_files WHERE id = ?`,
-      [priorityLevel, fileId]
+      `INSERT INTO notifications 
+        (user_id, title, message, type, reference_id, reference_type, is_read, is_global) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        fileDetails.user_id,
+        "Tuning Request Priority Updated",
+        `Your file ${fileDetails.original_filename} has been set to ${priorityLevel} priority. Click to view details.`,
+        "file_status",
+        fileId,
+        "ecu_file",
+        false,
+        false,
+      ]
     );
 
     return NextResponse.json({
