@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import ECUStatusTimeline from "@/components/ECUStatusTimeline";
+import ECUFileComments from "@/components/ECUFileComments";
 
 interface TuningOption {
   id: number;
@@ -28,6 +30,7 @@ interface TuningFileDetails {
   credits_used: number;
   admin_message: string | null;
   tuning_options: TuningOption[];
+  user_id: number;
 }
 
 export default function TuningFileDetailsPage({
@@ -275,6 +278,20 @@ export default function TuningFileDetailsPage({
               </ul>
             </div>
 
+            {/* Status Timeline */}
+            <div className="px-4 py-5 sm:px-6 border-t border-gray-200 dark:border-gray-700">
+              <ECUStatusTimeline
+                currentStatus={tuningFile.status}
+                createdAt={tuningFile.created_at}
+                updatedAt={tuningFile.updated_at}
+                showRefreshButton={true}
+                onRefresh={fetchTuningFileDetails}
+                estimatedCompletionTime={
+                  tuningFile.status === "processing" ? "1-2 hours" : undefined
+                }
+              />
+            </div>
+
             {/* Download section - only show if file is completed */}
             {tuningFile.status === "completed" &&
               tuningFile.processed_filename && (
@@ -292,19 +309,15 @@ export default function TuningFileDetailsPage({
                   </div>
                 </div>
               )}
-            {tuningFile.status === "processing" && (
-              <div className="px-4 py-5 sm:px-6 border-t border-gray-200 dark:border-gray-700">
-                <div className="flex flex-col items-center justify-center py-4">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    Your file is being processed
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    This may take a few minutes. You can check back later.
-                  </p>
-                </div>
-              </div>
-            )}
+              
+            {/* Comments Section */}
+            <div className="px-4 py-5 sm:px-6 border-t border-gray-200 dark:border-gray-700">
+              <ECUFileComments 
+                fileId={tuningFile.id}
+                currentUserId={tuningFile.user_id}
+                currentUserRole="user"
+              />
+            </div>
           </div>
         </div>
       </main>

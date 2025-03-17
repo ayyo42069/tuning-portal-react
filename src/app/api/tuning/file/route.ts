@@ -67,7 +67,7 @@ export async function GET(
         m.name as manufacturer_name,
         vm.name as model_name,
         ef.production_year,
-        COALESCE(ef.status, 'pending') as status,
+        ef.status,
         ef.created_at,
         ef.updated_at,
         ef.message as admin_message,

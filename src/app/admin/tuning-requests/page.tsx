@@ -11,6 +11,7 @@ import {
   CheckCircle,
   AlertTriangle,
 } from "lucide-react";
+import EstimatedTimeSelector from "@/components/admin/EstimatedTimeSelector";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface TuningRequest {
@@ -27,6 +28,7 @@ interface TuningRequest {
   created_at: string;
   updated_at: string;
   admin_message: string | null;
+  estimated_time: string | null;
   tuning_options: {
     id: number;
     name: string;
@@ -44,6 +46,7 @@ export default function TuningRequestsPage() {
   );
   const [statusUpdate, setStatusUpdate] = useState<string>("");
   const [adminMessage, setAdminMessage] = useState<string>("");
+  const [estimatedTime, setEstimatedTime] = useState<string>("");
   const [processingFile, setProcessingFile] = useState<File | null>(null);
   const router = useRouter();
 

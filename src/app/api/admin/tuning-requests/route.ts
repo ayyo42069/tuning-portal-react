@@ -36,7 +36,8 @@ export async function GET(request: NextRequest) {
         COALESCE(ef.status, 'pending') as status,
         ef.created_at,
         ef.updated_at,
-        ef.message as admin_message
+        ef.message as admin_message,
+        ef.estimated_time
       FROM ecu_files ef
       JOIN manufacturers m ON ef.manufacturer_id = m.id
       JOIN vehicle_models vm ON ef.model_id = vm.id

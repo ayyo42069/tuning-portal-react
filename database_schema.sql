@@ -37,14 +37,6 @@ CREATE TABLE IF NOT EXISTS sessions (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Sample admin user (password: admin123)
-INSERT INTO users (username, email, password, full_name, role)
-VALUES ('admin', 'admin@tuningportal.com', '$2a$10$JwZpdrCT1L/tKzr7Hl.wme1UUdxBt.rnYbZZ9t4KgSgRTjCjVIVyy', 'Admin User', 'admin');
-
--- Sample regular user (password: user123)
-INSERT INTO users (username, email, password, full_name, role)
-VALUES ('user', 'user@tuningportal.com', '$2a$10$3GyiU0CtcArVazuCN.JmFOUcJ/3X4UdMoQIECJUa7eoMGwxlTWPJi', 'Regular User', 'user');
-
 -- User credits table for managing credit system
 CREATE TABLE IF NOT EXISTS user_credits (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -101,6 +93,7 @@ CREATE TABLE IF NOT EXISTS ecu_files (
   file_size INT NOT NULL,
   status ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending',
   message TEXT,
+  estimated_time VARCHAR(50),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
