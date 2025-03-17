@@ -48,6 +48,7 @@ export default function TuningRequestsPage() {
   const [adminMessage, setAdminMessage] = useState<string>("");
   const [estimatedTime, setEstimatedTime] = useState<string>("");
   const [processingFile, setProcessingFile] = useState<File | null>(null);
+  const [isUpdatingTime, setIsUpdatingTime] = useState<boolean>(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -116,6 +117,45 @@ export default function TuningRequestsPage() {
     } catch (err) {
       console.error("Error updating status:", err);
       setError("Failed to update status. Please try again.");
+    }
+  };
+
+  const handleEstimatedTimeUpdate = async (id: number) => {
+    if (!estimatedTime) return;
+
+    try {
+      setIsUpdatingTime(true);
+      const response = await fetch(`/api/admin/tuning-requests/${id}/time`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          estimatedTime: estimatedTime,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update estimated time: ${response.status}`);
+      }
+
+      // Refresh the list
+      fetchTuningRequests();
+
+      // Update the selected request with the new estimated time
+      if (selectedRequest) {
+        setSelectedRequest({
+          ...selectedRequest,
+          estimated_time: estimatedTime,
+        });
+      }
+
+      setIsUpdatingTime(false);
+    } catch (err) {
+      console.error("Error updating estimated time:", err);
+      setError("Failed to update estimated time. Please try again.");
+      setIsUpdatingTime(false);
     }
   };
 
@@ -314,6 +354,72 @@ export default function TuningRequestsPage() {
 
           <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center mb-4">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg mr-3">
+                <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                Estimated Completion Time
+              </h3>
+            </div>
+            <div className="mb-6">
+              <div className="flex items-center mb-2">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">
+                  Current Estimate:
+                </p>
+                <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                  {selectedRequest.estimated_time || "Not set"}
+                </span>
+              </div>
+
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Set Estimated Time:
+                </label>
+                <EstimatedTimeSelector
+                  initialValue={
+                    estimatedTime || selectedRequest.estimated_time || ""
+                  }
+                  onTimeSelected={(time) => setEstimatedTime(time)}
+                />
+                <button
+                  onClick={() => handleEstimatedTimeUpdate(selectedRequest.id)}
+                  disabled={!estimatedTime || isUpdatingTime}
+                  className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center"
+                >
+                  {isUpdatingTime ? (
+                    <>
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Updating...
+                    </>
+                  ) : (
+                    "Update Estimated Time"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center mb-4">
               <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg mr-3">
                 <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
@@ -463,6 +569,12 @@ export default function TuningRequestsPage() {
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                   >
+                    Est. Time
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                  >
                     Actions
                   </th>
                 </tr>
@@ -504,6 +616,9 @@ export default function TuningRequestsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {formatDate(request.created_at)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {request.estimated_time || "Not set"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                         <button
