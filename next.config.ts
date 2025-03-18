@@ -104,13 +104,6 @@ const nextConfig: NextConfig = {
             value: "same-origin",
           },
 
-          // Content-Security-Policy
-          {
-            key: "Content-Security-Policy",
-            value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://tuning-portal.eu; connect-src 'self' https://api.stripe.com; frame-src 'self' https://js.stripe.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; font-src 'self'; manifest-src 'self'; media-src 'self'; worker-src 'self' blob:;",
-          },
-
           // X-Frame-Options (XFO)
           {
             key: "X-Frame-Options",

@@ -88,7 +88,19 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       // Check if we're in a browser environment
       if (typeof window === "undefined") return;
 
-      // Attempt to fetch notifications
+      // First check if user is authenticated before making the API call
+      const authResponse = await fetch("/api/auth/me", {
+        credentials: "include",
+      });
+
+      // Only proceed if user is authenticated
+      if (!authResponse.ok) {
+        // User is not authenticated, clear any existing notifications
+        setNotifications([]);
+        return; // Exit early to prevent the unnecessary API call
+      }
+
+      // Attempt to fetch notifications only if authenticated
       const response = await fetch("/api/notifications", {
         credentials: "include",
       });
@@ -96,8 +108,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         const data = await response.json();
         setNotifications(data.notifications);
-      } else if (response.status === 401) {
-        // User is not authenticated, clear any existing notifications
+      } else {
+        // Clear notifications on error
         setNotifications([]);
       }
     } catch (error) {
