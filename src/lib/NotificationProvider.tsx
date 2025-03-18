@@ -66,13 +66,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
           return () => clearInterval(intervalId);
         }
-        // Silently handle 401 responses (expected for unauthenticated users)
-        else if (authResponse.status === 401) {
-          // User is not authenticated, do nothing
-          
-        }
+        // Silently return for unauthenticated users without logging
       } catch (error) {
-        // Only log non-401 errors
+        // Only log critical errors
         console.error("Authentication check failed:", error);
       }
     };
@@ -103,7 +99,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       } else if (response.status === 401) {
         // User is not authenticated, clear any existing notifications
         setNotifications([]);
-        console.log("User not authenticated, skipping notification fetch");
       }
     } catch (error) {
       console.error("Error fetching notifications:", error);

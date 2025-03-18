@@ -162,7 +162,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "5mb",
       // allowedOrigins: ['tuning-portal.eu', '*.tuning-portal.eu']
     },
-    serverComponentsExternalPackages: ["mysql2"], // Optimize database connections
+    // Optimize database connections
     optimizePackageImports: ["react-icons", "@heroicons/react"], // Optimize large icon libraries
     turbo: {
       // Turbopack-specific optimizations
