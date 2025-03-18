@@ -27,13 +27,29 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
     minimumCacheTTL: 60,
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
   // Enable compression
   compress: true,
 
-  // Next.js 13+ uses SWC by default for minification
-  // No need to explicitly set swcMinify anymore
+  // Add performance optimization
+  poweredByHeader: false,
+
+  // Add output configuration for better performance
+  output: "standalone",
+
+  // Configure redirects for common patterns
+  async redirects() {
+    return [
+      {
+        source: "/home",
+        destination: "/",
+        permanent: true,
+      },
+    ];
+  },
 
   // Configure caching headers
   async headers() {
@@ -56,29 +72,20 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // Add specific caching for API routes
+      {
+        source: "/api/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, max-age=0",
+          },
+        ],
+      },
       {
         // Apply these headers to all routes
         source: "/:path*",
         headers: [
-          // Content Security Policy (CSP)
-          {
-            key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://js.stripe.com https://*.stripe.com",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https://tuning-portal.eu https://*.stripe.com",
-              "font-src 'self'",
-              "connect-src 'self' https://*.cloudflareinsights.com https://*.stripe.com https://api.stripe.com https://r.stripe.com",
-              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://*.stripe.com",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-              "frame-ancestors 'none'",
-              "upgrade-insecure-requests",
-            ].join("; "),
-          },
-
           // HTTP Strict Transport Security (HSTS)
           {
             key: "Strict-Transport-Security",
@@ -91,7 +98,20 @@ const nextConfig: NextConfig = {
             value: "same-origin",
           },
 
-          // X-Frame-Options (XFO) - Alternative to CSP frame-ancestors
+          // Cross-Origin-Resource-Policy (CORP)
+          {
+            key: "Cross-Origin-Resource-Policy",
+            value: "same-origin",
+          },
+
+          // Content-Security-Policy
+          {
+            key: "Content-Security-Policy",
+            value:
+              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://tuning-portal.eu; connect-src 'self' https://api.stripe.com; frame-src 'self' https://js.stripe.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; font-src 'self'; manifest-src 'self'; media-src 'self'; worker-src 'self' blob:;",
+          },
+
+          // X-Frame-Options (XFO)
           {
             key: "X-Frame-Options",
             value: "DENY",
@@ -113,11 +133,43 @@ const nextConfig: NextConfig = {
           {
             key: "Permissions-Policy",
             value:
-              "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+              "camera=(), microphone=(), geolocation=(), interest-cohort=(), autoplay=(), payment=(), usb=(), accelerometer=(), gyroscope=(), magnetometer=()",
+          },
+
+          // Add NEL (Network Error Logging)
+          {
+            key: "NEL",
+            value:
+              '{"report_to":"default","max_age":31536000,"include_subdomains":true}',
+          },
+
+          // Add Reporting-Endpoints header
+          {
+            key: "Reporting-Endpoints",
+            value: 'default="https://tuning-portal.eu/api/reporting"',
           },
         ],
       },
     ];
+  },
+
+  // Add experimental optimizations optimized for Turbopack
+  experimental: {
+    optimizeCss: true, // Optimize CSS
+    scrollRestoration: true, // Restore scroll position on navigation
+    serverActions: {
+      // You can specify options here if needed
+      bodySizeLimit: "5mb",
+      // allowedOrigins: ['tuning-portal.eu', '*.tuning-portal.eu']
+    },
+    serverComponentsExternalPackages: ["mysql2"], // Optimize database connections
+    optimizePackageImports: ["react-icons", "@heroicons/react"], // Optimize large icon libraries
+    turbo: {
+      // Turbopack-specific optimizations
+      resolveAlias: {
+        // Add any module aliases here if needed
+      },
+    },
   },
 };
 
