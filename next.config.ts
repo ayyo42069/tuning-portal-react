@@ -152,25 +152,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-
-  // Add experimental optimizations optimized for Turbopack
-  experimental: {
-    optimizeCss: true, // Optimize CSS
-    scrollRestoration: true, // Restore scroll position on navigation
-    serverActions: {
-      // You can specify options here if needed
-      bodySizeLimit: "5mb",
-      // allowedOrigins: ['tuning-portal.eu', '*.tuning-portal.eu']
-    },
-    // Optimize database connections
-    optimizePackageImports: ["react-icons", "@heroicons/react"], // Optimize large icon libraries
-    turbo: {
-      // Turbopack-specific optimizations
-      resolveAlias: {
-        // Add any module aliases here if needed
-      },
-    },
-  },
 };
 
 export default nextConfig;
