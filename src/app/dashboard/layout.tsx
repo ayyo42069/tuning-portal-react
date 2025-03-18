@@ -17,13 +17,14 @@ import {
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 import OpeningHours from "@/components/OpeningHours";
+import { useAuth } from "@/lib/AuthProvider";
 
 interface User {
   id: number;
   username: string;
   email: string;
   role: "user" | "admin";
-  credits?: number;
+  credits: number;
 }
 
 export default function DashboardLayout({
@@ -31,37 +32,19 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [user, setUser] = useState<User | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
+  const { user, logout } = useAuth();
+
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-      });
+      await logout();
       router.push("/");
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await fetch("/api/user/profile", {
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    fetchUserData();
-  }, []);
+  // No need to fetch user data separately as it's now provided by the AuthProvider
 
   // Close sidebar when clicking outside on mobile
   useEffect(() => {
@@ -179,7 +162,7 @@ export default function DashboardLayout({
                 <span className="text-sm text-gray-600 dark:text-gray-400 mt-1 md:mt-0">
                   Credits:{" "}
                   <span className="font-semibold text-blue-600 dark:text-blue-400">
-                    {user?.credits || 0}
+                    {user?.credits !== undefined ? user.credits : 0}
                   </span>
                 </span>
               </div>

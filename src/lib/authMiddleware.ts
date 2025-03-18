@@ -8,6 +8,7 @@ interface UserDB {
   email: string;
   role: string;
   created_at: string;
+  credits?: number;
 }
 
 /**
@@ -57,11 +58,12 @@ export async function authenticateUser(request: NextRequest) {
       }
     }
 
-    // Get user data from database
+    // Get user data from database including credits
     const user = await getRow<UserDB>(
-      `SELECT id, username, email, role, created_at 
-       FROM users 
-       WHERE id = ?`,
+      `SELECT u.id, u.username, u.email, u.role, u.created_at, COALESCE(uc.credits, 0) as credits 
+       FROM users u 
+       LEFT JOIN user_credits uc ON u.id = uc.user_id 
+       WHERE u.id = ?`,
       [decodedToken.id]
     );
 
@@ -73,7 +75,7 @@ export async function authenticateUser(request: NextRequest) {
       };
     }
 
-    // Return success with user data
+    // Return success with user data including credits
     return {
       success: true,
       user: {
@@ -82,6 +84,7 @@ export async function authenticateUser(request: NextRequest) {
         email: user.email,
         role: user.role,
         createdAt: user.created_at,
+        credits: user.credits || 0,
       },
     };
   } catch (error) {

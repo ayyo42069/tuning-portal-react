@@ -3,10 +3,20 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { User, Lock, LogIn, Home, Loader2, Mail, AlertCircle } from "lucide-react";
+import {
+  User,
+  Lock,
+  LogIn,
+  Home,
+  Loader2,
+  Mail,
+  AlertCircle,
+} from "lucide-react";
+import { useAuth } from "@/lib/AuthProvider";
 
 export default function Login() {
   const router = useRouter();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -34,17 +44,25 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      // First try to use the AuthProvider's login function
+      const loginSuccess = await login(formData.username, formData.password);
 
-      const data = await response.json();
+      if (loginSuccess) {
+        // Redirect to dashboard on successful login
+        router.push("/dashboard");
+      } else {
+        // If login failed but no error was set, it might be a verification issue
+        // We'll make a direct API call to check for verification requirements
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
 
-      if (!response.ok) {
+        const data = await response.json();
+
         if (response.status === 403 && data.emailVerificationRequired) {
           setShowVerificationAlert(true);
           setUnverifiedEmail(data.email);
@@ -52,9 +70,6 @@ export default function Login() {
         } else {
           throw new Error(data.error || "Login failed");
         }
-      } else {
-        // Redirect to dashboard on successful login
-        router.push("/dashboard");
       }
     } catch (err: any) {
       setError(err.message);
@@ -65,10 +80,10 @@ export default function Login() {
 
   const handleResendVerification = async () => {
     if (!unverifiedEmail || resendingEmail) return;
-    
+
     setResendingEmail(true);
     setResendSuccess(false);
-    
+
     try {
       const response = await fetch("/api/auth/resend-verification", {
         method: "POST",
@@ -161,7 +176,9 @@ export default function Login() {
                   <AlertCircle className="h-5 w-5 text-red-400" />
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-red-800 dark:text-red-200">{error}</p>
+                  <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                    {error}
+                  </p>
                 </div>
               </div>
             </div>
@@ -179,7 +196,8 @@ export default function Login() {
                   </p>
                   <div className="mt-2">
                     <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                      A verification email was sent to <strong>{unverifiedEmail}</strong>.
+                      A verification email was sent to{" "}
+                      <strong>{unverifiedEmail}</strong>.
                       {resendSuccess && (
                         <span className="block mt-1 text-green-600 dark:text-green-400">
                           Verification email resent successfully!

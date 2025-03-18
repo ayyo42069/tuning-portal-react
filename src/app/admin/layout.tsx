@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
+import { useAuth } from "@/lib/AuthProvider";
 
 interface User {
   id: number;
@@ -29,13 +30,11 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-      });
+      await logout();
       router.push("/");
     } catch (error) {
       console.error("Logout error:", error);
@@ -43,32 +42,17 @@ export default function AdminLayout({
   };
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch("/api/user/profile", {
-          credentials: "include",
-        });
+    // Check if user is admin, redirect if not
+    if (!user) {
+      router.push("/auth/login");
+      return;
+    }
 
-        if (!response.ok) {
-          router.push("/auth/login");
-          return;
-        }
-
-        const data = await response.json();
-        if (!data.user || data.user.role !== "admin") {
-          router.push("/dashboard");
-          return;
-        }
-
-        setUser(data.user);
-      } catch (error) {
-        console.error("Error checking auth:", error);
-        router.push("/auth/login");
-      }
-    };
-
-    checkAuth();
-  }, [router]);
+    if (user.role !== "admin") {
+      router.push("/dashboard");
+      return;
+    }
+  }, [user, router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">

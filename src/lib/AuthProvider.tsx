@@ -7,7 +7,14 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { User } from "@/components/tickets/types";
+// Define User interface with credits
+interface User {
+  id: number;
+  username: string;
+  role: string;
+  email?: string;
+  credits?: number;
+}
 
 interface AuthContextType {
   user: User | null;

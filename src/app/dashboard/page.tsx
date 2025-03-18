@@ -6,6 +6,7 @@ import ECUUploadForm from "./components/ECUUploadForm";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import TicketSystemWrapper from "@/components/TicketSystem";
 import { BarChart3, Clock, LogOut, Upload, MessageSquare } from "lucide-react";
+import { useAuth } from "@/lib/AuthProvider";
 
 interface User {
   id: number;
@@ -44,7 +45,7 @@ type OpeningHoursType = {
 
 export default function Dashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [recentFiles, setRecentFiles] = useState<TuningFile[]>([]);
@@ -156,22 +157,11 @@ export default function Dashboard() {
     return () => clearInterval(intervalId);
   }, []); // Remove currentTime from dependencies
 
-  const fetchUserData = async () => {
+  const fetchTuningFiles = async () => {
     try {
-      const response = await fetch("/api/user/profile", {
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          router.push("/auth/login");
-          return;
-        }
-        throw new Error(`Failed to fetch user data: ${response.status}`);
+      if (!user) {
+        return;
       }
-
-      const data = await response.json();
-      setUser(data.user);
 
       // Fetch recent tuning files
       const filesResponse = await fetch("/api/tuning/history", {
@@ -183,19 +173,23 @@ export default function Dashboard() {
         setRecentFiles(filesData.tuningFiles.slice(0, 5));
       }
     } catch (error) {
-      console.error("Error fetching user data:", error);
-      router.push("/auth/login");
-      return;
+      console.error("Error fetching tuning files:", error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUserData();
-    const intervalId = setInterval(fetchUserData, 30000);
+    // Redirect if not authenticated
+    if (user === null && !loading) {
+      router.push("/auth/login");
+      return;
+    }
+
+    fetchTuningFiles();
+    const intervalId = setInterval(fetchTuningFiles, 30000);
     return () => clearInterval(intervalId);
-  }, [router]);
+  }, [user, router, loading]);
 
   useEffect(() => {
     // Update time every minute
