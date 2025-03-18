@@ -45,8 +45,34 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
 
-  // Fetch notifications on component mount only if user is authenticated
+  // Fetch notifications on component mount only if user is authenticated and not on public pages
   useEffect(() => {
+    // Check if we're in a browser environment
+    if (typeof window === "undefined") return;
+
+    // Define public routes that should not trigger notification API calls
+    const publicRoutes = [
+      "/",
+      "/about",
+      "/privacy",
+      "/terms",
+      "/auth/login",
+      "/auth/register",
+      "/auth/verify",
+    ];
+
+    // Get current path from window location
+    const currentPath = window.location.pathname;
+
+    // Skip notification fetching on public routes
+    if (
+      publicRoutes.some(
+        (route) => currentPath === route || currentPath.startsWith(route + "/")
+      )
+    ) {
+      return;
+    }
+
     // Check if auth token exists before fetching notifications
     const checkAuthAndFetch = async () => {
       try {
@@ -87,6 +113,32 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     try {
       // Check if we're in a browser environment
       if (typeof window === "undefined") return;
+
+      // Define public routes that should not trigger notification API calls
+      const publicRoutes = [
+        "/",
+        "/about",
+        "/privacy",
+        "/terms",
+        "/auth/login",
+        "/auth/register",
+        "/auth/verify",
+      ];
+
+      // Get current path from window location
+      const currentPath = window.location.pathname;
+
+      // Skip notification fetching on public routes
+      if (
+        publicRoutes.some(
+          (route) =>
+            currentPath === route || currentPath.startsWith(route + "/")
+        )
+      ) {
+        // Clear any existing notifications on public pages
+        setNotifications([]);
+        return;
+      }
 
       // First check if user is authenticated before making the API call
       const authResponse = await fetch("/api/auth/me", {
