@@ -1,9 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useAuth } from "@/lib/AuthProvider";
 
 export const Header = () => {
+  const { user, logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/");
+  };
+
   return (
     <header className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-700 to-purple-800 dark:from-blue-700 dark:via-indigo-800 dark:to-purple-900 animate-gradient-x"></div>
@@ -31,18 +41,38 @@ export const Header = () => {
           </div>
           <div className="flex items-center space-x-4">
             <ThemeToggle />
-            <Link
-              href="/auth/login"
-              className="px-4 py-2 rounded-md bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-opacity-90 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            >
-              Login
-            </Link>
-            <Link
-              href="/auth/register"
-              className="px-4 py-2 rounded-md border-2 border-white dark:border-gray-600 text-white hover:bg-white hover:text-blue-600 dark:hover:bg-gray-800 dark:hover:text-blue-400 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            >
-              Register
-            </Link>
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-white">Welcome, {user.username}</span>
+                <Link
+                  href="/dashboard"
+                  className="px-4 py-2 rounded-md bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-opacity-90 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 rounded-md border-2 border-white dark:border-gray-600 text-white hover:bg-white hover:text-blue-600 dark:hover:bg-gray-800 dark:hover:text-blue-400 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="px-4 py-2 rounded-md bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-opacity-90 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="px-4 py-2 rounded-md border-2 border-white dark:border-gray-600 text-white hover:bg-white hover:text-blue-600 dark:hover:bg-gray-800 dark:hover:text-blue-400 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
