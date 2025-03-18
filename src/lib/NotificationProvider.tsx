@@ -69,7 +69,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         // Silently handle 401 responses (expected for unauthenticated users)
         else if (authResponse.status === 401) {
           // User is not authenticated, do nothing
-          console.log("User not authenticated, skipping notifications setup");
+          
         }
       } catch (error) {
         // Only log non-401 errors
