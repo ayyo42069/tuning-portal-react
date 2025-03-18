@@ -180,15 +180,28 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    // Redirect if not authenticated
+    // Only redirect if not authenticated AND loading is complete
+    // This prevents redirect on initial load when user data is still being fetched
     if (user === null && !loading) {
-      router.push("/auth/login");
-      return;
+      // Check if we're on a client-side navigation or a full page refresh
+      const isClientNavigation =
+        window.performance &&
+        window.performance.navigation &&
+        window.performance.navigation.type === 0;
+
+      // Only redirect on client navigation, not on page refresh
+      if (isClientNavigation) {
+        router.push("/auth/login");
+        return;
+      }
     }
 
-    fetchTuningFiles();
-    const intervalId = setInterval(fetchTuningFiles, 30000);
-    return () => clearInterval(intervalId);
+    // Only fetch files if user is authenticated
+    if (user) {
+      fetchTuningFiles();
+      const intervalId = setInterval(fetchTuningFiles, 30000);
+      return () => clearInterval(intervalId);
+    }
   }, [user, router, loading]);
 
   useEffect(() => {

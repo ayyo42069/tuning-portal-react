@@ -162,7 +162,7 @@ export default function DashboardLayout({
                 <span className="text-sm text-gray-600 dark:text-gray-400 mt-1 md:mt-0">
                   Credits:{" "}
                   <span className="font-semibold text-blue-600 dark:text-blue-400">
-                    {user?.credits !== undefined ? user.credits : 0}
+                    {user?.credits ?? 0}
                   </span>
                 </span>
               </div>

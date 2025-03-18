@@ -48,7 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         const data = await response.json();
-        setUser(data.user);
+        // Ensure credits is properly set from the response
+        setUser({
+          ...data.user,
+          credits: data.user.credits !== undefined ? data.user.credits : 0,
+        });
       } else {
         // User is not logged in or session expired
         setUser(null);
