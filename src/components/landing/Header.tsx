@@ -8,7 +8,7 @@ export const Header = () => {
     <header className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-700 to-purple-800 dark:from-blue-700 dark:via-indigo-800 dark:to-purple-900 animate-gradient-x"></div>
       <div className="absolute inset-0 opacity-20">
-        <div className="absolute inset-0 bg-[url('/images/grid-pattern.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+        <div className="absolute inset-0 bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
       </div>
 
       <div className="container mx-auto py-6 px-4 relative z-10">
