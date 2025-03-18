@@ -65,17 +65,17 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Consider restricting further in production
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob:",
               "font-src 'self'",
-              "connect-src 'self'",
+              "connect-src 'self' https://*.cloudflareinsights.com",
               "frame-src 'self'",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
-              "frame-ancestors 'none'", // This also helps prevent clickjacking
-              "upgrade-insecure-requests", // Upgrade HTTP to HTTPS
+              "frame-ancestors 'none'",
+              "upgrade-insecure-requests",
             ].join("; "),
           },
 
