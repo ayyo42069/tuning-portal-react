@@ -3,3 +3,18 @@
  */
 
 export * from "../types";
+
+/**
+ * Interface for user session data
+ */
+export interface Session {
+  id: string;
+  user_id: number;
+  username?: string;
+  email?: string;
+  ip_address?: string;
+  user_agent?: string;
+  last_activity?: string;
+  created_at: string;
+  expires_at: string;
+}
