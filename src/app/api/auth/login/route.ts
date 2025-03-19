@@ -21,6 +21,9 @@ interface User {
   password: string;
   role: "user" | "admin";
   email_verified: boolean;
+  is_banned?: boolean;
+  ban_reason?: string;
+  ban_expires_at?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -36,10 +39,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user in database
-    const user = await getRow<User>("SELECT * FROM users WHERE username = ?", [
-      username,
-    ]);
+    // Find user in database with ban information
+    const user = await getRow<User>(
+      `SELECT u.*, u.is_banned, u.ban_reason, u.ban_expires_at 
+       FROM users u 
+       WHERE u.username = ?`,
+      [username]
+    );
 
     if (!user) {
       // Log failed login attempt
@@ -73,6 +79,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if user is banned
+    if (user.is_banned) {
+      // Check if ban has expired
+      const banExpired =
+        user.ban_expires_at && new Date(user.ban_expires_at) < new Date();
+
+      if (!banExpired) {
+        return NextResponse.json(
+          {
+            error: `Your account has been banned. Reason: ${
+              user.ban_reason || "Violation of terms of service"
+            }`,
+            isBanned: true,
+            banReason: user.ban_reason,
+            banExpiresAt: user.ban_expires_at,
+          },
+          { status: 403 }
+        );
+      }
+      // If ban has expired, continue with login process
+    }
+
     // Generate JWT token
     const token = generateToken({
       id: user.id,
@@ -102,10 +130,18 @@ export async function POST(request: NextRequest) {
     // Return success response with user info (excluding password)
     const { password: _, ...userWithoutPassword } = user;
 
+    // Add ban information to the response
+    const userResponse = {
+      ...userWithoutPassword,
+      isBanned: user.is_banned || false,
+      banReason: user.ban_reason || null,
+      banExpiresAt: user.ban_expires_at || null,
+    };
+
     const response = NextResponse.json(
       {
         success: true,
-        user: userWithoutPassword,
+        user: userResponse,
       },
       { status: 200 }
     );
