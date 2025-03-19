@@ -127,17 +127,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           data.error === "Session terminated" ||
           data.redirectTo === "/auth/terminated"
         ) {
-          // Redirect to terminated page immediately
-          window.location.href = "/auth/terminated";
+          // Clear all auth state before redirecting
+          setUser(null);
+          localStorage.removeItem("auth_state");
+          // Use setTimeout to ensure state is cleared before redirect
+          setTimeout(() => {
+            window.location.href = "/auth/terminated";
+          }, 100);
           return;
         }
         // Handle other session termination and authentication errors
         else if (data.redirectTo) {
-          window.location.href = data.redirectTo;
+          // Clear all auth state before redirecting
+          setUser(null);
+          localStorage.removeItem("auth_state");
+          // Use setTimeout to ensure state is cleared before redirect
+          setTimeout(() => {
+            window.location.href = data.redirectTo;
+          }, 100);
           return;
         } else if (window.location.pathname.startsWith("/dashboard")) {
           // Redirect to login if unauthorized access to dashboard
-          window.location.href = "/auth/login";
+          setTimeout(() => {
+            window.location.href = "/auth/login";
+          }, 100);
           return;
         }
       }
