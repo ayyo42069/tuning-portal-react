@@ -14,9 +14,10 @@ import { SecurityEventType } from "@/lib/securityLogging";
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  context: { params: Promise<{ sessionId: string }> }
 ) {
   try {
+    const params = await context.params;
     const { sessionId } = params;
 
     // Authenticate the user

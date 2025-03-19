@@ -10,9 +10,10 @@ import { SecurityEventType } from "@/lib/securityLogging";
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) {
   try {
+    const params = await context.params;
     const { userId } = params;
 
     // Authenticate the user
