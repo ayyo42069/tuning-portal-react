@@ -46,8 +46,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         credentials: "include",
       });
 
+      const data = await response.json();
       if (response.ok) {
-        const data = await response.json();
         // Ensure credits is properly set from the response
         setUser({
           ...data.user,
@@ -56,6 +56,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         // User is not logged in or session expired
         setUser(null);
+        // Check if we need to redirect to a specific page
+        if (data.redirectTo) {
+          window.location.href = data.redirectTo;
+          return;
+        }
       }
     } catch (error) {
       console.error("Error fetching current user:", error);

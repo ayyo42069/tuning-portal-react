@@ -52,9 +52,10 @@ export async function authenticateUser(request: NextRequest) {
       if (!session || session.user_id !== decodedToken.id) {
         return {
           success: false,
-          error: "Invalid session",
-          status: 200, // Changed from 401 to 200 to avoid console errors
+          error: "Session terminated",
+          status: 200,
           isAuthenticated: false,
+          redirectTo: "/auth/terminated",
         };
       }
     }
