@@ -17,7 +17,7 @@ import {
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 import OpeningHours from "@/components/OpeningHours";
-import { useAuth } from "@/lib/AuthProvider";
+import { useAuth, useSessionTerminationCheck } from "@/lib/AuthProvider";
 
 interface User {
   id: number;
@@ -35,6 +35,9 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const { user, logout } = useAuth();
+
+  // Use the session termination check hook to detect terminated sessions in real-time
+  useSessionTerminationCheck();
 
   const handleLogout = async () => {
     try {

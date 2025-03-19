@@ -55,10 +55,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Always refresh user data from server to ensure it's up-to-date
     refreshUser();
 
-    // Set up a periodic refresh to maintain session validity
+    // Set up a more frequent refresh to detect session termination quickly
     const refreshInterval = setInterval(() => {
       refreshUser();
-    }, 5 * 60 * 1000); // Refresh every 5 minutes
+    }, 30 * 1000); // Refresh every 30 seconds to detect termination faster
 
     // Clean up interval on unmount
     return () => clearInterval(refreshInterval);
@@ -122,8 +122,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Clear localStorage
         localStorage.removeItem("auth_state");
 
-        // Handle session termination and other authentication errors
-        if (data.redirectTo) {
+        // Check for session termination specifically
+        if (
+          data.error === "Session terminated" ||
+          data.redirectTo === "/auth/terminated"
+        ) {
+          // Redirect to terminated page immediately
+          window.location.href = "/auth/terminated";
+          return;
+        }
+        // Handle other session termination and authentication errors
+        else if (data.redirectTo) {
           window.location.href = data.redirectTo;
           return;
         } else if (window.location.pathname.startsWith("/dashboard")) {
@@ -256,4 +265,21 @@ export function useAuth() {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
+}
+
+// Add a hook to check for session termination in dashboard components
+export function useSessionTerminationCheck() {
+  const { refreshUser } = useAuth();
+
+  useEffect(() => {
+    // Check session status immediately when component mounts
+    refreshUser();
+
+    // Set up a frequent check for session termination
+    const checkInterval = setInterval(() => {
+      refreshUser();
+    }, 15 * 1000); // Check every 15 seconds
+
+    return () => clearInterval(checkInterval);
+  }, [refreshUser]);
 }
