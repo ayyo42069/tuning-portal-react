@@ -37,14 +37,18 @@ export async function GET(request: NextRequest) {
 
     // Get all active sessions with user details
     const sessions = await executeQuery(
-      `SELECT s.*, u.username, u.email, COALESCE(ua.ip_address, 'Unknown') as ip_address, 
-       COALESCE(ua.user_agent, 'Unknown') as user_agent,
-       COALESCE(ua.created_at, s.created_at) as last_activity
+      `SELECT s.*, u.username, u.email, 
+       COALESCE(latest_activity.ip_address, 'Unknown') as ip_address,
+       COALESCE(latest_activity.user_agent, 'Unknown') as user_agent,
+       COALESCE(latest_activity.created_at, s.created_at) as last_activity
        FROM sessions s
        JOIN users u ON s.user_id = u.id
-       LEFT JOIN user_activity_logs ua ON s.user_id = ua.user_id
+       LEFT JOIN (
+         SELECT user_id, ip_address, user_agent, created_at,
+         ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY created_at DESC) as rn
+         FROM user_activity_logs
+       ) latest_activity ON s.user_id = latest_activity.user_id AND latest_activity.rn = 1
        WHERE s.expires_at > NOW()
-       GROUP BY s.id
        ORDER BY s.created_at DESC`,
       []
     );
