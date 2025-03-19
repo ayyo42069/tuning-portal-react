@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       const data = await response.json();
-      if (response.ok) {
+      if (response.ok && data.success) {
         // Ensure credits is properly set from the response
         setUser({
           ...data.user,
@@ -56,9 +56,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         // User is not logged in or session expired
         setUser(null);
-        // Check if we need to redirect to a specific page
+
+        // Handle session termination and other authentication errors
         if (data.redirectTo) {
           window.location.href = data.redirectTo;
+          return;
+        } else if (window.location.pathname.startsWith("/dashboard")) {
+          // Redirect to login if unauthorized access to dashboard
+          window.location.href = "/auth/login";
           return;
         }
       }

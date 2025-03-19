@@ -41,23 +41,31 @@ export async function authenticateUser(request: NextRequest) {
       };
     }
 
-    // Get session ID from cookies (will be implemented in login/register routes)
+    // Get session ID from cookies and verify session
     const sessionId = request.cookies.get("session_id")?.value;
 
-    // If session ID exists, verify the session
-    if (sessionId) {
-      const session = await getSession(sessionId);
+    // Always require a valid session for authentication
+    if (!sessionId) {
+      return {
+        success: false,
+        error: "No active session",
+        status: 200,
+        isAuthenticated: false,
+        redirectTo: "/auth/terminated",
+      };
+    }
 
-      // If session doesn't exist or doesn't match the user ID from the token
-      if (!session || session.user_id !== decodedToken.id) {
-        return {
-          success: false,
-          error: "Session terminated",
-          status: 200,
-          isAuthenticated: false,
-          redirectTo: "/auth/terminated",
-        };
-      }
+    const session = await getSession(sessionId);
+
+    // If session doesn't exist, has expired, or doesn't match the user ID from the token
+    if (!session || session.user_id !== decodedToken.id) {
+      return {
+        success: false,
+        error: "Session terminated",
+        status: 200,
+        isAuthenticated: false,
+        redirectTo: "/auth/terminated",
+      };
     }
 
     // Get user data from database including credits
