@@ -10,6 +10,7 @@ import { executeQuery } from "./db";
 // Import GeolocationData interface from types
 import { GeolocationData } from "./types";
 import { getGeolocationData } from "./geoLocationService";
+import { logUserActivity } from "./activityLogging";
 
 /**
  * Get client IP address from request
@@ -197,6 +198,16 @@ export async function logApiAccess(
       timestamp: new Date().toISOString(),
     },
   });
+
+  // Log user activity for API access
+  if (userId) {
+    await logUserActivity(userId, request, "api_access", {
+      endpoint,
+      method,
+      isSensitive,
+      timestamp: new Date().toISOString(),
+    });
+  }
 
   return eventId;
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken, getSession, getAuthCookie } from "./auth";
 import { getRow } from "./db";
+import { logUserActivity } from "./activityLogging";
 
 interface UserDB {
   id: number;
@@ -74,6 +75,12 @@ export async function authenticateUser(request: NextRequest) {
         status: 404,
       };
     }
+
+    // Log user activity
+    await logUserActivity(user.id, request, "auth_success", {
+      method: "jwt",
+      timestamp: new Date().toISOString(),
+    });
 
     // Return success with user data including credits
     return {
