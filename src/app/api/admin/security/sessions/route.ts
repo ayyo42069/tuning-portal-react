@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     const sessions = await executeQuery(
       `SELECT s.*, u.username, u.email, COALESCE(ua.ip_address, 'Unknown') as ip_address, 
        COALESCE(ua.user_agent, 'Unknown') as user_agent,
-       ua.last_activity
+       COALESCE(ua.created_at, s.created_at) as last_activity
        FROM sessions s
        JOIN users u ON s.user_id = u.id
        LEFT JOIN user_activity_logs ua ON s.user_id = ua.user_id
