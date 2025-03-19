@@ -37,7 +37,7 @@ export default function DashboardLayout({
   const { user, logout } = useAuth();
 
   // Use the session termination check hook to detect terminated sessions in real-time
-  useSessionTerminationCheck();
+  //useSessionTerminationCheck();
 
   const handleLogout = async () => {
     try {
