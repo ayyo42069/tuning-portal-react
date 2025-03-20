@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken, getSession, getAuthCookie } from "./auth";
 import { getRow } from "./db";
-import { logUserActivity } from "./activityLogging";
+import { logUserActivity, ActivityType } from "./activityLogging";
 
 interface UserDB {
   id: number;
@@ -116,7 +116,7 @@ export async function authenticateUser(request: NextRequest) {
     }
 
     // Log user activity
-    await logUserActivity(user.id, request, "auth_success", {
+    await logUserActivity(user.id, request, ActivityType.LOGIN, {
       method: "jwt",
       timestamp: new Date().toISOString(),
     });

@@ -10,7 +10,7 @@ import { executeQuery } from "./db";
 // Import GeolocationData interface from types
 import { GeolocationData } from "./types";
 import { getGeolocationData } from "./geoLocationService";
-import { logUserActivity } from "./activityLogging";
+import { logUserActivity, ActivityType } from "./activityLogging";
 
 /**
  * Get client IP address from request
@@ -201,7 +201,7 @@ export async function logApiAccess(
 
   // Log user activity for API access
   if (userId) {
-    await logUserActivity(userId, request, "api_access", {
+    await logUserActivity(userId, request, ActivityType.API_ACCESS, {
       endpoint,
       method,
       isSensitive,

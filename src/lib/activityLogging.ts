@@ -2,6 +2,18 @@ import { NextRequest } from "next/server";
 import { executeQuery } from "./db";
 import { getClientIp, getUserAgent } from "./securityMiddleware";
 
+// Define valid activity types to match the database ENUM
+export enum ActivityType {
+  LOGIN = "login",
+  LOGOUT = "logout",
+  REGISTRATION = "registration",
+  PASSWORD_RESET = "password_reset",
+  EMAIL_VERIFICATION = "email_verification",
+  PROFILE_UPDATE = "profile_update",
+  FAILED_LOGIN = "failed_login",
+  API_ACCESS = "api_access",
+}
+
 /**
  * Log user activity
  * @param userId The user ID
@@ -13,7 +25,7 @@ import { getClientIp, getUserAgent } from "./securityMiddleware";
 export async function logUserActivity(
   userId: number,
   request: NextRequest,
-  activity_type: string,
+  activity_type: ActivityType | string,
   details?: any
 ): Promise<number> {
   try {
