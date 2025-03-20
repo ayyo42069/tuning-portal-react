@@ -34,10 +34,17 @@ export default function DashboardLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
 
   // Use the session termination check hook to detect terminated sessions in real-time
   //useSessionTerminationCheck();
+
+  // Check if user is authenticated, redirect if not
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/auth/login");
+    }
+  }, [user, isLoading, router]);
 
   const handleLogout = async () => {
     try {

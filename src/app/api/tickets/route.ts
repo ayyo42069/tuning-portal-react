@@ -117,10 +117,6 @@ export async function GET(request: NextRequest) {
     queryParams.push(String(limit));
     queryParams.push(String(offset));
 
-    // Log the query and parameters for debugging
-    console.log("Query:", query);
-    console.log("Parameters:", queryParams);
-
     const tickets = await executeQuery<TicketDB[]>(query, queryParams);
 
     // Transform database column names to camelCase for frontend

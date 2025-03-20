@@ -37,9 +37,6 @@ const nextConfig: NextConfig = {
   // Add performance optimization
   poweredByHeader: false,
 
-  // Add output configuration for better performance
-  output: "standalone",
-
   // Configure redirects for common patterns
   async redirects() {
     return [

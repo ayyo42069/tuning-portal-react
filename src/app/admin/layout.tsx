@@ -43,12 +43,14 @@ export default function AdminLayout({
 
   useEffect(() => {
     // Check if user is admin, redirect if not
-    if (!user) {
+    // Only redirect if we're not still loading the auth state
+    const { isLoading } = useAuth();
+    if (!isLoading && !user) {
       router.push("/auth/login");
       return;
     }
 
-    if (user.role !== "admin") {
+    if (user?.role !== "admin") {
       router.push("/dashboard");
       return;
     }
