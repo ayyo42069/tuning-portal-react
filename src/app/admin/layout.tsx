@@ -30,7 +30,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -44,7 +44,6 @@ export default function AdminLayout({
   useEffect(() => {
     // Check if user is admin, redirect if not
     // Only redirect if we're not still loading the auth state
-    const { isLoading } = useAuth();
     if (!isLoading && !user) {
       router.push("/auth/login");
       return;
@@ -54,7 +53,7 @@ export default function AdminLayout({
       router.push("/dashboard");
       return;
     }
-  }, [user, router]);
+  }, [user, isLoading, router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
