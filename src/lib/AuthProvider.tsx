@@ -213,6 +213,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return false;
         }
 
+        // Immediately trigger data fetching for notifications and other user data
+        // This ensures the dashboard shows the latest data without requiring a manual refresh
+        try {
+          // Fetch notifications
+          const notificationsModule = await import("./NotificationProvider");
+          if (
+            notificationsModule &&
+            typeof notificationsModule.fetchNotificationsGlobal === "function"
+          ) {
+            notificationsModule.fetchNotificationsGlobal();
+          } else {
+            // Fallback: try to fetch notifications directly
+            fetch("/api/notifications", { credentials: "include" });
+          }
+
+          // Fetch user profile data to ensure credits and other info are up-to-date
+          fetch("/api/user/profile", { credentials: "include" });
+
+          // Fetch credit transactions if needed
+          fetch("/api/credits/transactions", { credentials: "include" });
+        } catch (fetchError) {
+          // Log but don't fail the login process if these fetches fail
+          console.error("Error pre-fetching user data:", fetchError);
+        }
+
         return true;
       } else {
         setError(data.error || "Login failed");

@@ -251,3 +251,17 @@ export function useNotifications() {
   }
   return context;
 }
+
+// Export a global function that can be called from outside the component context
+// This allows the AuthProvider to trigger notification fetching after login
+export const fetchNotificationsGlobal = async () => {
+  try {
+    const response = await fetch("/api/notifications", {
+      credentials: "include",
+    });
+    return response.ok;
+  } catch (error) {
+    console.error("Error fetching notifications globally:", error);
+    return false;
+  }
+};
