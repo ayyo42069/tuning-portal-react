@@ -213,26 +213,102 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return false;
         }
 
-        // Immediately trigger data fetching for notifications and other user data
+        // Immediately trigger data fetching for notifications and other user data using React Query
         // This ensures the dashboard shows the latest data without requiring a manual refresh
         try {
-          // Fetch notifications
-          const notificationsModule = await import("./NotificationProvider");
-          if (
-            notificationsModule &&
-            typeof notificationsModule.fetchNotificationsGlobal === "function"
-          ) {
-            notificationsModule.fetchNotificationsGlobal();
+          // Get access to the QueryClient instance
+          const queryClientModule = await import("./QueryProvider");
+          const queryClient = queryClientModule.getQueryClient();
+
+          if (queryClient) {
+            // Import query keys from useDataFetching
+            const { queryKeys } = await import("./hooks/useDataFetching");
+
+            // Invalidate all relevant queries to trigger immediate refetching
+            queryClient.invalidateQueries({ queryKey: [queryKeys.user] });
+            queryClient.invalidateQueries({
+              queryKey: [queryKeys.notifications],
+            });
+            queryClient.invalidateQueries({ queryKey: [queryKeys.credits] });
+            queryClient.invalidateQueries({
+              queryKey: [queryKeys.tuningFiles],
+            });
+
+            // Prefetch critical data to ensure it's immediately available
+            queryClient.prefetchQuery({
+              queryKey: [queryKeys.user, userData.id],
+              queryFn: async () => {
+                const response = await fetch("/api/user/profile", {
+                  credentials: "include",
+                });
+                if (!response.ok)
+                  throw new Error("Failed to fetch user profile");
+                return response.json();
+              },
+            });
+
+            // Also prefetch notifications
+            queryClient.prefetchQuery({
+              queryKey: [queryKeys.notifications, userData.id],
+              queryFn: async () => {
+                const response = await fetch("/api/notifications", {
+                  credentials: "include",
+                });
+                if (!response.ok)
+                  throw new Error("Failed to fetch notifications");
+                const data = await response.json();
+                return data.notifications;
+              },
+            });
+
+            // Prefetch credit transactions
+            queryClient.prefetchQuery({
+              queryKey: [queryKeys.credits, userData.id],
+              queryFn: async () => {
+                const response = await fetch("/api/credits/transactions", {
+                  credentials: "include",
+                });
+                if (!response.ok)
+                  throw new Error("Failed to fetch credit transactions");
+                return response.json();
+              },
+            });
+
+            // Prefetch tuning files if needed
+            queryClient.prefetchQuery({
+              queryKey: [queryKeys.tuningFiles, userData.id],
+              queryFn: async () => {
+                const response = await fetch("/api/tuning/history", {
+                  credentials: "include",
+                });
+                if (!response.ok)
+                  throw new Error("Failed to fetch tuning files");
+                const data = await response.json();
+                return data.tuningFiles;
+              },
+            });
           } else {
-            // Fallback: try to fetch notifications directly
-            fetch("/api/notifications", { credentials: "include" });
+            // Fallback to direct fetch calls if queryClient is not available
+            const notificationsModule = await import("./NotificationProvider");
+            if (
+              notificationsModule &&
+              typeof notificationsModule.fetchNotificationsGlobal === "function"
+            ) {
+              notificationsModule.fetchNotificationsGlobal();
+            } else {
+              // Fallback: try to fetch notifications directly
+              fetch("/api/notifications", { credentials: "include" });
+            }
+
+            // Fetch user profile data to ensure credits and other info are up-to-date
+            fetch("/api/user/profile", { credentials: "include" });
+
+            // Fetch credit transactions if needed
+            fetch("/api/credits/transactions", { credentials: "include" });
+
+            // Fetch tuning files history
+            fetch("/api/tuning/history", { credentials: "include" });
           }
-
-          // Fetch user profile data to ensure credits and other info are up-to-date
-          fetch("/api/user/profile", { credentials: "include" });
-
-          // Fetch credit transactions if needed
-          fetch("/api/credits/transactions", { credentials: "include" });
         } catch (fetchError) {
           // Log but don't fail the login process if these fetches fail
           console.error("Error pre-fetching user data:", fetchError);
