@@ -130,6 +130,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Clear all auth state before redirecting
           setUser(null);
           localStorage.removeItem("auth_state");
+
+          // Clear auth_session cookie to prevent redirect loop
+          document.cookie =
+            "auth_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
           // Use setTimeout to ensure state is cleared before redirect
           setTimeout(() => {
             window.location.href = "/auth/terminated";
@@ -261,10 +266,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               },
             });
 
-            // Prefetch credit transactions
+            // Prefetch credit transactions and update user state with latest credit balance
             queryClient.prefetchQuery({
               queryKey: [queryKeys.credits, userData.id],
               queryFn: async () => {
+                // First get the latest credit balance
+                const balanceResponse = await fetch("/api/credits/balance", {
+                  credentials: "include",
+                });
+                if (balanceResponse.ok) {
+                  const balanceData = await balanceResponse.json();
+                  // Update user state with the latest credit balance
+                  const updatedUserData = {
+                    ...userData,
+                    credits: balanceData.credits,
+                  };
+                  setUser(updatedUserData);
+                  // Update localStorage with the latest credit information
+                  localStorage.setItem(
+                    "auth_state",
+                    JSON.stringify(updatedUserData)
+                  );
+                }
+
+                // Then fetch transactions as before
                 const response = await fetch("/api/credits/transactions", {
                   credentials: "include",
                 });
@@ -301,7 +326,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             // Fetch user profile data to ensure credits and other info are up-to-date
-            fetch("/api/user/profile", { credentials: "include" });
+            fetch("/api/user/profile", { credentials: "include" })
+              .then((response) => {
+                if (response.ok) return response.json();
+                throw new Error("Failed to fetch user profile");
+              })
+              .then((data) => {
+                if (data.user) {
+                  // Update user state with the latest user data
+                  const updatedUserData = {
+                    ...userData,
+                    credits: data.user.credits || 0,
+                  };
+                  setUser(updatedUserData);
+                  localStorage.setItem(
+                    "auth_state",
+                    JSON.stringify(updatedUserData)
+                  );
+                }
+              })
+              .catch((error) =>
+                console.error("Error updating user data:", error)
+              );
+
+            // Fetch credit balance directly and update user state
+            fetch("/api/credits/balance", { credentials: "include" })
+              .then((response) => {
+                if (response.ok) return response.json();
+                throw new Error("Failed to fetch credit balance");
+              })
+              .then((data) => {
+                // Update user state with the latest credit balance
+                const updatedUserData = {
+                  ...userData,
+                  credits: data.credits,
+                };
+                setUser(updatedUserData);
+                localStorage.setItem(
+                  "auth_state",
+                  JSON.stringify(updatedUserData)
+                );
+              })
+              .catch((error) =>
+                console.error("Error updating credit balance:", error)
+              );
 
             // Fetch credit transactions if needed
             fetch("/api/credits/transactions", { credentials: "include" });
@@ -342,6 +410,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         // Clear localStorage
         localStorage.removeItem("auth_state");
+        // Clear auth_session cookie to prevent redirect loop
+        document.cookie =
+          "auth_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       } else {
         const data = await response.json();
         setError(data.error || "Logout failed");
