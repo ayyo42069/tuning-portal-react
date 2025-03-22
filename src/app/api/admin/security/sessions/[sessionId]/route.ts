@@ -89,7 +89,28 @@ export async function DELETE(
       false
     );
 
-    return NextResponse.json({ success: true });
+    // Create a response with success message
+    const response = NextResponse.json({
+      success: true,
+      message: "Session terminated successfully",
+    });
+
+    // Add Set-Cookie headers to clear cookies for the terminated user
+    // These will be sent to the client when the session is terminated by an admin
+    response.headers.append(
+      "Set-Cookie",
+      "auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict"
+    );
+    response.headers.append(
+      "Set-Cookie",
+      "session_id=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict"
+    );
+    response.headers.append(
+      "Set-Cookie",
+      "auth_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict"
+    );
+
+    return response;
   } catch (error) {
     console.error("Error terminating session:", error);
     return NextResponse.json(
