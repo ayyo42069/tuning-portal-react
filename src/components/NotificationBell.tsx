@@ -1,17 +1,44 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useNotifications, Notification } from "@/lib/NotificationProvider";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useNotifications as useNotificationsQuery } from "@/lib/hooks/useDataFetching";
+// Keep the old provider for backward compatibility
+import { useNotifications, Notification } from "@/lib/NotificationProvider";
+
+// Define interface for notifications from React Query hook to match the legacy provider
+interface QueryNotification {
+  id: number;
+  title: string;
+  message: string;
+  type: "file_status" | "admin_message" | "credit_transaction" | "system";
+  referenceId?: number;
+  referenceType?: string;
+  isRead: boolean;
+  isGlobal: boolean;
+  createdAt: string;
+}
 
 export default function NotificationBell() {
-  const { notifications, unreadCount, markAsRead, markAllAsRead } =
-    useNotifications();
+  // Use the React Query hook for notifications
+  const {
+    data: notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    isLoading,
+  } = useNotificationsQuery();
+  // Fallback to legacy provider if needed
+  const legacyNotifications = useNotifications();
+
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  // Use React Query data if available, otherwise fall back to legacy provider
+  const notificationData = notifications || legacyNotifications.notifications;
+  const notificationCount = unreadCount || legacyNotifications.unreadCount;
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -29,7 +56,9 @@ export default function NotificationBell() {
     };
   }, []);
 
-  const handleNotificationClick = async (notification: Notification) => {
+  const handleNotificationClick = async (
+    notification: QueryNotification | Notification
+  ) => {
     await markAsRead(notification.id);
 
     // Navigate based on notification type and reference
@@ -186,7 +215,7 @@ export default function NotificationBell() {
               </div>
             ) : (
               <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-                {notifications.map((notification) => (
+                {notifications.map((notification: QueryNotification) => (
                   <li
                     key={notification.id}
                     className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer ${

@@ -23,6 +23,13 @@ import {
   FloatingArrow,
   FloatingPortal,
 } from "@floating-ui/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useManufacturers,
+  useModelsByManufacturer,
+  useTuningOptions,
+} from "@/lib/hooks/useDataFetching";
+import { queryKeys } from "@/lib/hooks/useDataFetching";
 
 interface TooltipProps {
   content: string;
@@ -103,58 +110,39 @@ export default function ECUUploadForm() {
   const [error, setError] = useState<string>("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  // Use React Query hooks for data fetching
+  const { data: manufacturersData, isLoading: manufacturersLoading } =
+    useManufacturers();
+  const { data: tuningOptionsData, isLoading: tuningOptionsLoading } =
+    useTuningOptions();
+  const { data: modelsData, isLoading: modelsLoading } =
+    useModelsByManufacturer(selectedManufacturer || null);
+
+  // Update state when data is fetched
   useEffect(() => {
-    // Fetch manufacturers
-    const fetchManufacturers = async () => {
-      try {
-        const response = await fetch("/api/manufacturers");
-        if (response.ok) {
-          const data = await response.json();
-          setManufacturers(data);
-        }
-      } catch (error) {
-        console.error("Error fetching manufacturers:", error);
-      }
-    };
-
-    // Fetch tuning options
-    const fetchTuningOptions = async () => {
-      try {
-        const response = await fetch("/api/tuning-options");
-        if (response.ok) {
-          const data = await response.json();
-          setTuningOptions(data);
-        }
-      } catch (error) {
-        console.error("Error fetching tuning options:", error);
-      }
-    };
-
-    fetchManufacturers();
-    fetchTuningOptions();
-  }, []);
+    if (manufacturersData) {
+      setManufacturers(manufacturersData);
+    }
+  }, [manufacturersData]);
 
   useEffect(() => {
-    // Fetch models when manufacturer is selected
-    const fetchModels = async () => {
-      if (selectedManufacturer) {
-        try {
-          const response = await fetch(
-            `/api/models?manufacturer=${selectedManufacturer}`
-          );
-          if (response.ok) {
-            const data = await response.json();
-            setModels(data);
-          }
-        } catch (error) {
-          console.error("Error fetching models:", error);
-        }
-      } else {
-        setModels([]);
-      }
-    };
+    if (tuningOptionsData) {
+      setTuningOptions(tuningOptionsData);
+    }
+  }, [tuningOptionsData]);
 
-    fetchModels();
+  useEffect(() => {
+    if (modelsData) {
+      setModels(modelsData);
+    }
+  }, [modelsData]);
+
+  // When manufacturer changes, reset selected model
+  useEffect(() => {
+    if (!selectedManufacturer) {
+      setModels([]);
+      setSelectedModel(0);
+    }
   }, [selectedManufacturer]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -167,6 +155,46 @@ export default function ECUUploadForm() {
       setFile(null);
     }
   };
+
+  // Use React Query for form submission
+  const queryClient = useQueryClient();
+
+  const uploadMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const response = await fetch("/api/ecu/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "An error occurred during upload");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      // Reset form
+      setFile(null);
+      setSelectedManufacturer(0);
+      setSelectedModel(0);
+      setSelectedOptions([]);
+      setMessage("");
+
+      // Show success message
+      setShowSuccessModal(true);
+
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: [queryKeys.tuningFiles] });
+      queryClient.invalidateQueries({ queryKey: [queryKeys.user] });
+    },
+    onError: (error: Error) => {
+      setError(error.message || "An error occurred during upload");
+    },
+    onSettled: () => {
+      setLoading(false);
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -196,34 +224,7 @@ export default function ECUUploadForm() {
       })
     );
 
-    try {
-      const response = await fetch("/api/ecu/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        // Reset form
-        setFile(null);
-        setSelectedManufacturer(0);
-        setSelectedModel(0);
-        setSelectedOptions([]);
-        setMessage("");
-        // Show success message
-        setShowSuccessModal(true);
-        // Refresh the page to update recent activity
-        router.refresh();
-      } else {
-        const data = await response.json();
-        setError(data.error || "An error occurred during upload");
-      }
-    } catch (error) {
-      console.error("Upload error:", error);
-      setError("An error occurred during upload");
-    } finally {
-      setLoading(false);
-    }
+    uploadMutation.mutate(formData);
   };
 
   // Function to close the success modal

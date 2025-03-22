@@ -14,6 +14,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import { useAuth } from "@/lib/AuthProvider";
+import { useTuningFiles, useUserProfile } from "@/lib/hooks/useDataFetching";
 
 interface User {
   id: number;
@@ -164,27 +165,13 @@ export default function Dashboard() {
     return () => clearInterval(intervalId);
   }, []); // Remove currentTime from dependencies
 
-  const fetchTuningFiles = async () => {
-    try {
-      if (!user) {
-        return;
-      }
+  // Use React Query for tuning files
+  const { data: tuningFilesData, isLoading: tuningFilesLoading } =
+    useTuningFiles();
 
-      // Fetch recent tuning files
-      const filesResponse = await fetch("/api/tuning/history", {
-        credentials: "include",
-      });
-
-      if (filesResponse.ok) {
-        const filesData = await filesResponse.json();
-        setRecentFiles(filesData.tuningFiles.slice(0, 5));
-      }
-    } catch (error) {
-      console.error("Error fetching tuning files:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use React Query for user profile
+  const { data: userProfileData, isLoading: userProfileLoading } =
+    useUserProfile();
 
   useEffect(() => {
     // Only redirect if not authenticated AND loading is complete
@@ -202,14 +189,15 @@ export default function Dashboard() {
         return;
       }
     }
-
-    // Only fetch files if user is authenticated
-    if (user) {
-      fetchTuningFiles();
-      const intervalId = setInterval(fetchTuningFiles, 30000);
-      return () => clearInterval(intervalId);
-    }
   }, [user, router, loading]);
+
+  // Update recentFiles state when tuningFilesData changes
+  useEffect(() => {
+    if (tuningFilesData) {
+      setRecentFiles(tuningFilesData.slice(0, 5));
+      setLoading(false);
+    }
+  }, [tuningFilesData]);
 
   useEffect(() => {
     // Update time every minute

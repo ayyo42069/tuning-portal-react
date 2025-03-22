@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { useNotifications } from "@/lib/NotificationProvider";
+import { useNotifications } from "@/lib/hooks/useDataFetching";
 
 interface Notification {
   id: number;
@@ -19,14 +19,14 @@ interface Notification {
 
 export default function NotificationsPage() {
   const router = useRouter();
-  const { notifications, markAsRead, markAllAsRead } = useNotifications();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Set loading to false once notifications are loaded
-    setLoading(false);
-  }, [notifications]);
+  const {
+    data: notifications,
+    markAsRead,
+    markAllAsRead,
+    isLoading,
+    error,
+  } = useNotifications();
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
@@ -119,7 +119,7 @@ export default function NotificationsPage() {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <LoadingSpinner size="lg" message="Loading notifications..." />
@@ -133,9 +133,9 @@ export default function NotificationsPage() {
         <h2 className="text-3xl font-bold tracking-tight">Notifications</h2>
       </div>
 
-      {error && (
+      {(error || localError) && (
         <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-400 text-red-700 rounded-md">
-          <p>{error}</p>
+          <p>{error?.message || localError}</p>
         </div>
       )}
 
@@ -198,7 +198,7 @@ export default function NotificationsPage() {
           </div>
         ) : (
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {notifications.map((notification) => (
+            {notifications.map((notification: Notification) => (
               <div
                 key={notification.id}
                 className={`p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors ${
