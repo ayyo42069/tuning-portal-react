@@ -127,15 +127,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           data.error === "Session terminated" ||
           data.redirectTo === "/auth/terminated"
         ) {
-          // Clear all auth state before redirecting
+          // Clear all auth state before redirectings
           setUser(null);
           localStorage.removeItem("auth_state");
 
-          // Clear auth_session and auth_token cookies to prevent redirect loop
+          // Clear auth_session and auth_token, session_id cookies to prevent redirect loop
           document.cookie =
             "auth_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
           document.cookie =
             "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          document.cookie =
+            "session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
           // Use setTimeout to ensure state is cleared before redirect
           setTimeout(() => {
@@ -412,11 +414,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         // Clear localStorage
         localStorage.removeItem("auth_state");
-        // Clear auth_session and auth_token cookies to prevent redirect loop
+        // Clear auth_session and auth_token, session_id cookies to prevent redirect loop
         document.cookie =
           "auth_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         document.cookie =
           "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie =
+          "session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       } else {
         const data = await response.json();
         setError(data.error || "Logout failed");
