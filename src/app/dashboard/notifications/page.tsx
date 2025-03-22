@@ -164,7 +164,7 @@ export default function NotificationsPage() {
               </p>
             </div>
           </div>
-          {notifications.length > 0 && (
+          {notifications && notifications.length > 0 && (
             <button
               onClick={() => markAllAsRead()}
               className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
@@ -174,7 +174,7 @@ export default function NotificationsPage() {
           )}
         </div>
 
-        {notifications.length === 0 ? (
+        {!notifications || notifications.length === 0 ? (
           <div className="px-6 py-8 text-center">
             <svg
               className="mx-auto h-12 w-12 text-gray-400"
@@ -198,41 +198,42 @@ export default function NotificationsPage() {
           </div>
         ) : (
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {notifications.map((notification: Notification) => (
-              <div
-                key={notification.id}
-                className={`p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors ${
-                  !notification.isRead ? "bg-blue-50 dark:bg-blue-900/20" : ""
-                }`}
-                onClick={() => handleNotificationClick(notification)}
-              >
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    {getNotificationIcon(notification.type)}
-                  </div>
-                  <div className="ml-4 flex-1">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {notification.title}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {formatDate(notification.createdAt)}
-                      </p>
+            {notifications &&
+              notifications.map((notification: Notification) => (
+                <div
+                  key={notification.id}
+                  className={`p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors ${
+                    !notification.isRead ? "bg-blue-50 dark:bg-blue-900/20" : ""
+                  }`}
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      {getNotificationIcon(notification.type)}
                     </div>
-                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                      {notification.message}
-                    </p>
-                    {!notification.isRead && (
-                      <div className="mt-2">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100">
-                          New
-                        </span>
+                    <div className="ml-4 flex-1">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {notification.title}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {formatDate(notification.createdAt)}
+                        </p>
                       </div>
-                    )}
+                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                        {notification.message}
+                      </p>
+                      {!notification.isRead && (
+                        <div className="mt-2">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100">
+                            New
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         )}
       </div>
