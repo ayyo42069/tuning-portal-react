@@ -5,7 +5,6 @@ import { ThemeProvider } from "@/lib/ThemeProvider";
 import { NotificationProvider } from "@/lib/NotificationProvider";
 import { AuthProvider } from "@/lib/AuthProvider";
 import { QueryProvider } from "@/lib/QueryProvider";
-import { GA_TRACKING_ID } from "@/lib/analytics";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -95,7 +94,7 @@ export default function RootLayout({
       <head>
         {/* Google Analytics */}
         <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}
+          src={`https://www.googletagmanager.com/gtag/js?id=G-6VFG6B4CMY`}
           strategy="afterInteractive"
         />
         <Script id="google-analytics" strategy="afterInteractive">
@@ -103,7 +102,7 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', '${GA_TRACKING_ID}');
+            gtag('config', 'G-6VFG6B4CMY');
           `}
         </Script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
