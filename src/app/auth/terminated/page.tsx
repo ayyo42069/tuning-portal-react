@@ -2,9 +2,24 @@
 
 import { useRouter } from "next/navigation";
 import { AlertTriangle, LogIn, HelpCircle } from "lucide-react";
+import { useEffect } from "react";
 
 export default function TerminatedSession() {
   const router = useRouter();
+
+  // Clear all authentication cookies when the terminated page loads
+  useEffect(() => {
+    // Clear auth cookies by setting their expiration to the past
+    document.cookie =
+      "auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict";
+    document.cookie =
+      "session_id=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict";
+    document.cookie =
+      "auth_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict";
+
+    // Also clear from localStorage if any auth state is stored there
+    localStorage.removeItem("auth_state");
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
