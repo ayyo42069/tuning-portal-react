@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/lib/ThemeProvider";
 import { NotificationProvider } from "@/lib/NotificationProvider";
 import { AuthProvider } from "@/lib/AuthProvider";
 import { QueryProvider } from "@/lib/QueryProvider";
+import { GoogleAnalytics } from "@next/third-parties/google";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -92,19 +94,6 @@ export default function RootLayout({
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <head>
-        {/* Google Analytics */}
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=G-6VFG6B4CMY`}
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-6VFG6B4CMY');
-          `}
-        </Script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -127,6 +116,7 @@ export default function RootLayout({
           </QueryProvider>
         </ThemeProvider>
       </body>
+      <GoogleAnalytics gaId="G-6VFG6B4CMY" />
     </html>
   );
 }
