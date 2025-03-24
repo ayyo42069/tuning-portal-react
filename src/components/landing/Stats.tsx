@@ -54,13 +54,21 @@ export const Stats = ({ inView }: StatsProps) => {
         }
 
         const data = await response.json();
+        console.log("Stats API response:", data); // Debug logging
 
-        setStatsData(data);
+        // Ensure we have valid numbers
+        const validatedData = {
+          users: Math.max(1, Number(data.users) || 0),
+          files: Math.max(1, Number(data.files) || 0),
+          satisfaction: Math.max(1, Number(data.satisfaction) || 0),
+        };
+
+        setStatsData(validatedData);
       } catch (err) {
         console.error("Error fetching stats:", err);
         setError("Failed to load statistics");
         // Use fallback data if fetch fails
-        setStatsData({ users: 5000, files: 25000, satisfaction: 98 });
+        setStatsData({ users: 10, files: 25, satisfaction: 98 });
       } finally {
         setIsLoading(false);
       }
@@ -164,7 +172,7 @@ export const Stats = ({ inView }: StatsProps) => {
               </svg>
             </div>
             <div className="text-5xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-2">
-              {count.users.toLocaleString()}+
+              {count.users.toLocaleString()}
             </div>
             <div className="text-gray-600 dark:text-gray-300 text-lg">
               Active Users
@@ -198,7 +206,7 @@ export const Stats = ({ inView }: StatsProps) => {
               </svg>
             </div>
             <div className="text-5xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-2">
-              {count.files.toLocaleString()}+
+              {count.files.toLocaleString()}
             </div>
             <div className="text-gray-600 dark:text-gray-300 text-lg">
               Tuning Files Created
@@ -232,7 +240,7 @@ export const Stats = ({ inView }: StatsProps) => {
               </svg>
             </div>
             <div className="text-5xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-2">
-              {count.satisfaction}%
+              {count.satisfaction.toLocaleString()}
             </div>
             <div className="text-gray-600 dark:text-gray-300 text-lg">
               Customer Satisfaction
