@@ -77,6 +77,23 @@ export const Stats = ({ inView }: StatsProps) => {
     fetchStats();
   }, [inView]);
 
+  // Initialize count when statsData is loaded
+  useEffect(() => {
+    if (statsData) {
+      // If we haven't animated yet, start with zeros
+      // If we've already animated or are not in view, just set to final values
+      if (!inView || hasAnimated) {
+        setCount({
+          users: statsData.users,
+          files: statsData.files,
+          satisfaction: statsData.satisfaction,
+        });
+      } else {
+        setCount({ users: 0, files: 0, satisfaction: 0 });
+      }
+    }
+  }, [statsData, inView, hasAnimated]);
+
   // Animate counting effect
   useEffect(() => {
     if (inView && !hasAnimated && statsData) {
