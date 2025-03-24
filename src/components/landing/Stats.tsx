@@ -54,6 +54,7 @@ export const Stats = ({ inView }: StatsProps) => {
         }
 
         const data = await response.json();
+
         setStatsData(data);
       } catch (err) {
         console.error("Error fetching stats:", err);
@@ -88,7 +89,15 @@ export const Stats = ({ inView }: StatsProps) => {
           satisfaction: Math.floor(progress * statsData.satisfaction),
         });
 
-        if (step >= steps) clearInterval(timer);
+        if (step >= steps) {
+          // Ensure final values match exactly with the API data
+          setCount({
+            users: statsData.users,
+            files: statsData.files,
+            satisfaction: statsData.satisfaction,
+          });
+          clearInterval(timer);
+        }
       }, interval);
 
       return () => clearInterval(timer);
