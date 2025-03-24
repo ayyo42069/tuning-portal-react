@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/AuthProvider";
 
@@ -16,43 +17,95 @@ export const Header = () => {
 
   return (
     <header className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-700 to-purple-800 dark:from-blue-700 dark:via-indigo-800 dark:to-purple-900 animate-gradient-x"></div>
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute inset-0 bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-700 via-indigo-800 to-purple-900 dark:from-blue-800 dark:via-indigo-900 dark:to-purple-950"></div>
+
+      {/* Circuit pattern overlay */}
+      <div className="absolute inset-0 opacity-5">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "url('/patterns/circuit-board.svg')",
+            backgroundSize: "300px",
+          }}
+        ></div>
       </div>
+
+      {/* Hexagon pattern overlay */}
+      <div className="absolute inset-0 opacity-10">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "url('/patterns/hexagons.svg')",
+            backgroundSize: "30px",
+            filter: "blur(0.5px)",
+          }}
+        ></div>
+      </div>
+
+      {/* Animated glow effects */}
+      <motion.div
+        className="absolute -left-32 top-0 w-64 h-64 bg-cyan-500/20 rounded-full blur-3xl"
+        animate={{
+          x: [0, 10, 0],
+          opacity: [0.2, 0.3, 0.2],
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      <motion.div
+        className="absolute -right-32 top-0 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl"
+        animate={{
+          x: [0, -10, 0],
+          opacity: [0.2, 0.3, 0.2],
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1,
+        }}
+      />
 
       <div className="container mx-auto py-6 px-4 relative z-10">
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center">
+          <Link href="/" className="flex items-center space-x-2 group">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:shadow-cyan-500/20 transition-all duration-300">
               <svg
-                className="w-6 h-6 text-blue-600 dark:text-blue-400"
-                fill="currentColor"
-                viewBox="0 0 20 20"
+                className="w-7 h-7 text-white"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
-                  clipRule="evenodd"
-                />
+                <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
               </svg>
             </div>
             <h1 className="text-3xl font-bold text-white">Tuning Portal</h1>
-          </div>
+          </Link>
+
           <div className="flex items-center space-x-4">
             <ThemeToggle />
             {user ? (
               <div className="flex items-center space-x-4">
-                <span className="text-white">Welcome, {user.username}</span>
+                <span className="text-white hidden md:inline">
+                  Welcome, {user.username}
+                </span>
                 <Link
                   href="/dashboard"
-                  className="px-4 py-2 rounded-md bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-opacity-90 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 font-medium"
                 >
                   Dashboard
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 rounded-md border-2 border-white dark:border-gray-600 text-white hover:bg-white hover:text-blue-600 dark:hover:bg-gray-800 dark:hover:text-blue-400 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="px-4 py-2 rounded-lg border border-white/30 text-white hover:bg-white/10 transition-all duration-300 font-medium backdrop-blur-sm"
                 >
                   Logout
                 </button>
@@ -61,13 +114,13 @@ export const Header = () => {
               <>
                 <Link
                   href="/auth/login"
-                  className="px-4 py-2 rounded-md bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 hover:bg-opacity-90 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="px-4 py-2 rounded-lg border border-white/30 text-white hover:bg-white/10 transition-all duration-300 font-medium backdrop-blur-sm"
                 >
                   Login
                 </Link>
                 <Link
                   href="/auth/register"
-                  className="px-4 py-2 rounded-md border-2 border-white dark:border-gray-600 text-white hover:bg-white hover:text-blue-600 dark:hover:bg-gray-800 dark:hover:text-blue-400 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 font-medium"
                 >
                   Register
                 </Link>
@@ -76,12 +129,18 @@ export const Header = () => {
           </div>
         </div>
 
-        <div className="mt-4 text-center text-white text-sm">
+        <div className="mt-6 text-center text-white text-sm">
           <div className="flex justify-center space-x-6">
-            <Link href="/terms" className="hover:underline">
+            <Link
+              href="/terms"
+              className="hover:text-cyan-300 transition-colors duration-300"
+            >
               Terms of Service
             </Link>
-            <Link href="/privacy" className="hover:underline">
+            <Link
+              href="/privacy"
+              className="hover:text-cyan-300 transition-colors duration-300"
+            >
               Privacy Policy
             </Link>
           </div>
