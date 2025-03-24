@@ -128,23 +128,6 @@ export const Header = () => {
             )}
           </div>
         </div>
-
-        <div className="mt-6 text-center text-white text-sm">
-          <div className="flex justify-center space-x-6">
-            <Link
-              href="/terms"
-              className="hover:text-cyan-300 transition-colors duration-300"
-            >
-              Terms of Service
-            </Link>
-            <Link
-              href="/privacy"
-              className="hover:text-cyan-300 transition-colors duration-300"
-            >
-              Privacy Policy
-            </Link>
-          </div>
-        </div>
       </div>
     </header>
   );

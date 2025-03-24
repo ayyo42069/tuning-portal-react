@@ -5,6 +5,7 @@ import { Header } from "@/components/landing/Header";
 import { Hero } from "@/components/landing/Hero";
 import { Stats } from "@/components/landing/Stats";
 import { Features } from "@/components/landing/Features";
+import { Footer } from "@/components/landing/Footer";
 import { CookieConsent } from "@/components/CookieConsent";
 
 export default function Home() {
@@ -23,6 +24,11 @@ export default function Home() {
     triggerOnce: true,
   });
 
+  const [footerRef, footerInView] = useInView({
+    threshold: 0.1,
+    triggerOnce: true,
+  });
+
   return (
     <div className="min-h-screen flex flex-col overflow-hidden">
       <Header />
@@ -37,6 +43,10 @@ export default function Home() {
 
       <div ref={featuresRef}>
         <Features inView={featuresInView} />
+      </div>
+
+      <div ref={footerRef}>
+        <Footer inView={footerInView} />
       </div>
 
       <CookieConsent />
