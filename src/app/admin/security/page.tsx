@@ -124,10 +124,24 @@ export default function SecurityDashboard() {
         throw new Error("Failed to fetch security logs");
       }
       const data = await response.json();
-      setLogs(data.logs);
-      setTotalLogs(data.total || data.logs.length); // Use total if provided, otherwise use length
+
+      // Check if data.logs exists and is an array
+      if (data.logs && Array.isArray(data.logs)) {
+        setLogs(data.logs);
+        setTotalLogs(data.total || data.logs.length); // Use total if provided, otherwise use length
+      } else {
+        console.error(
+          "No logs data returned from API or invalid format:",
+          data
+        );
+        setLogs([]);
+        setTotalLogs(0);
+      }
     } catch (err: any) {
       setError(err.message);
+      console.error("Error fetching security logs:", err);
+      setLogs([]);
+      setTotalLogs(0);
     } finally {
       setLoading(false);
     }
