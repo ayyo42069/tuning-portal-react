@@ -122,15 +122,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Clear all auth state
         setUser(null);
         localStorage.removeItem("auth_state");
-
-        // Clear cookies
-        document.cookie =
-          "auth_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        document.cookie =
-          "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        document.cookie =
-          "session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-
         // Redirect to terminated page
         window.location.href = "/auth/terminated";
       }

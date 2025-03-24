@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create cookies that expire immediately to clear the auth token and session ID
+    // Create cookies that expire immediately to clear all auth-related cookies
     const authCookieHeader = serialize("auth_token", "", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -54,6 +54,39 @@ export async function POST(request: NextRequest) {
       path: "/",
     });
 
+    const authSessionCookieHeader = serialize("auth_session", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: -1, // Expire immediately
+      path: "/",
+    });
+
+    // Also clear any non-HttpOnly cookies that might be set
+    const clientAuthCookieHeader = serialize("auth_token", "", {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: -1,
+      path: "/",
+    });
+
+    const clientSessionCookieHeader = serialize("session_id", "", {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: -1,
+      path: "/",
+    });
+
+    const clientAuthSessionCookieHeader = serialize("auth_session", "", {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: -1,
+      path: "/",
+    });
+
     // Return success response
     const response = NextResponse.json(
       {
@@ -63,9 +96,13 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
 
-    // Add the cookies to the response
+    // Add all the cookies to the response
     response.headers.append("Set-Cookie", authCookieHeader);
     response.headers.append("Set-Cookie", sessionCookieHeader);
+    response.headers.append("Set-Cookie", authSessionCookieHeader);
+    response.headers.append("Set-Cookie", clientAuthCookieHeader);
+    response.headers.append("Set-Cookie", clientSessionCookieHeader);
+    response.headers.append("Set-Cookie", clientAuthSessionCookieHeader);
 
     return response;
   } catch (error) {

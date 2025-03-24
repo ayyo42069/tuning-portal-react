@@ -8,18 +8,51 @@ import { executeQuery } from "@/lib/db";
 export default function TerminatedSession() {
   const router = useRouter();
 
-  // Clear all authentication cookies when the terminated page loads
-  useEffect(() => {
-    // Clear auth cookies by setting their expiration to the past
-    document.cookie =
-      "auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict";
-    document.cookie =
-      "session_id=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict";
-    document.cookie =
-      "auth_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict";
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-    // Also clear from localStorage if any auth state is stored there
-    localStorage.removeItem("auth_state");
+  // Clear all authentication state when the terminated page loads
+  useEffect(() => {
+    // Prevent redirect loops by checking if we've already attempted logout
+    const hasAttemptedLogout = localStorage.getItem("logout_attempted");
+
+    if (!hasAttemptedLogout) {
+      // Set flag to prevent redirect loops
+      localStorage.setItem("logout_attempted", "true");
+
+      // Clear local storage auth state
+      localStorage.removeItem("auth_state");
+
+      // Use server-side logout to properly clear HttpOnly cookies
+      const performServerLogout = async () => {
+        setIsLoggingOut(true);
+        try {
+          const response = await fetch("/api/auth/logout", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!response.ok) {
+            console.error("Failed to logout properly");
+          }
+        } catch (error) {
+          console.error("Error during logout:", error);
+        } finally {
+          setIsLoggingOut(false);
+        }
+      };
+
+      performServerLogout();
+    }
+
+    // Clear the logout attempt flag after 10 minutes to allow future logout attempts
+    const clearLogoutFlag = setTimeout(() => {
+      localStorage.removeItem("logout_attempted");
+    }, 10 * 60 * 1000);
+
+    return () => clearTimeout(clearLogoutFlag);
   }, []);
 
   return (
