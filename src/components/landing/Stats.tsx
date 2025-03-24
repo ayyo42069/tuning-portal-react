@@ -7,9 +7,18 @@ interface StatsProps {
   inView: boolean;
 }
 
+interface StatsData {
+  users: number;
+  files: number;
+  satisfaction: number;
+}
+
 export const Stats = ({ inView }: StatsProps) => {
   const [count, setCount] = useState({ users: 0, files: 0, satisfaction: 0 });
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [statsData, setStatsData] = useState<StatsData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -30,8 +39,38 @@ export const Stats = ({ inView }: StatsProps) => {
     },
   };
 
+  // Fetch stats data from API
   useEffect(() => {
-    if (inView && !hasAnimated) {
+    const fetchStats = async () => {
+      if (!inView) return;
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await fetch("/api/stats");
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch statistics");
+        }
+
+        const data = await response.json();
+        setStatsData(data);
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+        setError("Failed to load statistics");
+        // Use fallback data if fetch fails
+        setStatsData({ users: 5000, files: 25000, satisfaction: 98 });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [inView]);
+
+  // Animate counting effect
+  useEffect(() => {
+    if (inView && !hasAnimated && statsData) {
       setHasAnimated(true);
 
       const duration = 2000;
@@ -44,9 +83,9 @@ export const Stats = ({ inView }: StatsProps) => {
         const progress = step / steps;
 
         setCount({
-          users: Math.floor(progress * 5000),
-          files: Math.floor(progress * 25000),
-          satisfaction: Math.floor(progress * 98),
+          users: Math.floor(progress * statsData.users),
+          files: Math.floor(progress * statsData.files),
+          satisfaction: Math.floor(progress * statsData.satisfaction),
         });
 
         if (step >= steps) clearInterval(timer);
@@ -54,7 +93,7 @@ export const Stats = ({ inView }: StatsProps) => {
 
       return () => clearInterval(timer);
     }
-  }, [inView, hasAnimated]);
+  }, [inView, hasAnimated, statsData]);
 
   return (
     <section className="py-20 relative overflow-hidden">
