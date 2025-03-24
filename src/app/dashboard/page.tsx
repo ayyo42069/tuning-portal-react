@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import ECUUploadForm from "./components/ECUUploadForm";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import TicketSystemWrapper from "@/components/TicketSystem";
+// Ticket system now available via floating button
 import {
   BarChart3,
   Clock,
@@ -443,14 +443,24 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Support/Ticket System Card */}
+        {/* Support Card - Removed embedded ticket system in favor of floating button */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
           <div className="p-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
               <MessageSquare className="w-5 h-5 mr-2 text-blue-500" />
               Support
             </h3>
-            <TicketSystemWrapper />
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
+              Need help with your tuning files or have questions about our
+              services?
+            </p>
+            <p className="text-gray-600 dark:text-gray-300">
+              Click the support button{" "}
+              <span className="inline-flex items-center justify-center w-5 h-5 bg-blue-600 rounded-full text-white">
+                <MessageSquare className="w-3 h-3" />
+              </span>{" "}
+              in the bottom right corner to access our ticket system.
+            </p>
           </div>
         </div>
       </div>
