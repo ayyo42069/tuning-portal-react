@@ -27,6 +27,7 @@ export default function SessionViewer({
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -55,19 +56,34 @@ export default function SessionViewer({
     }
   };
 
-  // Terminate a session
+  // Terminate a session (and all other sessions for the same user)
   const terminateSession = async (sessionId: string) => {
     try {
+      setLoading(true);
+
       const response = await fetch(
         `/api/admin/security/sessions/${sessionId}`,
         {
           method: "DELETE",
+          headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+          },
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to terminate session");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to terminate session");
       }
+
+      const result = await response.json();
+
+      // Show success message with number of terminated sessions
+      setError(null);
+      setSuccessMessage(
+        `Successfully terminated ${result.terminatedSessions} session(s) for user`
+      );
 
       // Refresh sessions list
       fetchSessions();
@@ -80,6 +96,8 @@ export default function SessionViewer({
       setShowModal(false);
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -191,6 +209,18 @@ export default function SessionViewer({
         </div>
       )}
 
+      {successMessage && (
+        <div className="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-green-900/30 dark:text-green-400">
+          {successMessage}
+          <button
+            onClick={() => setSuccessMessage(null)}
+            className="float-right text-green-800 dark:text-green-400"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
       {loading ? (
         <div className="text-center py-10">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent align-[-0.125em]"></div>
@@ -291,11 +321,13 @@ export default function SessionViewer({
             <div className="mb-6">
               {modalAction === "terminate" ? (
                 <p className="text-gray-600 dark:text-gray-400">
-                  Are you sure you want to terminate the session for user{" "}
+                  Are you sure you want to terminate{" "}
+                  <strong>all active sessions</strong> for user{" "}
                   <span className="font-medium text-gray-900 dark:text-white">
                     {selectedSession.username}
                   </span>
-                  ? This will force the user to log in again.
+                  ? This will force the user to log out from all devices and
+                  require re-login.
                 </p>
               ) : (
                 <>

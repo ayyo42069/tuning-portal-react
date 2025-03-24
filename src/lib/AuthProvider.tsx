@@ -55,13 +55,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Always refresh user data from server to ensure it's up-to-date
     refreshUser();
 
-    // Set up a more frequent refresh to detect session termination quickly
+    // Check specifically for session termination
+    checkSessionTermination();
+
+    // Set up intervals for regular checks
     const refreshInterval = setInterval(() => {
       refreshUser();
-    }, 30 * 1000); // Refresh every 30 seconds to detect termination faster
+    }, 60 * 1000); // Refresh user data every minute
 
-    // Clean up interval on unmount
-    return () => clearInterval(refreshInterval);
+    const terminationCheckInterval = setInterval(() => {
+      checkSessionTermination();
+    }, 15 * 1000); // Check for termination more frequently (every 15 seconds)
+
+    // Clean up intervals on unmount
+    return () => {
+      clearInterval(refreshInterval);
+      clearInterval(terminationCheckInterval);
+    };
   }, []);
 
   // Handle F5 refresh and tab/browser close events
@@ -80,6 +90,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [user]);
+
+  // Check specifically for session termination
+  const checkSessionTermination = async (): Promise<void> => {
+    // Only check if user is logged in
+    if (!user) return;
+
+    try {
+      const userId = user.id;
+      const response = await fetch(
+        `/api/auth/session-status?userId=${userId}`,
+        {
+          credentials: "include",
+          // Use cache: 'no-store' to prevent caching
+          cache: "no-store",
+          headers: {
+            // Add a timestamp to prevent caching
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+            "X-Request-Time": Date.now().toString(),
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.terminated) {
+        // Session has been terminated
+        console.log("Session termination detected");
+
+        // Clear all auth state
+        setUser(null);
+        localStorage.removeItem("auth_state");
+
+        // Clear cookies
+        document.cookie =
+          "auth_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie =
+          "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie =
+          "session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+        // Redirect to terminated page
+        window.location.href = "/auth/terminated";
+      }
+    } catch (error) {
+      console.error("Error checking session termination:", error);
+      // Don't clear auth state on network errors to prevent false logouts
+    }
+  };
 
   const refreshUser = async (): Promise<void> => {
     try {

@@ -7,6 +7,7 @@ import {
   logSessionEvent,
 } from "@/lib/securityMiddleware";
 import { SecurityEventType } from "@/lib/securityLogging";
+import { cookies } from "next/headers";
 
 /**
  * DELETE handler for terminating a specific session
@@ -58,6 +59,12 @@ export async function DELETE(
 
     const session = sessionDetails[0];
 
+    // Get all active sessions for this user to terminate them all
+    const userSessions = await executeQuery<any[]>(
+      "SELECT id FROM sessions WHERE user_id = ?",
+      [session.user_id]
+    );
+
     // Log session termination event
     await logSessionEvent(
       session.user_id,
@@ -78,8 +85,17 @@ export async function DELETE(
       }
     );
 
-    // Delete the session
-    await executeQuery("DELETE FROM sessions WHERE id = ?", [sessionId]);
+    // Delete all sessions for this user instead of just the one
+    // This ensures the user is completely logged out from all devices
+    await executeQuery("DELETE FROM sessions WHERE user_id = ?", [
+      session.user_id,
+    ]);
+
+    // Add a termination record to notify clients
+    await executeQuery(
+      "INSERT INTO session_terminations (user_id, terminated_by, terminated_at, reason) VALUES (?, ?, NOW(), ?)",
+      [session.user_id, authResult.user.id, "Administrative action"]
+    );
 
     // Log successful API access
     await logApiAccess(
@@ -92,23 +108,13 @@ export async function DELETE(
     // Create a response with success message
     const response = NextResponse.json({
       success: true,
-      message: "Session terminated successfully",
+      message: "All sessions for user terminated successfully",
+      terminatedSessions: userSessions.length,
+      userId: session.user_id,
     });
 
-    // Add Set-Cookie headers to clear cookies for the terminated user
-    // These will be sent to the client when the session is terminated by an admin
-    response.headers.append(
-      "Set-Cookie",
-      "auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict"
-    );
-    response.headers.append(
-      "Set-Cookie",
-      "session_id=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict"
-    );
-    response.headers.append(
-      "Set-Cookie",
-      "auth_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict"
-    );
+    // We don't need to set cookies here as they won't reach the terminated user
+    // The terminated user's client will detect termination on their next API call
 
     return response;
   } catch (error) {

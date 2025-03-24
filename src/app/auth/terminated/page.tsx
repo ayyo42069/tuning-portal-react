@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AlertTriangle, LogIn, HelpCircle } from "lucide-react";
-import { useEffect } from "react";
+import { AlertTriangle, LogIn, HelpCircle, RefreshCw } from "lucide-react";
+import { useEffect, useState } from "react";
+import { executeQuery } from "@/lib/db";
 
 export default function TerminatedSession() {
   const router = useRouter();
