@@ -118,13 +118,41 @@ function CreditPurchaseForm() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 backdrop-filter backdrop-blur-sm bg-opacity-95 dark:bg-opacity-95">
+    <div className="relative bg-white/80 dark:bg-gray-800/80 p-4 sm:p-6 rounded-xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 backdrop-filter backdrop-blur-md overflow-hidden">
+      {/* Background pattern */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-600/10 dark:from-blue-500/20 dark:to-indigo-600/20 -z-10 overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-5 dark:opacity-10"
+          style={{
+            backgroundImage: "url('/patterns/hexagons.svg')",
+            backgroundSize: "300px",
+          }}
+        ></div>
+      </div>
+
       <h3 className="text-xl font-semibold mb-3 sm:mb-4 text-gray-800 dark:text-white flex items-center">
+        <div className="p-2 bg-blue-500/10 dark:bg-blue-500/20 rounded-lg mr-3">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-blue-600 dark:text-blue-400"
+          >
+            <rect width="20" height="14" x="2" y="5" rx="2" />
+            <line x1="2" x2="22" y1="10" y2="10" />
+          </svg>
+        </div>
         <span className="bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent">
           Credit Balance
         </span>
       </h3>
-      <div className="mb-5 sm:mb-6 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 rounded-md border border-blue-100 dark:border-blue-800 shadow-sm">
+      <div className="mb-5 sm:mb-6 p-4 sm:p-5 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg border border-blue-200/50 dark:border-blue-700/50 shadow-md">
         <p className="text-base sm:text-lg font-medium text-blue-700 dark:text-blue-300">
           Current Balance:{" "}
           <span className="font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
@@ -133,35 +161,83 @@ function CreditPurchaseForm() {
         </p>
       </div>
 
-      <h3 className="text-xl font-semibold mb-3 sm:mb-4 text-gray-800 dark:text-white">
+      <h3 className="text-xl font-semibold mb-3 sm:mb-4 text-gray-800 dark:text-white flex items-center">
+        <div className="p-2 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-lg mr-3">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-indigo-600 dark:text-indigo-400"
+          >
+            <path d="M5 11a7 7 0 0 1 14 0" />
+            <path d="M5 19a7 7 0 0 0 14 0" />
+            <circle cx="12" cy="11" r="3" />
+            <circle cx="12" cy="19" r="3" />
+          </svg>
+        </div>
         <span className="bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent">
           Purchase Credits
         </span>
       </h3>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-900/20 border border-red-500/30 text-red-300 rounded-md shadow-md backdrop-blur-sm relative z-10">
+        <div className="mb-4 p-4 bg-red-500/10 border-l-4 border-red-500 text-red-700 dark:text-red-300 rounded-md shadow-md backdrop-blur-sm relative z-10">
           <p className="flex items-center">
-            <span className="inline-block w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="mr-2 text-red-500"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" x2="12" y1="8" y2="12" />
+              <line x1="12" x2="12.01" y1="16" y2="16" />
+            </svg>
             {error}
           </p>
         </div>
       )}
 
       {success && (
-        <div className="mb-4 p-3 bg-green-900/20 border border-green-500/30 text-green-300 rounded-md shadow-md backdrop-blur-sm relative z-10">
+        <div className="mb-4 p-4 bg-green-500/10 border-l-4 border-green-500 text-green-700 dark:text-green-300 rounded-md shadow-md backdrop-blur-sm relative z-10">
           <p className="flex items-center">
-            <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="mr-2 text-green-500"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
             {success}
           </p>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label
             htmlFor="amount"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center"
           >
             <span className="bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent font-medium">
               Amount of Credits
@@ -174,19 +250,21 @@ function CreditPurchaseForm() {
               min="1"
               value={amount}
               onChange={(e) => setAmount(parseInt(e.target.value) || 1)}
-              className="w-full rounded-md border border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white py-2 px-3 transition-all duration-200 hover:border-blue-400 dark:hover:border-blue-500"
+              className="w-full rounded-lg border border-gray-300/70 dark:border-gray-600/70 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 dark:bg-gray-800/90 dark:text-white py-3 px-4 transition-all duration-200 hover:border-blue-400 dark:hover:border-blue-500 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm"
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400 dark:text-gray-500">
-              <span className="text-sm">credits</span>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-500 dark:text-gray-400">
+              <span className="text-sm font-medium">credits</span>
             </div>
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Card Details
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+            <span className="bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent font-medium">
+              Card Details
+            </span>
           </label>
-          <div className="p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 relative z-10 shadow-sm hover:shadow-md transition-shadow duration-200 focus-within:border-blue-400 dark:focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-400 dark:focus-within:ring-blue-500">
+          <div className="p-4 border border-gray-300/70 dark:border-gray-600/70 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm relative z-10 shadow-sm hover:shadow-md transition-all duration-300 focus-within:border-blue-400 dark:focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-400/50 dark:focus-within:ring-blue-500/50">
             <CardElement
               options={{
                 style: {
@@ -210,35 +288,59 @@ function CreditPurchaseForm() {
               className="stripe-card-element"
             />
           </div>
-          <div className="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 p-2 sm:p-3 rounded-md">
-            <p className="font-medium mb-1">
-              ⚠️ Test Mode - Use Test Cards Only
-            </p>
+          <div className="mt-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400 bg-gray-50/80 dark:bg-gray-900/80 p-3 sm:p-4 rounded-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
+            <div className="flex items-center mb-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-amber-500 mr-2"
+              >
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                <path d="M12 9v4" />
+                <path d="M12 17h.01" />
+              </svg>
+              <p className="font-medium text-amber-700 dark:text-amber-400">
+                Test Mode - Use Test Cards Only
+              </p>
+            </div>
             <p>
               This payment form is in test mode. Please use one of these test
               card numbers:
             </p>
-            <ul className="list-disc pl-4 sm:pl-5 mt-1 space-y-1">
-              <li>
-                <span className="font-mono text-xs sm:text-sm">
+            <ul className="list-disc pl-4 sm:pl-5 mt-2 space-y-1.5">
+              <li className="flex items-center">
+                <span className="font-mono text-xs sm:text-sm bg-white dark:bg-gray-800 px-2 py-1 rounded mr-2 border border-gray-200 dark:border-gray-700">
                   4242 4242 4242 4242
-                </span>{" "}
-                - Successful payment
+                </span>
+                <span className="text-green-600 dark:text-green-400 font-medium">
+                  Successful payment
+                </span>
               </li>
-              <li>
-                <span className="font-mono text-xs sm:text-sm">
+              <li className="flex items-center">
+                <span className="font-mono text-xs sm:text-sm bg-white dark:bg-gray-800 px-2 py-1 rounded mr-2 border border-gray-200 dark:border-gray-700">
                   4000 0000 0000 0002
-                </span>{" "}
-                - Declined (generic)
+                </span>
+                <span className="text-red-600 dark:text-red-400 font-medium">
+                  Declined (generic)
+                </span>
               </li>
-              <li>
-                <span className="font-mono text-xs sm:text-sm">
+              <li className="flex items-center">
+                <span className="font-mono text-xs sm:text-sm bg-white dark:bg-gray-800 px-2 py-1 rounded mr-2 border border-gray-200 dark:border-gray-700">
                   4000 0000 0000 9995
-                </span>{" "}
-                - Declined (insufficient funds)
+                </span>
+                <span className="text-red-600 dark:text-red-400 font-medium">
+                  Declined (insufficient funds)
+                </span>
               </li>
             </ul>
-            <p className="mt-1">
+            <p className="mt-2 bg-blue-50 dark:bg-blue-900/30 p-2 rounded border-l-2 border-blue-400 dark:border-blue-600">
               Use any future expiration date, any 3-digit CVC, and any postal
               code.
             </p>
@@ -271,16 +373,17 @@ function CreditPurchaseForm() {
           `}</style>
         </div>
 
-        <div className="pt-2">
+        <div className="pt-3">
           <button
             type="submit"
             disabled={!stripe || loading}
-            className="w-full flex justify-center py-2 sm:py-3 px-4 border border-transparent rounded-md shadow-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200 transform hover:translate-y-[-1px] hover:shadow-xl"
+            className="w-full flex justify-center items-center py-3 sm:py-4 px-6 border border-transparent rounded-lg shadow-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-xl relative overflow-hidden group"
           >
+            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-blue-400/20 to-indigo-400/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
             {loading ? (
-              <span className="flex items-center">
+              <span className="flex items-center relative z-10">
                 <svg
-                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -302,7 +405,25 @@ function CreditPurchaseForm() {
                 Processing...
               </span>
             ) : (
-              `Purchase Credits ($${amount}.00)`
+              <span className="flex items-center relative z-10">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="mr-2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+                  <path d="M12 18V6" />
+                </svg>
+                Purchase Credits ($${amount}.00)
+              </span>
             )}
           </button>
         </div>
