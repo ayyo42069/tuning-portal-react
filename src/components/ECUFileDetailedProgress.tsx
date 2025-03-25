@@ -219,14 +219,32 @@ export default function ECUFileDetailedProgress({
               {/* Status Content */}
               <div className="flex-1">
                 <div
-                  className="flex items-center justify-between cursor-pointer"
+                  className={`flex items-center justify-between cursor-pointer p-2 -ml-2 rounded-lg transition-colors duration-200 ${
+                    isStepCurrent(step.status)
+                      ? "bg-blue-50/50 dark:bg-blue-900/20"
+                      : "hover:bg-gray-50 dark:hover:bg-gray-700/30"
+                  }`}
                   onClick={() => toggleExpand(step.status)}
                 >
-                  <h4 className="text-md font-medium text-gray-900 dark:text-white">
+                  <h4
+                    className={`text-md font-medium ${
+                      isStepCurrent(step.status)
+                        ? "text-blue-700 dark:text-blue-300"
+                        : isStepActive(step.status)
+                        ? "text-gray-900 dark:text-white"
+                        : "text-gray-500 dark:text-gray-400"
+                    }`}
+                  >
                     {step.label}
                   </h4>
                   {step.details && (
-                    <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                    <button
+                      className={`p-1 rounded-full transition-colors duration-200 ${
+                        isStepCurrent(step.status)
+                          ? "text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-100/50 dark:hover:bg-blue-900/30"
+                          : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50"
+                      }`}
+                    >
                       {expandedStep === step.status ? (
                         <ChevronUp className="h-5 w-5" />
                       ) : (
@@ -235,11 +253,18 @@ export default function ECUFileDetailedProgress({
                     </button>
                   )}
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p
+                  className={`text-sm mt-1 ${
+                    isStepCurrent(step.status)
+                      ? "text-gray-700 dark:text-gray-300"
+                      : "text-gray-500 dark:text-gray-400"
+                  }`}
+                >
                   {step.description}
                 </p>
                 {step.date && (
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 flex items-center">
+                    <Clock className="w-3 h-3 mr-1 inline" />{" "}
                     {formatDate(step.date)}
                   </p>
                 )}
@@ -248,17 +273,26 @@ export default function ECUFileDetailedProgress({
                 {isStepCurrent(step.status) &&
                   step.status === "processing" &&
                   estimatedCompletionTime && (
-                    <p className="text-xs text-blue-500 dark:text-blue-400 mt-1">
-                      Estimated completion: {estimatedCompletionTime}
-                    </p>
+                    <div className="mt-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-400 dark:border-blue-600 rounded-r-md flex items-center">
+                      <Clock className="w-4 h-4 text-blue-500 dark:text-blue-400 mr-2" />
+                      <p className="text-xs text-blue-700 dark:text-blue-300">
+                        Estimated completion:{" "}
+                        <span className="font-medium">
+                          {estimatedCompletionTime}
+                        </span>
+                      </p>
+                    </div>
                   )}
 
                 {/* Show error message for failed status */}
                 {isStepCurrent(step.status) && currentStatus === "failed" && (
-                  <p className="text-xs text-red-500 dark:text-red-400 mt-1">
-                    There was an issue processing your file. Please check the
-                    admin message for details.
-                  </p>
+                  <div className="mt-2 px-3 py-2 bg-red-50 dark:bg-red-900/30 border-l-4 border-red-400 dark:border-red-600 rounded-r-md flex items-center">
+                    <AlertCircle className="w-4 h-4 text-red-500 dark:text-red-400 mr-2" />
+                    <p className="text-xs text-red-700 dark:text-red-300">
+                      There was an issue processing your file. Please check the
+                      admin message for details.
+                    </p>
+                  </div>
                 )}
 
                 {/* Expanded details */}
