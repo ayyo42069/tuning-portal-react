@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import ECUStatusTimeline from "@/components/ECUStatusTimeline";
 import ECUFileDetailedProgress from "@/components/ECUFileDetailedProgress";
 import ECUFileComments from "@/components/ECUFileComments";
 
@@ -122,33 +121,79 @@ export default function TuningFileDetailsPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" message="Loading file details..." />
+      <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-800 dark:from-blue-950 dark:to-blue-900 relative overflow-hidden flex items-center justify-center">
+        {/* SVG Pattern Background */}
+        <div className="absolute inset-0 z-0 opacity-10">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url('/patterns/hexagons.svg')",
+              backgroundSize: "30px",
+              filter: "blur(0.5px)",
+            }}
+          ></div>
+        </div>
+
+        {/* Circuit board pattern overlay */}
+        <div className="absolute inset-0 z-0 opacity-5">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url('/patterns/circuit-board.svg')",
+              backgroundSize: "300px",
+            }}
+          ></div>
+        </div>
+
+        <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md p-8 rounded-xl shadow-xl border border-white/20 dark:border-gray-700/30 relative z-10">
+          <LoadingSpinner size="lg" message="Loading file details..." />
+        </div>
       </div>
     );
   }
 
   if (error || !tuningFile) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <header className="bg-white dark:bg-gray-800 shadow">
+      <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-800 dark:from-blue-950 dark:to-blue-900 relative overflow-hidden">
+        {/* SVG Pattern Background */}
+        <div className="absolute inset-0 z-0 opacity-10">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url('/patterns/hexagons.svg')",
+              backgroundSize: "30px",
+              filter: "blur(0.5px)",
+            }}
+          ></div>
+        </div>
+
+        {/* Circuit board pattern overlay */}
+        <div className="absolute inset-0 z-0 opacity-5">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url('/patterns/circuit-board.svg')",
+              backgroundSize: "300px",
+            }}
+          ></div>
+        </div>
+
+        <header className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border-b border-white/20 dark:border-gray-700/30 shadow-lg relative z-10">
           <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Error
-            </h1>
+            <h1 className="text-3xl font-bold text-white">Error</h1>
             <div className="flex items-center space-x-4">
               <Link
                 href="/dashboard/tuning-history"
-                className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="px-4 py-2 border border-white/30 text-sm font-medium rounded-lg text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-sm"
               >
                 Back to History
               </Link>
             </div>
           </div>
         </header>
-        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 relative z-10">
           <div className="px-4 py-6 sm:px-0">
-            <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-400 text-red-700">
+            <div className="mb-4 p-6 bg-red-900/20 border border-red-500/30 text-red-300 rounded-md shadow-md backdrop-blur-sm relative z-10">
               <p>{error || "Tuning file not found"}</p>
             </div>
           </div>
@@ -158,39 +203,45 @@ export default function TuningFileDetailsPage({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Tuning File Details
-          </h1>
-          <div className="flex items-center space-x-4">
-            <Link
-              href="/dashboard/tuning-history"
-              className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Back to History
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-800 dark:from-blue-950 dark:to-blue-900 relative overflow-hidden">
+      {/* SVG Pattern Background */}
+      <div className="absolute inset-0 z-0 opacity-10">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "url('/patterns/hexagons.svg')",
+            backgroundSize: "30px",
+            filter: "blur(0.5px)",
+          }}
+        ></div>
+      </div>
+
+      {/* Circuit board pattern overlay */}
+      <div className="absolute inset-0 z-0 opacity-5">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "url('/patterns/circuit-board.svg')",
+            backgroundSize: "300px",
+          }}
+        ></div>
+      </div>
 
       {/* Main content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 relative z-10">
         <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
-            <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl overflow-hidden sm:rounded-xl border border-white/20 dark:border-gray-700/30 hover:shadow-2xl transition-all duration-300">
+            <div className="px-6 py-6 sm:px-8 flex justify-between items-center border-b border-white/20 dark:border-gray-700/30 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 dark:from-blue-900/30 dark:to-cyan-900/30 backdrop-blur-sm">
               <div>
-                <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                <h3 className="text-xl leading-6 font-medium text-gray-900 dark:text-white">
                   {tuningFile.file_name}
                 </h3>
-                <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
+                <p className="mt-1 max-w-2xl text-sm text-gray-600 dark:text-gray-300">
                   Uploaded on {formatDate(tuningFile.created_at)}
                 </p>
               </div>
               <span
-                className={`px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${getStatusBadgeClass(
+                className={`px-4 py-1.5 inline-flex text-sm leading-5 font-semibold rounded-full shadow-sm backdrop-blur-sm ${getStatusBadgeClass(
                   tuningFile.status
                 )}`}
               >
@@ -198,48 +249,48 @@ export default function TuningFileDetailsPage({
                   tuningFile.status.slice(1)}
               </span>
             </div>
-            <div className="border-t border-gray-200 dark:border-gray-700">
-              <dl>
-                <div className="bg-gray-50 dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            <div className="border-t border-white/20 dark:border-gray-700/30">
+              <dl className="divide-y divide-white/20 dark:divide-gray-700/30">
+                <div className="px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-8 backdrop-blur-sm bg-white/5 dark:bg-gray-800/20 hover:bg-white/10 dark:hover:bg-gray-700/30 transition-all duration-200">
+                  <dt className="text-sm font-medium text-gray-600 dark:text-gray-300">
                     Vehicle Information
                   </dt>
-                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2 font-medium">
                     {tuningFile.manufacturer_name} {tuningFile.model_name},
                     Year: {tuningFile.production_year}
                   </dd>
                 </div>
-                <div className="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <div className="px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-8 backdrop-blur-sm bg-white/10 dark:bg-gray-800/30 hover:bg-white/15 dark:hover:bg-gray-700/40 transition-all duration-200">
+                  <dt className="text-sm font-medium text-gray-600 dark:text-gray-300">
                     Status
                   </dt>
-                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2 font-medium">
                     {tuningFile.status.charAt(0).toUpperCase() +
                       tuningFile.status.slice(1)}
                   </dd>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <div className="px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-8 backdrop-blur-sm bg-white/5 dark:bg-gray-800/20 hover:bg-white/10 dark:hover:bg-gray-700/30 transition-all duration-200">
+                  <dt className="text-sm font-medium text-gray-600 dark:text-gray-300">
                     Last Updated
                   </dt>
-                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2 font-medium">
                     {formatDate(tuningFile.updated_at)}
                   </dd>
                 </div>
-                <div className="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <div className="px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-8 backdrop-blur-sm bg-white/10 dark:bg-gray-800/30 hover:bg-white/15 dark:hover:bg-gray-700/40 transition-all duration-200">
+                  <dt className="text-sm font-medium text-gray-600 dark:text-gray-300">
                     Credits Used
                   </dt>
-                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+                  <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2 font-medium">
                     {tuningFile.credits_used}
                   </dd>
                 </div>
                 {tuningFile.admin_message && (
-                  <div className="bg-gray-50 dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  <div className="px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-8 backdrop-blur-sm bg-white/5 dark:bg-gray-800/20 hover:bg-white/10 dark:hover:bg-gray-700/30 transition-all duration-200">
+                    <dt className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Admin Message
                     </dt>
-                    <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+                    <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2 font-medium">
                       {tuningFile.admin_message}
                     </dd>
                   </div>
@@ -248,29 +299,32 @@ export default function TuningFileDetailsPage({
             </div>
 
             {/* Tuning Options */}
-            <div className="px-4 py-5 sm:px-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="px-6 py-6 sm:px-8 border-t border-white/20 dark:border-gray-700/30 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 dark:from-indigo-900/30 dark:to-purple-900/30 backdrop-blur-sm">
               <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
                 Selected Tuning Options
               </h3>
-              <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-1 max-w-2xl text-sm text-gray-600 dark:text-gray-300">
                 The following tuning options were selected for this file
               </p>
             </div>
-            <div className="border-t border-gray-200 dark:border-gray-700">
-              <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+            <div className="border-t border-white/20 dark:border-gray-700/30">
+              <ul className="divide-y divide-white/20 dark:divide-gray-700/30">
                 {tuningFile.tuning_options.map((option) => (
-                  <li key={option.id} className="px-4 py-4 sm:px-6">
+                  <li
+                    key={option.id}
+                    className="px-6 py-4 sm:px-8 backdrop-blur-sm bg-white/5 dark:bg-gray-800/20 hover:bg-white/10 dark:hover:bg-gray-700/30 transition-all duration-200"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                           {option.name}
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
                           {option.description}
                         </p>
                       </div>
                       <div className="ml-2 flex-shrink-0 flex">
-                        <p className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                        <p className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100/80 text-green-800 dark:bg-green-800/80 dark:text-green-100 shadow-sm backdrop-blur-sm">
                           {option.credit_cost} credits
                         </p>
                       </div>
@@ -280,22 +334,11 @@ export default function TuningFileDetailsPage({
               </ul>
             </div>
 
-            {/* Status Timeline */}
-            <div className="px-4 py-5 sm:px-6 border-t border-gray-200 dark:border-gray-700">
-              <ECUStatusTimeline
-                currentStatus={tuningFile.status}
-                createdAt={tuningFile.created_at}
-                updatedAt={tuningFile.updated_at}
-                showRefreshButton={true}
-                onRefresh={fetchTuningFileDetails}
-                estimatedCompletionTime={
-                  tuningFile.status === "processing" ? "1-2 hours" : undefined
-                }
-              />
-            </div>
-
             {/* Detailed Progress */}
-            <div className="px-4 py-5 sm:px-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="px-6 py-6 sm:px-8 border-t border-white/20 dark:border-gray-700/30 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 dark:from-cyan-900/30 dark:to-blue-900/30 backdrop-blur-sm">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                Processing Status
+              </h3>
               <ECUFileDetailedProgress
                 currentStatus={tuningFile.status}
                 createdAt={tuningFile.created_at}
@@ -312,14 +355,14 @@ export default function TuningFileDetailsPage({
             {/* Download section - only show if file is completed */}
             {tuningFile.status === "completed" &&
               tuningFile.processed_filename && (
-                <div className="px-4 py-5 sm:px-6 border-t border-gray-200 dark:border-gray-700">
-                  <div className="flex flex-col items-center justify-center py-4">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                <div className="px-6 py-6 sm:px-8 border-t border-white/20 dark:border-gray-700/30 bg-gradient-to-r from-green-500/10 to-emerald-500/10 dark:from-green-900/30 dark:to-emerald-900/30 backdrop-blur-sm">
+                  <div className="flex flex-col items-center justify-center py-6">
+                    <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-6">
                       Your tuned file is ready for download
                     </h3>
                     <a
                       href={`/api/tuning/download?id=${tuningFile.id}`}
-                      className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                      className="px-6 py-3 border border-green-300/30 dark:border-green-700/30 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 focus:outline-none focus:ring-2 focus:ring-green-500/50 shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm"
                     >
                       Download Tuned File
                     </a>
@@ -328,7 +371,10 @@ export default function TuningFileDetailsPage({
               )}
 
             {/* Comments Section */}
-            <div className="px-4 py-5 sm:px-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="px-6 py-6 sm:px-8 border-t border-white/20 dark:border-gray-700/30 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 dark:from-blue-900/30 dark:to-indigo-900/30 backdrop-blur-sm">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                Comments & Questions
+              </h3>
               <ECUFileComments
                 fileId={tuningFile.id}
                 currentUserId={tuningFile.user_id}
