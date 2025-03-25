@@ -53,7 +53,7 @@ const FloatingTicketButton = () => {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+        className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
         aria-label="Open Support Tickets"
       >
         <MessageSquare className="w-6 h-6" />
@@ -65,16 +65,16 @@ const FloatingTicketButton = () => {
           {/* Modal Content */}
           <div
             ref={modalRef}
-            className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-10"
+            className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-10 border border-gray-200/50 dark:border-gray-700/50"
           >
             {/* Modal Header */}
-            <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+            <div className="flex justify-between items-center p-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-800">
+              <h3 className="text-lg font-medium text-white">
                 Support Tickets
               </h3>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none"
+                className="text-white/80 hover:text-white focus:outline-none transition-colors duration-200"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />

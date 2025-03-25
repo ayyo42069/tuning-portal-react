@@ -429,9 +429,9 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col h-[600px]">
+    <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden flex flex-col h-[600px] border border-gray-200/50 dark:border-gray-700/50">
       {/* Ticket System Header */}
-      <div className="bg-blue-600 dark:bg-blue-800 p-2 flex justify-between items-center">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-800 p-3 flex justify-between items-center">
         <h3 className="text-white font-medium text-sm">
           {selectedTicket
             ? `Ticket #${selectedTicket.id}: ${selectedTicket.subject}`
@@ -441,7 +441,7 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
           {!selectedTicket && (
             <button
               onClick={() => setShowNewTicketForm(!showNewTicketForm)}
-              className="text-xs bg-green-500 hover:bg-green-600 text-white py-1 px-2 rounded-md transition-colors"
+              className="text-xs bg-green-500/90 hover:bg-green-600 text-white py-1.5 px-3 rounded-lg transition-all duration-200 hover:shadow-md flex items-center"
             >
               {showNewTicketForm ? "Cancel" : "New Ticket"}
             </button>
@@ -452,7 +452,7 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
                 setSelectedTicket(null);
                 setTicketResponses([]);
               }}
-              className="text-xs bg-gray-500 hover:bg-gray-600 text-white py-1 px-2 rounded-md transition-colors"
+              className="text-xs bg-gray-600/90 hover:bg-gray-700 text-white py-1.5 px-3 rounded-lg transition-all duration-200 hover:shadow-md flex items-center"
             >
               Back to List
             </button>
@@ -462,23 +462,23 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
 
       {/* View Filters */}
       {!selectedTicket && !showNewTicketForm && (
-        <div className="flex border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900">
+        <div className="flex border-b border-gray-200/50 dark:border-gray-700/50 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-sm">
           <button
             onClick={() => setView("all")}
-            className={`flex-1 py-2 text-xs font-medium ${
+            className={`flex-1 py-3 text-xs font-medium transition-all duration-200 ${
               view === "all"
-                ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
-                : "text-gray-500 dark:text-gray-400"
+                ? "text-blue-600 border-b-2 border-blue-500 dark:text-blue-400 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/20"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
             }`}
           >
             All Tickets
           </button>
           <button
             onClick={() => setView("my")}
-            className={`flex-1 py-2 text-xs font-medium ${
+            className={`flex-1 py-3 text-xs font-medium transition-all duration-200 ${
               view === "my"
-                ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
-                : "text-gray-500 dark:text-gray-400"
+                ? "text-blue-600 border-b-2 border-blue-500 dark:text-blue-400 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/20"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
             }`}
           >
             My Tickets
@@ -486,10 +486,10 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
           {currentUser.role === "admin" && (
             <button
               onClick={() => setView("assigned")}
-              className={`flex-1 py-2 text-xs font-medium ${
+              className={`flex-1 py-3 text-xs font-medium transition-all duration-200 ${
                 view === "assigned"
-                  ? "text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400"
-                  : "text-gray-500 dark:text-gray-400"
+                  ? "text-blue-600 border-b-2 border-blue-500 dark:text-blue-400 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/20"
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
               }`}
             >
               Assigned to Me
@@ -499,9 +499,9 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto p-3 bg-gray-50 dark:bg-gray-900">
+      <div className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
         {error && (
-          <div className="bg-red-50 dark:bg-red-900 p-2 rounded-md text-red-800 dark:text-red-200 text-xs mb-3">
+          <div className="bg-red-50/90 dark:bg-red-900/30 backdrop-blur-sm p-3 rounded-lg border border-red-200 dark:border-red-800/50 text-red-800 dark:text-red-200 text-xs mb-4 shadow-sm">
             {error}
           </div>
         )}

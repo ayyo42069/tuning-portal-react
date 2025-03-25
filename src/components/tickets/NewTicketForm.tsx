@@ -44,8 +44,9 @@ const NewTicketForm: React.FC<NewTicketFormProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-      <h4 className="font-medium text-sm text-gray-900 dark:text-white mb-3">
+    <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-5 rounded-xl shadow-md border border-gray-200/50 dark:border-gray-700/50">
+      <h4 className="font-medium text-base text-gray-900 dark:text-white mb-4 flex items-center">
+        <span className="inline-block w-1 h-5 bg-gradient-to-b from-blue-500 to-indigo-600 rounded mr-2"></span>
         Create New Support Ticket
       </h4>
 
@@ -65,11 +66,11 @@ const NewTicketForm: React.FC<NewTicketFormProps> = ({
               }
             }}
             placeholder="Brief summary of your issue"
-            className={`w-full p-2 text-xs border ${
+            className={`w-full p-2.5 text-sm border ${
               errors.subject
-                ? "border-red-500 dark:border-red-700"
-                : "border-gray-300 dark:border-gray-600"
-            } rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
+                ? "border-red-500 dark:border-red-700 ring-1 ring-red-500/30 dark:ring-red-700/30"
+                : "border-gray-300/70 dark:border-gray-600/70 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/20"
+            } rounded-lg bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm text-gray-900 dark:text-white transition-all duration-200 shadow-sm`}
           />
           {errors.subject && (
             <p className="text-red-500 dark:text-red-400 text-xs mt-1">
@@ -92,11 +93,11 @@ const NewTicketForm: React.FC<NewTicketFormProps> = ({
               }
             }}
             placeholder="Detailed explanation of your issue"
-            className={`w-full p-2 text-xs border ${
+            className={`w-full p-2.5 text-sm border ${
               errors.description
-                ? "border-red-500 dark:border-red-700"
-                : "border-gray-300 dark:border-gray-600"
-            } rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white min-h-[120px]`}
+                ? "border-red-500 dark:border-red-700 ring-1 ring-red-500/30 dark:ring-red-700/30"
+                : "border-gray-300/70 dark:border-gray-600/70 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/20"
+            } rounded-lg bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm text-gray-900 dark:text-white min-h-[150px] transition-all duration-200 shadow-sm`}
           />
           {errors.description && (
             <p className="text-red-500 dark:text-red-400 text-xs mt-1">
@@ -113,7 +114,7 @@ const NewTicketForm: React.FC<NewTicketFormProps> = ({
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value as Ticket["priority"])}
-            className="w-full p-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            className="w-full p-2.5 text-sm border border-gray-300/70 dark:border-gray-600/70 rounded-lg bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm text-gray-900 dark:text-white transition-all duration-200 shadow-sm focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/20"
           >
             <option value="low">Low</option>
             <option value="medium">Medium</option>
@@ -123,19 +124,19 @@ const NewTicketForm: React.FC<NewTicketFormProps> = ({
         </div>
 
         {/* Form Actions */}
-        <div className="flex justify-end space-x-2 pt-2">
+        <div className="flex justify-end space-x-3 mt-2">
           <button
             type="button"
             onClick={onCancel}
-            className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 text-xs font-medium rounded-md transition-colors"
+            className="px-4 py-2 text-sm border border-gray-300/70 dark:border-gray-600/70 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm backdrop-blur-sm"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors"
+            className="px-4 py-2 text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg transition-all duration-200 hover:shadow-md"
           >
-            Create Ticket
+            Submit Ticket
           </button>
         </div>
       </form>
