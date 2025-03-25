@@ -4,6 +4,7 @@ import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { createRoot } from "react-dom/client";
 import {
   User,
   Mail,
@@ -78,6 +79,7 @@ export default function Register() {
     confirmPassword: "",
   });
   const [showTerms, setShowTerms] = useState(false);
+  const [termsContent, setTermsContent] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [deviceInfo, setDeviceInfo] = useState({});
   const [showVerificationModal, setShowVerificationModal] = useState(false);
@@ -375,60 +377,16 @@ export default function Register() {
                 <Shield className="h-5 w-5 mr-2 text-blue-500" />
                 Terms of Service
               </h3>
-              <div className="prose dark:prose-invert max-w-none">
-                <h4>1. Acceptance of Terms</h4>
-                <p>
-                  By registering for an account, you agree to be bound by these
-                  Terms of Service. If you do not agree to these terms, please
-                  do not register or use our services.
+              {termsContent ? (
+                <div
+                  className="prose dark:prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: termsContent }}
+                />
+              ) : (
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Loading terms...
                 </p>
-
-                <h4>2. User Accounts</h4>
-                <p>
-                  You are responsible for maintaining the confidentiality of
-                  your account credentials and for all activities that occur
-                  under your account. You agree to notify us immediately of any
-                  unauthorized use of your account.
-                </p>
-
-                <h4>3. Prohibited Activities</h4>
-                <p>
-                  You agree not to create multiple accounts for the purpose of
-                  abusing our services, engaging in fraudulent activities, or
-                  circumventing any limitations. We reserve the right to suspend
-                  or terminate accounts that violate these terms.
-                </p>
-
-                <h4>4. Data Collection</h4>
-                <p>
-                  We collect certain information about your device for security
-                  purposes and to prevent fraud. This may include your IP
-                  address, browser information, and device characteristics. This
-                  information is processed in accordance with our Privacy
-                  Policy.
-                </p>
-
-                <h4>5. Privacy</h4>
-                <p>
-                  We respect your privacy and protect your personal information.
-                  Please review our Privacy Policy to understand how we collect,
-                  use, and disclose information about you.
-                </p>
-
-                <h4>6. Termination</h4>
-                <p>
-                  We reserve the right to terminate or suspend your account at
-                  any time for violations of these terms or for any other reason
-                  at our discretion.
-                </p>
-
-                <h4>7. Changes to Terms</h4>
-                <p>
-                  We may modify these terms at any time. Continued use of our
-                  services after such changes constitutes your acceptance of the
-                  new terms.
-                </p>
-              </div>
+              )}
               <div className="mt-6 flex justify-end space-x-4">
                 <motion.button
                   onClick={() => setShowTerms(false)}
@@ -445,7 +403,7 @@ export default function Register() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="max-w-md w-full space-y-8 relative z-10 bg-white/10 dark:bg-gray-900/20 backdrop-blur-sm p-8 rounded-xl border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-white/30 hover:bg-white/15 dark:hover:bg-gray-900/30"
+          className="max-w-md w-full mx-auto space-y-8 relative z-10 bg-white/10 dark:bg-gray-900/20 backdrop-blur-sm p-8 rounded-xl border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-white/30 hover:bg-white/15 dark:hover:bg-gray-900/30"
         >
           <motion.div variants={itemVariants}>
             <div className="w-16 h-16 mx-auto rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 mb-4">
@@ -692,7 +650,21 @@ export default function Register() {
                   I accept the{" "}
                   <motion.button
                     type="button"
-                    onClick={() => setShowTerms(true)}
+                    onClick={async () => {
+                      try {
+                        // Import the utility function to get terms content
+                        const { getTermsContent } = await import(
+                          "@/utils/termsUtils"
+                        );
+
+                        // Get the terms content
+                        const content = await getTermsContent();
+                        setTermsContent(content);
+                      } catch (error) {
+                        console.error("Error loading terms:", error);
+                      }
+                      setShowTerms(true);
+                    }}
                     className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 underline"
                   >
                     Terms of Service
