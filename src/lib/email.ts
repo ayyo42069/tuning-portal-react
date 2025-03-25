@@ -97,35 +97,39 @@ export async function sendVerificationEmail(
         "X-Tracking-ID": emailTrackingId,
       },
       html: `
-        <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-          <div style="text-align: center; margin-bottom: 20px;">
-            <h1 style="color: #2563eb; font-size: 24px; margin-bottom: 0;">Tuning Portal</h1>
-            <p style="color: #64748b; font-size: 14px;">Your one-stop solution for tuning services</p>
+        <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); background-color: #0f172a; color: #f8fafc;">
+          <!-- Header with gradient background -->
+          <div style="text-align: center; margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); border-radius: 8px; box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);">
+            <div style="width: 60px; height: 60px; margin: 0 auto 12px; background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+              <img src="https://cdn-icons-png.flaticon.com/512/1828/1828640.png" width="36" height="36" style="filter: brightness(0) invert(1);" alt="Verify Icon">
+            </div>
+            <h1 style="color: white; font-size: 24px; margin-bottom: 4px; font-weight: 700;">Tuning Portal</h1>
+            <p style="color: rgba(255, 255, 255, 0.8); font-size: 14px;">Your one-stop solution for tuning services</p>
           </div>
           
-          <div style="background-color: #f8fafc; border-radius: 6px; padding: 20px; margin-bottom: 20px;">
-            <h2 style="color: #1e293b; font-size: 18px; margin-top: 0;">Email Verification</h2>
-            <p style="color: #334155; line-height: 1.5;">Thank you for registering with Tuning Portal. Please verify your email address to activate your account and access all features.</p>
+          <div style="background-color: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 24px; margin-bottom: 24px; border: 1px solid rgba(255, 255, 255, 0.1);">
+            <h2 style="color: white; font-size: 20px; margin-top: 0; margin-bottom: 16px; font-weight: 600;">Email Verification</h2>
+            <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; margin-bottom: 24px;">Thank you for registering with Tuning Portal. Please verify your email address to activate your account and access all features.</p>
             
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${verificationUrl}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Verify Email Address</a>
+            <div style="text-align: center; margin: 32px 0;">
+              <a href="${verificationUrl}" style="background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3); transition: all 0.3s ease;">Verify Email Address</a>
             </div>
             
-            <div style="background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 12px; margin: 20px 0;">
-              <p style="color: #475569; font-size: 14px; margin: 0 0 8px 0;">Your verification code:</p>
-              <p style="color: #0f172a; font-family: monospace; font-size: 16px; background: #e2e8f0; padding: 8px; border-radius: 4px; text-align: center; letter-spacing: 1px;">${token}</p>
+            <div style="background-color: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 16px; margin: 24px 0;">
+              <p style="color: rgba(255, 255, 255, 0.8); font-size: 14px; margin: 0 0 8px 0;">Your verification code:</p>
+              <p style="color: white; font-family: monospace; font-size: 18px; background: rgba(6, 182, 212, 0.2); padding: 12px; border-radius: 6px; text-align: center; letter-spacing: 2px; border: 1px solid rgba(6, 182, 212, 0.3);">${token}</p>
             </div>
             
-            <p style="color: #64748b; font-size: 14px;">If the button doesn't work, you can also copy and paste the following link into your browser:</p>
-            <p style="word-break: break-all;"><a href="${verificationUrl}" style="color: #2563eb; text-decoration: none;">${verificationUrl}</a></p>
-            <p style="color: #64748b; font-size: 14px;">This link will expire in 24 hours.</p>
-            <p style="color: #64748b; font-size: 14px;">For security reasons, this verification link can only be used once.</p>
+            <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px; margin-bottom: 8px;">If the button doesn't work, you can also copy and paste the following link into your browser:</p>
+            <p style="word-break: break-all; margin-bottom: 16px;"><a href="${verificationUrl}" style="color: #38bdf8; text-decoration: none;">${verificationUrl}</a></p>
+            <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px; margin-bottom: 8px;">This link will expire in 24 hours.</p>
+            <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px;">For security reasons, this verification link can only be used once.</p>
           </div>
           
-          <div style="text-align: center; color: #94a3b8; font-size: 12px;">
-            <p>If you didn't register for an account, please ignore this email.</p>
-            <p>Email sent at: ${timestamp} (Ref: ${emailTrackingId})</p>
-            <p>&copy; ${new Date().getFullYear()} Tuning Portal. All rights reserved.</p>
+          <div style="text-align: center; color: rgba(255, 255, 255, 0.5); font-size: 12px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+            <p style="margin-bottom: 8px;">If you didn't register for an account, please ignore this email.</p>
+            <p style="margin-bottom: 8px;">Email sent at: ${timestamp} (Ref: ${emailTrackingId})</p>
+            <p style="margin-bottom: 0;">&copy; ${new Date().getFullYear()} Tuning Portal. All rights reserved.</p>
           </div>
         </div>
       `,
