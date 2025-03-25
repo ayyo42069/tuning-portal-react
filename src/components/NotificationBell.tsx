@@ -193,7 +193,7 @@ export default function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-lg shadow-xl overflow-hidden z-[100] max-h-[28rem] flex flex-col border border-white/20 dark:border-gray-700/30">
+        <div className="absolute right-0 mt-2 w-80 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-lg shadow-xl overflow-hidden z-[9999] max-h-[28rem] flex flex-col border border-white/20 dark:border-gray-700/30">
           <div className="p-3 border-b border-white/20 dark:border-gray-700/30 flex justify-between items-center bg-gradient-to-r from-blue-600/10 to-purple-600/10 dark:from-blue-900/30 dark:to-purple-900/30">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
               Notifications
