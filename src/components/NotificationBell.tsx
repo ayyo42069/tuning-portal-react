@@ -167,7 +167,7 @@ export default function NotificationBell() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors relative"
+        className="p-2 rounded-md hover:bg-white/10 dark:hover:bg-gray-700/80 transition-all duration-200 relative backdrop-blur-sm"
         aria-label="Notifications"
       >
         <svg
@@ -186,22 +186,22 @@ export default function NotificationBell() {
         </svg>
 
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg shadow-red-500/20 border border-white/20">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg overflow-hidden z-50 max-h-96 flex flex-col">
-          <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+        <div className="absolute right-0 mt-2 w-80 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-lg shadow-xl overflow-hidden z-[100] max-h-[28rem] flex flex-col border border-white/20 dark:border-gray-700/30">
+          <div className="p-3 border-b border-white/20 dark:border-gray-700/30 flex justify-between items-center bg-gradient-to-r from-blue-600/10 to-purple-600/10 dark:from-blue-900/30 dark:to-purple-900/30">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
               Notifications
             </h3>
             {unreadCount > 0 && (
               <button
                 onClick={() => markAllAsRead()}
-                className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 px-2 py-1 rounded-md hover:bg-white/10 dark:hover:bg-blue-900/30 transition-colors duration-200"
               >
                 Mark all as read
               </button>
@@ -218,10 +218,10 @@ export default function NotificationBell() {
                 {notifications.map((notification: QueryNotification) => (
                   <li
                     key={notification.id}
-                    className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer ${
+                    className={`p-3 hover:bg-gray-50/80 dark:hover:bg-gray-700/80 cursor-pointer transition-colors duration-200 ${
                       !notification.isRead
-                        ? "bg-blue-50 dark:bg-blue-900/20"
-                        : ""
+                        ? "bg-blue-50/80 dark:bg-blue-900/30 border-l-4 border-blue-500"
+                        : "border-l-4 border-transparent"
                     }`}
                     onClick={() => handleNotificationClick(notification)}
                   >
@@ -252,10 +252,10 @@ export default function NotificationBell() {
             )}
           </div>
 
-          <div className="p-2 border-t border-gray-200 dark:border-gray-700 text-center">
+          <div className="p-2 border-t border-white/20 dark:border-gray-700/30 text-center bg-gradient-to-r from-blue-600/10 to-purple-600/10 dark:from-blue-900/30 dark:to-purple-900/30">
             <Link
               href="/dashboard/notifications"
-              className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+              className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 px-2 py-1 rounded-md hover:bg-white/10 dark:hover:bg-blue-900/30 transition-colors duration-200 inline-block"
               onClick={() => setIsOpen(false)}
             >
               View all notifications
