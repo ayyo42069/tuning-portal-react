@@ -3,6 +3,7 @@
 import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   User,
   Mail,
@@ -32,6 +33,31 @@ const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 // Username validation regex - alphanumeric with limited special chars
 const USERNAME_REGEX = /^[a-zA-Z0-9._-]{3,20}$/;
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.3,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 12,
+    },
+  },
+};
 
 export default function Register() {
   const router = useRouter();
@@ -264,432 +290,508 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      {showTerms && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6">
-            <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
-              <Shield className="h-5 w-5 mr-2 text-blue-500" />
-              Terms of Service
-            </h3>
-            <div className="prose dark:prose-invert max-w-none">
-              <h4>1. Acceptance of Terms</h4>
-              <p>
-                By registering for an account, you agree to be bound by these
-                Terms of Service. If you do not agree to these terms, please do
-                not register or use our services.
-              </p>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-b from-blue-900 to-blue-800 dark:from-blue-950 dark:to-blue-900 py-12 px-4 sm:px-6 lg:px-8">
+      {/* SVG Pattern Background */}
+      <div className="absolute inset-0 z-0 opacity-10">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "url('/patterns/hexagons.svg')",
+            backgroundSize: "30px",
+            filter: "blur(0.5px)",
+          }}
+        ></div>
+      </div>
 
-              <h4>2. User Accounts</h4>
-              <p>
-                You are responsible for maintaining the confidentiality of your
-                account credentials and for all activities that occur under your
-                account. You agree to notify us immediately of any unauthorized
-                use of your account.
-              </p>
+      {/* Circuit board pattern overlay */}
+      <div className="absolute inset-0 z-0 opacity-5">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "url('/patterns/circuit-board.svg')",
+            backgroundSize: "300px",
+          }}
+        ></div>
+      </div>
 
-              <h4>3. Prohibited Activities</h4>
-              <p>
-                You agree not to create multiple accounts for the purpose of
-                abusing our services, engaging in fraudulent activities, or
-                circumventing any limitations. We reserve the right to suspend
-                or terminate accounts that violate these terms.
-              </p>
-
-              <h4>4. Data Collection</h4>
-              <p>
-                We collect certain information about your device for security
-                purposes and to prevent fraud. This may include your IP address,
-                browser information, and device characteristics. This
-                information is processed in accordance with our Privacy Policy.
-              </p>
-
-              <h4>5. Privacy</h4>
-              <p>
-                We respect your privacy and protect your personal information.
-                Please review our Privacy Policy to understand how we collect,
-                use, and disclose information about you.
-              </p>
-
-              <h4>6. Termination</h4>
-              <p>
-                We reserve the right to terminate or suspend your account at any
-                time for violations of these terms or for any other reason at
-                our discretion.
-              </p>
-
-              <h4>7. Changes to Terms</h4>
-              <p>
-                We may modify these terms at any time. Continued use of our
-                services after such changes constitutes your acceptance of the
-                new terms.
-              </p>
-            </div>
-            <div className="mt-6 flex justify-end space-x-4">
-              <button
-                onClick={() => setShowTerms(false)}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-            Create a new account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Or{" "}
-            <Link
-              href="/auth/login"
-              className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              sign in to your existing account
-            </Link>
-          </p>
-        </div>
-
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                Username
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  required
-                  className={`appearance-none relative block w-full pl-10 px-3 py-2 border ${
-                    validationErrors.username
-                      ? "border-red-500"
-                      : "border-gray-300 dark:border-gray-700"
-                  } rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-800 dark:text-white`}
-                  placeholder="Username"
-                  value={formData.username}
-                  onChange={handleChange}
-                />
-              </div>
-              {validationErrors.username && (
-                <p className="mt-1 text-sm text-red-500 flex items-center">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  {validationErrors.username}
+      {/* Animated elements */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+        <motion.div
+          initial={{ x: -100, opacity: 0.2 }}
+          animate={{ x: 0, opacity: 0.15 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="absolute w-[600px] h-[600px] rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 -top-64 -left-64 will-change-transform filter blur-3xl"
+        />
+        <motion.div
+          initial={{ x: 100, opacity: 0.2 }}
+          animate={{ x: 0, opacity: 0.15 }}
+          transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
+          className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 top-1/3 -right-64 will-change-transform filter blur-3xl"
+        />
+        <motion.div
+          initial={{ y: 100, opacity: 0.2 }}
+          animate={{ y: 0, opacity: 0.15 }}
+          transition={{ duration: 1.5, ease: "easeOut", delay: 0.4 }}
+          className="absolute w-[400px] h-[400px] rounded-full bg-gradient-to-r from-purple-500 to-pink-500 -bottom-32 left-1/3 will-change-transform filter blur-3xl"
+        />
+        {showTerms && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6">
+              <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
+                <Shield className="h-5 w-5 mr-2 text-blue-500" />
+                Terms of Service
+              </h3>
+              <div className="prose dark:prose-invert max-w-none">
+                <h4>1. Acceptance of Terms</h4>
+                <p>
+                  By registering for an account, you agree to be bound by these
+                  Terms of Service. If you do not agree to these terms, please
+                  do not register or use our services.
                 </p>
-              )}
-            </div>
 
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                Email
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  className={`appearance-none relative block w-full pl-10 px-3 py-2 border ${
-                    validationErrors.email
-                      ? "border-red-500"
-                      : "border-gray-300 dark:border-gray-700"
-                  } rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-800 dark:text-white`}
-                  placeholder="Email address"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-              </div>
-              {validationErrors.email && (
-                <p className="mt-1 text-sm text-red-500 flex items-center">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  {validationErrors.email}
+                <h4>2. User Accounts</h4>
+                <p>
+                  You are responsible for maintaining the confidentiality of
+                  your account credentials and for all activities that occur
+                  under your account. You agree to notify us immediately of any
+                  unauthorized use of your account.
                 </p>
-              )}
-            </div>
 
-            <div>
-              <label
-                htmlFor="fullName"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                Full Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <UserRound className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="fullName"
-                  name="fullName"
-                  type="text"
-                  className="appearance-none relative block w-full pl-10 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-800 dark:text-white"
-                  placeholder="Full Name (optional)"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  className={`appearance-none relative block w-full pl-10 px-3 py-2 border ${
-                    validationErrors.password
-                      ? "border-red-500"
-                      : "border-gray-300 dark:border-gray-700"
-                  } rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-800 dark:text-white`}
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-              </div>
-
-              {/* Password strength indicator */}
-              {formData.password && (
-                <div className="mt-2">
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-1">
-                    <div
-                      className={`h-2.5 rounded-full ${getPasswordStrengthColor()}`}
-                      style={{ width: `${(passwordStrength / 5) * 100}%` }}
-                    ></div>
-                  </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-gray-500 dark:text-gray-400 flex items-center">
-                      <Info className="h-3 w-3 mr-1" />
-                      Password strength: {getPasswordStrengthText()}
-                    </span>
-                    {passwordStrength >= 4 && (
-                      <span className="text-green-500 flex items-center">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Strong password
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {validationErrors.password && (
-                <p className="mt-1 text-sm text-red-500 flex items-center">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  {validationErrors.password}
+                <h4>3. Prohibited Activities</h4>
+                <p>
+                  You agree not to create multiple accounts for the purpose of
+                  abusing our services, engaging in fraudulent activities, or
+                  circumventing any limitations. We reserve the right to suspend
+                  or terminate accounts that violate these terms.
                 </p>
-              )}
-            </div>
 
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                Confirm Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  required
-                  className={`appearance-none relative block w-full pl-10 px-3 py-2 border ${
-                    validationErrors.confirmPassword
-                      ? "border-red-500"
-                      : "border-gray-300 dark:border-gray-700"
-                  } rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-800 dark:text-white`}
-                  placeholder="Confirm Password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                />
-              </div>
-              {validationErrors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-500 flex items-center">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  {validationErrors.confirmPassword}
+                <h4>4. Data Collection</h4>
+                <p>
+                  We collect certain information about your device for security
+                  purposes and to prevent fraud. This may include your IP
+                  address, browser information, and device characteristics. This
+                  information is processed in accordance with our Privacy
+                  Policy.
                 </p>
-              )}
-            </div>
-          </div>
 
-          <div className="flex items-start">
-            <div className="flex items-center h-5">
-              <input
-                id="terms"
-                name="terms"
-                type="checkbox"
-                checked={acceptedTerms}
-                onChange={(e) => setAcceptedTerms(e.target.checked)}
-                className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-              />
-            </div>
-            <div className="ml-3 text-sm">
-              <label
-                htmlFor="terms"
-                className="font-medium text-gray-700 dark:text-gray-300"
-              >
-                I accept the{" "}
-                <button
-                  type="button"
-                  onClick={() => setShowTerms(true)}
-                  className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 underline"
+                <h4>5. Privacy</h4>
+                <p>
+                  We respect your privacy and protect your personal information.
+                  Please review our Privacy Policy to understand how we collect,
+                  use, and disclose information about you.
+                </p>
+
+                <h4>6. Termination</h4>
+                <p>
+                  We reserve the right to terminate or suspend your account at
+                  any time for violations of these terms or for any other reason
+                  at our discretion.
+                </p>
+
+                <h4>7. Changes to Terms</h4>
+                <p>
+                  We may modify these terms at any time. Continued use of our
+                  services after such changes constitutes your acceptance of the
+                  new terms.
+                </p>
+              </div>
+              <div className="mt-6 flex justify-end space-x-4">
+                <motion.button
+                  onClick={() => setShowTerms(false)}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
-                  Terms of Service
-                </button>
-              </label>
+                  Close
+                </motion.button>
+              </div>
             </div>
           </div>
+        )}
 
-          {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
-          )}
-
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="max-w-md w-full space-y-8 relative z-10 bg-white/10 dark:bg-gray-900/20 backdrop-blur-sm p-8 rounded-xl border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-white/30"
+        >
+          <motion.div variants={itemVariants}>
+            <div className="w-16 h-16 mx-auto rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 mb-4">
+              <svg
+                className="w-10 h-10 text-white"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
+            <motion.h2
+              variants={itemVariants}
+              className="mt-4 text-center text-3xl font-extrabold text-white bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-100"
             >
-              <div className="flex items-center justify-center">
-                {loading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Creating account...
-                  </>
-                ) : (
-                  "Create account"
+              Create a new account
+            </motion.h2>
+            <motion.p
+              variants={itemVariants}
+              className="mt-2 text-center text-sm text-white/70"
+            >
+              Or{" "}
+              <Link
+                href="/auth/login"
+                className="font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+              >
+                sign in to your existing account
+              </Link>
+            </motion.p>
+          </motion.div>
+
+          <motion.form
+            variants={itemVariants}
+            className="mt-8 space-y-6"
+            onSubmit={handleSubmit}
+          >
+            <div className="rounded-md shadow-sm space-y-4">
+              <div>
+                <label
+                  htmlFor="username"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Username
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    required
+                    className={`appearance-none relative block w-full pl-10 px-4 py-3 border ${
+                      validationErrors.username
+                        ? "border-red-500/50"
+                        : "border-white/20"
+                    } bg-white/10 backdrop-blur-sm placeholder-white/60 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/70 focus:border-transparent focus:z-10 focus:shadow-[0_0_10px_rgba(6,182,212,0.3)] sm:text-sm transition-all duration-200`}
+                    placeholder="Username"
+                    value={formData.username}
+                    onChange={handleChange}
+                  />
+                </div>
+                {validationErrors.username && (
+                  <p className="mt-1 text-sm text-red-500 flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-1" />
+                    {validationErrors.username}
+                  </p>
                 )}
               </div>
-            </button>
-          </div>
-        </form>
 
-        <div className="text-center mt-4">
-          <Link
-            href="/"
-            className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 inline-flex items-center"
-          >
-            <Home className="h-4 w-4 mr-1" />
-            Back to home
-          </Link>
-          {/* Email Verification Modal */}
-          {showVerificationModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6 shadow-xl">
-                <div className="text-center mb-4">
-                  <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 dark:bg-green-900 mb-4">
-                    <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Email
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Mail className="h-5 w-5 text-gray-400" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                    Account Created Successfully!
-                  </h3>
-                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    We've sent a verification code to{" "}
-                    <span className="font-bold">{registeredEmail}</span>. Please
-                    check your inbox and enter the verification code below to
-                    activate your account.
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    className={`appearance-none relative block w-full pl-10 px-4 py-3 border ${
+                      validationErrors.email
+                        ? "border-red-500/50"
+                        : "border-white/20"
+                    } bg-white/10 backdrop-blur-sm placeholder-white/60 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent focus:z-10 sm:text-sm transition-all duration-200`}
+                    placeholder="Email address"
+                    value={formData.email}
+                    onChange={handleChange}
+                  />
+                </div>
+                {validationErrors.email && (
+                  <p className="mt-1 text-sm text-red-500 flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-1" />
+                    {validationErrors.email}
                   </p>
-                </div>
+                )}
+              </div>
 
-                <div className="mt-4 mb-6">
-                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Enter Verification Code:
+              <div>
+                <label
+                  htmlFor="fullName"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Full Name
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <UserRound className="h-5 w-5 text-gray-400" />
                   </div>
-                  <div className="flex">
-                    <input
-                      type="text"
-                      value={enteredVerificationCode}
-                      onChange={(e) => {
-                        setEnteredVerificationCode(e.target.value);
-                        setVerificationError("");
-                      }}
-                      placeholder="Enter code from your email"
-                      className="flex-grow px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm"
-                    />
-                  </div>
-                  {verificationError && (
-                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                      {verificationError}
-                    </p>
-                  )}
-                  {verificationSuccess && (
-                    <p className="mt-2 text-sm text-green-600 dark:text-green-400">
-                      Verification successful! Redirecting to login...
-                    </p>
-                  )}
-                </div>
-
-                <div className="mt-6 space-y-3">
-                  <button
-                    onClick={async () => {
-                      try {
-                        const response = await fetch(
-                          `/api/auth/verify?token=${enteredVerificationCode}`
-                        );
-                        const data = await response.json();
-
-                        if (data.success) {
-                          setVerificationSuccess(true);
-                          setVerificationError("");
-                          setTimeout(() => {
-                            router.push("/dashboard");
-                          }, 2000);
-                        } else {
-                          setVerificationError(
-                            data.error ||
-                              "Invalid verification code. Please try again."
-                          );
-                        }
-                      } catch (error) {
-                        setVerificationError(
-                          "An error occurred during verification. Please try again."
-                        );
-                      }
-                    }}
-                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    disabled={verificationSuccess}
-                  >
-                    Verify Account
-                  </button>
-                  <button
-                    onClick={() => router.push("/auth/login")}
-                    className="w-full flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Go to Login
-                  </button>
+                  <input
+                    id="fullName"
+                    name="fullName"
+                    type="text"
+                    className="appearance-none relative block w-full pl-10 px-4 py-3 border border-white/20 bg-white/10 backdrop-blur-sm placeholder-white/60 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent focus:z-10 sm:text-sm transition-all duration-200"
+                    placeholder="Full Name (optional)"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                  />
                 </div>
               </div>
+
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    className={`appearance-none relative block w-full pl-10 px-4 py-3 border ${
+                      validationErrors.password
+                        ? "border-red-500/50"
+                        : "border-white/20"
+                    } bg-white/10 backdrop-blur-sm placeholder-white/60 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent focus:z-10 sm:text-sm transition-all duration-200`}
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                {/* Password strength indicator */}
+                {formData.password && (
+                  <div className="mt-2">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-1">
+                      <div
+                        className={`h-2.5 rounded-full ${getPasswordStrengthColor()}`}
+                        style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                      ></div>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-gray-500 dark:text-gray-400 flex items-center">
+                        <Info className="h-3 w-3 mr-1" />
+                        Password strength: {getPasswordStrengthText()}
+                      </span>
+                      {passwordStrength >= 4 && (
+                        <span className="text-green-500 flex items-center">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Strong password
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {validationErrors.password && (
+                  <p className="mt-1 text-sm text-red-500 flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-1" />
+                    {validationErrors.password}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    required
+                    className={`appearance-none relative block w-full pl-10 px-4 py-3 border ${
+                      validationErrors.confirmPassword
+                        ? "border-red-500/50"
+                        : "border-white/20"
+                    } bg-white/10 backdrop-blur-sm placeholder-white/60 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent focus:z-10 sm:text-sm transition-all duration-200`}
+                    placeholder="Confirm Password"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                  />
+                </div>
+                {validationErrors.confirmPassword && (
+                  <p className="mt-1 text-sm text-red-500 flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-1" />
+                    {validationErrors.confirmPassword}
+                  </p>
+                )}
+              </div>
             </div>
-          )}
-        </div>
+
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="terms"
+                  name="terms"
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                />
+              </div>
+              <div className="ml-3 text-sm">
+                <label
+                  htmlFor="terms"
+                  className="font-medium text-gray-700 dark:text-gray-300"
+                >
+                  I accept the{" "}
+                  <motion.button
+                    type="button"
+                    onClick={() => setShowTerms(true)}
+                    className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 underline"
+                  >
+                    Terms of Service
+                  </motion.button>
+                </label>
+              </div>
+            </div>
+
+            {error && (
+              <div className="text-red-500 text-sm text-center">{error}</div>
+            )}
+
+            <div>
+              <motion.button
+                type="submit"
+                disabled={loading}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="group relative w-full flex justify-center py-3 px-4 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-blue-500/25 transform hover:-translate-y-0.5"
+              >
+                <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 text-white/80 animate-spin" />
+                  ) : (
+                    <User className="h-5 w-5 text-white/80" />
+                  )}
+                </span>
+                <div className="flex items-center justify-center">
+                  {loading ? "Creating account..." : "Create account"}
+                </div>
+              </motion.button>
+            </div>
+          </motion.form>
+
+          <motion.div variants={itemVariants} className="text-center mt-4">
+            <Link
+              href="/"
+              className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 inline-flex items-center"
+            >
+              <Home className="h-4 w-4 mr-1" />
+              Back to home
+            </Link>
+            {/* Email Verification Modal */}
+            {showVerificationModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6 shadow-xl">
+                  <div className="text-center mb-4">
+                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 dark:bg-green-900 mb-4">
+                      <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                      Account Created Successfully!
+                    </h3>
+                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                      We've sent a verification code to{" "}
+                      <span className="font-bold">{registeredEmail}</span>.
+                      Please check your inbox and enter the verification code
+                      below to activate your account.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 mb-6">
+                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Enter Verification Code:
+                    </div>
+                    <div className="flex">
+                      <input
+                        type="text"
+                        value={enteredVerificationCode}
+                        onChange={(e) => {
+                          setEnteredVerificationCode(e.target.value);
+                          setVerificationError("");
+                        }}
+                        placeholder="Enter code from your email"
+                        className="flex-grow px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm"
+                      />
+                    </div>
+                    {verificationError && (
+                      <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {verificationError}
+                      </p>
+                    )}
+                    {verificationSuccess && (
+                      <p className="mt-2 text-sm text-green-600 dark:text-green-400">
+                        Verification successful! Redirecting to login...
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="mt-6 space-y-3">
+                    <motion.button
+                      onClick={async () => {
+                        try {
+                          const response = await fetch(
+                            `/api/auth/verify?token=${enteredVerificationCode}`
+                          );
+                          const data = await response.json();
+
+                          if (data.success) {
+                            setVerificationSuccess(true);
+                            setVerificationError("");
+                            setTimeout(() => {
+                              router.push("/dashboard");
+                            }, 2000);
+                          } else {
+                            setVerificationError(
+                              data.error ||
+                                "Invalid verification code. Please try again."
+                            );
+                          }
+                        } catch (error) {
+                          setVerificationError(
+                            "An error occurred during verification. Please try again."
+                          );
+                        }
+                      }}
+                      className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      disabled={verificationSuccess}
+                    >
+                      Verify Account
+                    </motion.button>
+                    <motion.button
+                      onClick={() => router.push("/auth/login")}
+                      className="w-full flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      Go to Login
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );
