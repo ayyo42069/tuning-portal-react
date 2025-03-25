@@ -703,10 +703,12 @@ export default function Register() {
           <motion.div variants={itemVariants} className="text-center mt-4">
             <Link
               href="/"
-              className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 inline-flex items-center"
+              className="flex items-center text-sm text-white/70 hover:text-white transition-colors group"
             >
-              <Home className="h-4 w-4 mr-1" />
-              Back to home
+              <div className="bg-white/10 p-1.5 rounded-full mr-2 group-hover:bg-white/20 transition-colors">
+                <Home className="h-4 w-4 text-cyan-300 group-hover:text-cyan-200 transition-colors" />
+              </div>
+              Back to Home
             </Link>
             {/* Email Verification Modal */}
             {showVerificationModal && (
