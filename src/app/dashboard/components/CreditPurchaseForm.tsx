@@ -140,7 +140,7 @@ function CreditPurchaseForm() {
       </h3>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 rounded-md shadow-sm backdrop-blur-sm">
+        <div className="mb-4 p-3 bg-red-900/20 border border-red-500/30 text-red-300 rounded-md shadow-md backdrop-blur-sm relative z-10">
           <p className="flex items-center">
             <span className="inline-block w-2 h-2 bg-red-500 rounded-full mr-2"></span>
             {error}
@@ -149,7 +149,7 @@ function CreditPurchaseForm() {
       )}
 
       {success && (
-        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/30 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-300 rounded-md shadow-sm backdrop-blur-sm">
+        <div className="mb-4 p-3 bg-green-900/20 border border-green-500/30 text-green-300 rounded-md shadow-md backdrop-blur-sm relative z-10">
           <p className="flex items-center">
             <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
             {success}

@@ -233,16 +233,19 @@ export default function ECUUploadForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 max-h-[80vh] overflow-y-auto pr-1"
+    >
       {error && (
-        <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+        <div className="bg-red-50 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-md backdrop-blur-sm">
           {error}
         </div>
       )}
 
       {/* Success Modal */}
       {showSuccessModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-5 sm:p-6 max-w-md w-full shadow-xl max-h-[90vh] overflow-y-auto my-4 mx-auto backdrop-blur-sm bg-opacity-95 dark:bg-opacity-95 border border-gray-200 dark:border-gray-700">
             <div className="text-center">
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
@@ -281,7 +284,9 @@ export default function ECUUploadForm() {
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+      <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-white/20 dark:border-gray-700/30 mb-6 relative overflow-hidden">
+        {/* Background glow effect */}
+        <div className="absolute -right-10 -top-10 w-20 h-20 bg-blue-500/20 rounded-full blur-2xl"></div>
         <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
           <div className="flex items-center">
             <Upload className="w-5 h-5 mr-2 text-blue-600" />
@@ -291,7 +296,7 @@ export default function ECUUploadForm() {
             </CustomTooltip>
           </div>
         </label>
-        <div className="mt-2 bg-gray-50 dark:bg-gray-700 p-4 rounded-md">
+        <div className="mt-2 bg-gray-50/30 dark:bg-gray-700/30 p-4 rounded-md backdrop-blur-sm relative z-10">
           <input
             type="file"
             accept=".bin"
@@ -313,8 +318,10 @@ export default function ECUUploadForm() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6">
-        <div className="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6 relative z-10">
+        <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-white/20 dark:border-gray-700/30 relative overflow-hidden">
+          {/* Background glow effect */}
+          <div className="absolute -right-10 -top-10 w-20 h-20 bg-indigo-500/10 rounded-full blur-2xl"></div>
           <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
             <div className="flex items-center">
               <Car className="w-5 h-5 mr-2 text-indigo-600" />
@@ -335,7 +342,9 @@ export default function ECUUploadForm() {
           </select>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-white/20 dark:border-gray-700/30 relative overflow-hidden">
+          {/* Background glow effect */}
+          <div className="absolute -right-10 -top-10 w-20 h-20 bg-indigo-500/10 rounded-full blur-2xl"></div>
           <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
             <div className="flex items-center">
               <CarFront className="w-5 h-5 mr-2 text-indigo-600" />
@@ -357,7 +366,9 @@ export default function ECUUploadForm() {
           </select>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-white/20 dark:border-gray-700/30 relative overflow-hidden">
+          {/* Background glow effect */}
+          <div className="absolute -right-10 -top-10 w-20 h-20 bg-indigo-500/10 rounded-full blur-2xl"></div>
           <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
             <div className="flex items-center">
               <Calendar className="w-5 h-5 mr-2 text-indigo-600" />
@@ -375,7 +386,9 @@ export default function ECUUploadForm() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-white/20 dark:border-gray-700/30 relative overflow-hidden">
+        {/* Background glow effect */}
+        <div className="absolute -left-10 -bottom-10 w-20 h-20 bg-indigo-500/20 rounded-full blur-2xl"></div>
         <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
           <div className="flex items-center">
             <Settings className="w-5 h-5 mr-2 text-indigo-600" />
@@ -385,11 +398,11 @@ export default function ECUUploadForm() {
             </CustomTooltip>
           </div>
         </label>
-        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-gray-50 dark:bg-gray-700 p-3 sm:p-4 rounded-md">
+        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-gray-50/30 dark:bg-gray-700/30 p-3 sm:p-4 rounded-md backdrop-blur-sm relative z-10">
           {tuningOptions.map((option) => (
             <label
               key={option.id}
-              className="flex items-start p-2 sm:p-3 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transition-colors duration-200"
+              className="flex items-start p-2 sm:p-3 bg-white/20 dark:bg-gray-800/40 rounded-md border border-white/30 dark:border-gray-600/50 hover:border-blue-300/70 dark:hover:border-blue-500/70 transition-all duration-200 backdrop-blur-sm hover:bg-white/30 dark:hover:bg-gray-700/50"
             >
               <input
                 type="checkbox"
@@ -422,7 +435,9 @@ export default function ECUUploadForm() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-white/20 dark:border-gray-700/30 relative overflow-hidden">
+        {/* Background glow effect */}
+        <div className="absolute -left-10 -bottom-10 w-20 h-20 bg-indigo-500/20 rounded-full blur-2xl"></div>
         <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
           <div className="flex items-center">
             <MessageSquare className="w-5 h-5 mr-2 text-indigo-600" />
@@ -445,7 +460,7 @@ export default function ECUUploadForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 focus:ring-offset-blue-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-300 text-center text-base font-semibold shadow-lg hover:shadow-blue-500/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-1"
         >
           {loading ? (
             <>
