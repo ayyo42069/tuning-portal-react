@@ -61,7 +61,7 @@ const FloatingTicketButton = () => {
 
       {/* Modal Overlay */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 md:p-6">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 md:p-6">
           {/* Modal Content */}
           <div
             ref={modalRef}

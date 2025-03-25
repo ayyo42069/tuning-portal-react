@@ -326,30 +326,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-b from-blue-900 to-blue-800 dark:from-blue-950 dark:to-blue-900 py-12 px-4 sm:px-6 lg:px-8">
-      {/* SVG Pattern Background */}
-      <div className="absolute inset-0 z-0 opacity-10">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "url('/patterns/hexagons.svg')",
-            backgroundSize: "30px",
-            filter: "blur(0.5px)",
-          }}
-        ></div>
-      </div>
-
-      {/* Circuit board pattern overlay */}
-      <div className="absolute inset-0 z-0 opacity-5">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "url('/patterns/circuit-board.svg')",
-            backgroundSize: "300px",
-          }}
-        ></div>
-      </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Animated elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
         <motion.div
