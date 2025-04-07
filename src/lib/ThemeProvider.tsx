@@ -19,7 +19,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Only run this on the client side
     setMounted(true);
-    
+
     // Use try-catch to handle potential localStorage errors
     try {
       const storedTheme = localStorage.getItem("theme") as Theme | null;
@@ -36,11 +36,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Update HTML class when theme changes
   useEffect(() => {
     if (!mounted) return;
-    
+
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
     root.classList.add(theme);
-    
+    root.classList.add("theme-transition"); // Add transition class
+
     try {
       localStorage.setItem("theme", theme);
     } catch (error) {

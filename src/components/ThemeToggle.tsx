@@ -1,15 +1,20 @@
 "use client";
 
 import { useTheme } from "@/lib/ThemeProvider";
+import { motion } from "framer-motion";
 
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <button
+    <motion.button
       onClick={toggleTheme}
       className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+      whileTap={{ scale: 0.9 }}
+      initial={false}
+      animate={{ rotate: theme === "light" ? 0 : 180 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       {theme === "light" ? (
         // Moon icon for dark mode
@@ -44,6 +49,6 @@ export default function ThemeToggle() {
           />
         </svg>
       )}
-    </button>
+    </motion.button>
   );
 }

@@ -19,6 +19,8 @@
   --input-background: #ffffff;
   --input-border: #d1d5db;
   --input-focus-border: #3b82f6;
+  --text-light: #4b5563; /* Medium gray for better contrast in light mode */
+  --text-lighter: #6b7280; /* Darker gray for secondary text in light mode */
 }
 
 .dark {
@@ -34,6 +36,18 @@
   --input-background: #111827;
   --input-border: #4b5563;
   --input-focus-border: #60a5fa;
+  --text-light: #d1d5db; /* Light gray for dark mode */
+  --text-lighter: #9ca3af; /* Medium gray for secondary text in dark mode */
+}
+
+/* Theme transition class for smooth animations */
+.theme-transition,
+.theme-transition *,
+.theme-transition *:before,
+.theme-transition *:after {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 300ms;
+  transition-timing-function: ease-in-out;
 }
 
 /* For system preference - this will be overridden by the .dark class when manually toggled */

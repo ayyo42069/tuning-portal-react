@@ -32,26 +32,26 @@ export default function CookiePolicy() {
         <div className="mb-8 flex items-center">
           <Link
             href="/"
-            className="flex items-center text-white hover:text-blue-200 transition-colors"
+            className="flex items-center text-gray-700 dark:text-white hover:text-blue-600 dark:hover:text-blue-200 transition-colors"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
           </Link>
         </div>
 
-        <div className="bg-white/10 dark:bg-gray-900/20 backdrop-blur-sm shadow-xl rounded-lg overflow-hidden border border-white/20 hover:shadow-2xl transition-all duration-300 hover:border-white/30 hover:bg-white/15 dark:hover:bg-gray-900/30">
-          <div className="px-6 py-8 sm:p-10 text-white">
+        <div className="bg-white/20 dark:bg-gray-900/20 backdrop-blur-sm shadow-xl rounded-lg overflow-hidden border border-white/20 hover:shadow-2xl transition-all duration-300 hover:border-white/30 hover:bg-white/25 dark:hover:bg-gray-900/30">
+          <div className="px-6 py-8 sm:p-10 text-gray-800 dark:text-white">
             <div className="text-center mb-10">
-              <h1 className="text-3xl font-bold text-white mb-2">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 Cookie Policy
               </h1>
-              <p className="text-white/70">
+              <p className="text-gray-600 dark:text-white/70">
                 Last Updated: {new Date().toLocaleDateString()}
               </p>
             </div>
 
-            <div className="prose prose-invert max-w-none text-white/90">
-              <h2 className="text-xl font-semibold text-white mt-8 mb-4">
+            <div className="prose max-w-none text-gray-700 dark:prose-invert dark:text-white/90">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mt-8 mb-4">
                 1. Introduction
               </h2>
               <p>
@@ -62,7 +62,7 @@ export default function CookiePolicy() {
                 use of them.
               </p>
 
-              <h2 className="text-xl font-semibold text-white mt-8 mb-4">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mt-8 mb-4">
                 2. What Are Cookies?
               </h2>
               <p>
@@ -84,7 +84,7 @@ export default function CookiePolicy() {
                 other websites.
               </p>
 
-              <h2 className="text-xl font-semibold text-white mt-8 mb-4">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mt-8 mb-4">
                 3. Why Do We Use Cookies?
               </h2>
               <p>
@@ -97,7 +97,7 @@ export default function CookiePolicy() {
                 our website for advertising, analytics, and other purposes.
               </p>
 
-              <h2 className="text-xl font-semibold text-white mt-8 mb-4">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mt-8 mb-4">
                 4. Types of Cookies We Use
               </h2>
               <p>
@@ -135,7 +135,7 @@ export default function CookiePolicy() {
                 </li>
               </ul>
 
-              <h2 className="text-xl font-semibold text-white mt-8 mb-4">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mt-8 mb-4">
                 5. How Can You Control Cookies?
               </h2>
               <p>
@@ -154,7 +154,7 @@ export default function CookiePolicy() {
                 menu for more information.
               </p>
 
-              <h2 className="text-xl font-semibold text-white mt-8 mb-4">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mt-8 mb-4">
                 6. How Often Will We Update This Cookie Policy?
               </h2>
               <p>
@@ -169,7 +169,7 @@ export default function CookiePolicy() {
                 last updated.
               </p>
 
-              <h2 className="text-xl font-semibold text-white mt-8 mb-4">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mt-8 mb-4">
                 7. Where Can You Get Further Information?
               </h2>
               <p>
