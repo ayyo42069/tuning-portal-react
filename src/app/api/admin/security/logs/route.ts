@@ -111,10 +111,10 @@ export async function GET(request: NextRequest) {
     );
 
     // Get security logs
-    const logs = await getSecurityLogs(queryOptions);
+    const { logs, total } = await getSecurityLogs(queryOptions);
 
-    // Return the logs
-    return NextResponse.json({ logs });
+    // Return the logs and total count
+    return NextResponse.json({ logs, total });
   } catch (error) {
     console.error("Error fetching security logs:", error);
     return NextResponse.json(
