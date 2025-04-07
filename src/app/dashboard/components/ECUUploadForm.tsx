@@ -284,10 +284,10 @@ export default function ECUUploadForm() {
         </div>
       )}
 
-      <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-white/20 dark:border-gray-700/30 mb-6 relative overflow-hidden">
+      <div className="bg-blue-50 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-blue-200 dark:border-gray-700/30 mb-6 relative overflow-hidden">
         {/* Background glow effect */}
         <div className="absolute -right-10 -top-10 w-20 h-20 bg-blue-500/20 rounded-full blur-2xl"></div>
-        <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
+        <label className="block text-md font-medium text-gray-900 dark:text-gray-200 mb-2">
           <div className="flex items-center">
             <Upload className="w-5 h-5 mr-2 text-blue-600" />
             ECU File Upload
@@ -296,12 +296,12 @@ export default function ECUUploadForm() {
             </CustomTooltip>
           </div>
         </label>
-        <div className="mt-2 bg-gray-50/30 dark:bg-gray-700/30 p-4 rounded-md backdrop-blur-sm relative z-10">
+        <div className="mt-2 bg-white dark:bg-gray-700/30 p-4 rounded-md backdrop-blur-sm relative z-10 border border-gray-200 dark:border-transparent">
           <input
             type="file"
             accept=".bin"
             onChange={handleFileChange}
-            className="mt-1 block w-full text-sm text-gray-500
+            className="mt-1 block w-full text-sm text-gray-600
               file:mr-4 file:py-2 file:px-3 sm:file:py-3 sm:file:px-4
               file:rounded-md file:border-0
               file:text-sm file:font-semibold
@@ -319,10 +319,10 @@ export default function ECUUploadForm() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6 relative z-10">
-        <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-white/20 dark:border-gray-700/30 relative overflow-hidden">
+        <div className="bg-blue-50 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-blue-200 dark:border-gray-700/30 relative overflow-hidden">
           {/* Background glow effect */}
           <div className="absolute -right-10 -top-10 w-20 h-20 bg-indigo-500/10 rounded-full blur-2xl"></div>
-          <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
+          <label className="block text-md font-medium text-gray-900 dark:text-gray-200 mb-2">
             <div className="flex items-center">
               <Car className="w-5 h-5 mr-2 text-indigo-600" />
               Manufacturer
@@ -342,10 +342,10 @@ export default function ECUUploadForm() {
           </select>
         </div>
 
-        <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-white/20 dark:border-gray-700/30 relative overflow-hidden">
+        <div className="bg-blue-50 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-blue-200 dark:border-gray-700/30 relative overflow-hidden">
           {/* Background glow effect */}
           <div className="absolute -right-10 -top-10 w-20 h-20 bg-indigo-500/10 rounded-full blur-2xl"></div>
-          <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
+          <label className="block text-md font-medium text-gray-900 dark:text-gray-200 mb-2">
             <div className="flex items-center">
               <CarFront className="w-5 h-5 mr-2 text-indigo-600" />
               Model
@@ -366,10 +366,10 @@ export default function ECUUploadForm() {
           </select>
         </div>
 
-        <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-white/20 dark:border-gray-700/30 relative overflow-hidden">
+        <div className="bg-blue-50 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-blue-200 dark:border-gray-700/30 relative overflow-hidden">
           {/* Background glow effect */}
           <div className="absolute -right-10 -top-10 w-20 h-20 bg-indigo-500/10 rounded-full blur-2xl"></div>
-          <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
+          <label className="block text-md font-medium text-gray-900 dark:text-gray-200 mb-2">
             <div className="flex items-center">
               <Calendar className="w-5 h-5 mr-2 text-indigo-600" />
               Production Year
@@ -386,10 +386,10 @@ export default function ECUUploadForm() {
         </div>
       </div>
 
-      <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-white/20 dark:border-gray-700/30 relative overflow-hidden">
+      <div className="bg-blue-50 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-blue-200 dark:border-gray-700/30 relative overflow-hidden">
         {/* Background glow effect */}
         <div className="absolute -left-10 -bottom-10 w-20 h-20 bg-indigo-500/20 rounded-full blur-2xl"></div>
-        <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
+        <label className="block text-md font-medium text-gray-900 dark:text-gray-200 mb-2">
           <div className="flex items-center">
             <Settings className="w-5 h-5 mr-2 text-indigo-600" />
             Tuning Options
@@ -398,11 +398,11 @@ export default function ECUUploadForm() {
             </CustomTooltip>
           </div>
         </label>
-        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-gray-50/30 dark:bg-gray-700/30 p-3 sm:p-4 rounded-md backdrop-blur-sm relative z-10">
+        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white dark:bg-gray-700/30 p-3 sm:p-4 rounded-md backdrop-blur-sm relative z-10 border border-gray-200 dark:border-transparent">
           {tuningOptions.map((option) => (
             <label
               key={option.id}
-              className="flex items-start p-2 sm:p-3 bg-white/20 dark:bg-gray-800/40 rounded-md border border-white/30 dark:border-gray-600/50 hover:border-blue-300/70 dark:hover:border-blue-500/70 transition-all duration-200 backdrop-blur-sm hover:bg-white/30 dark:hover:bg-gray-700/50"
+              className="flex items-start p-2 sm:p-3 bg-white dark:bg-gray-800/40 rounded-md border border-gray-300 dark:border-gray-600/50 hover:border-blue-400 dark:hover:border-blue-500/70 transition-all duration-200 backdrop-blur-sm hover:bg-blue-50 dark:hover:bg-gray-700/50"
             >
               <input
                 type="checkbox"
@@ -420,10 +420,10 @@ export default function ECUUploadForm() {
                 className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-0.5"
               />
               <div className="ml-3">
-                <span className="block text-sm font-medium text-gray-800 dark:text-white">
+                <span className="block text-sm font-medium text-gray-900 dark:text-white">
                   {option.name}
                 </span>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-gray-600 dark:text-gray-400">
                   {option.description}
                 </p>
                 <div className="mt-1 text-xs font-medium text-blue-600 dark:text-blue-400">
@@ -435,10 +435,10 @@ export default function ECUUploadForm() {
         </div>
       </div>
 
-      <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-white/20 dark:border-gray-700/30 relative overflow-hidden">
+      <div className="bg-blue-50 dark:bg-gray-800/20 backdrop-blur-md p-4 sm:p-5 rounded-lg shadow-md border border-blue-200 dark:border-gray-700/30 relative overflow-hidden">
         {/* Background glow effect */}
         <div className="absolute -left-10 -bottom-10 w-20 h-20 bg-indigo-500/20 rounded-full blur-2xl"></div>
-        <label className="block text-md font-medium text-gray-800 dark:text-gray-200 mb-2">
+        <label className="block text-md font-medium text-gray-900 dark:text-gray-200 mb-2">
           <div className="flex items-center">
             <MessageSquare className="w-5 h-5 mr-2 text-indigo-600" />
             Additional Notes

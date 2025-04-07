@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { FileText, Users, CreditCard, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface AdminStats {
@@ -107,7 +108,7 @@ export default function AdminDashboard() {
               ></div>
             </div>
             <div className="mt-4">
-              <a
+              <Link
                 href="/admin/tuning-requests"
                 className="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
               >
@@ -126,7 +127,7 @@ export default function AdminDashboard() {
                     d="M9 5l7 7-7 7"
                   />
                 </svg>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -153,7 +154,7 @@ export default function AdminDashboard() {
               ></div>
             </div>
             <div className="mt-4">
-              <a
+              <Link
                 href="/admin/users"
                 className="inline-flex items-center text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 transition-colors"
               >
@@ -172,7 +173,7 @@ export default function AdminDashboard() {
                     d="M9 5l7 7-7 7"
                   />
                 </svg>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -201,7 +202,7 @@ export default function AdminDashboard() {
               ></div>
             </div>
             <div className="mt-4">
-              <a
+              <Link
                 href="/admin/credits"
                 className="inline-flex items-center text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition-colors"
               >
@@ -220,7 +221,7 @@ export default function AdminDashboard() {
                     d="M9 5l7 7-7 7"
                   />
                 </svg>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -236,7 +237,7 @@ export default function AdminDashboard() {
               Quick Actions
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <a
+              <Link
                 href="/admin/tuning-requests"
                 className="flex items-center p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors group"
               >
@@ -251,8 +252,8 @@ export default function AdminDashboard() {
                     Review pending tunes
                   </p>
                 </div>
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/admin/users"
                 className="flex items-center p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors group"
               >
@@ -267,8 +268,8 @@ export default function AdminDashboard() {
                     Manage user accounts
                   </p>
                 </div>
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/admin/credits"
                 className="flex items-center p-3 rounded-lg bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors group"
               >
@@ -283,8 +284,8 @@ export default function AdminDashboard() {
                     Manage user credits
                   </p>
                 </div>
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/admin/security"
                 className="flex items-center p-3 rounded-lg bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors group"
               >
@@ -299,7 +300,7 @@ export default function AdminDashboard() {
                     Monitor system security
                   </p>
                 </div>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
