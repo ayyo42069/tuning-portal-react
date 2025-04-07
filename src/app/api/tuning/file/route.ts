@@ -72,7 +72,7 @@ export async function GET(
         ef.updated_at,
         ef.message as admin_message,
         COALESCE(ef.priority, 0) as priority,
-        0 as credits_used
+        (SELECT SUM(to2.credit_cost) FROM ecu_file_tuning_options efto JOIN tuning_options to2 ON efto.tuning_option_id = to2.id WHERE efto.ecu_file_id = ef.id) as credits_used
       FROM ecu_files ef
       JOIN manufacturers m ON ef.manufacturer_id = m.id
       JOIN vehicle_models vm ON ef.model_id = vm.id
