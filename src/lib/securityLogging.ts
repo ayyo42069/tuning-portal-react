@@ -271,65 +271,91 @@ export async function resolveSecurityAlert(
 /**
  * Get security logs with filtering options
  * @param options Query options for filtering logs
- * @returns Array of security logs
+ * @returns Object containing logs array and total count
  */
 export async function getSecurityLogs(
   options: SecurityLogQueryOptions = {}
-): Promise<SecurityLog[]> {
+): Promise<{ logs: SecurityLog[]; total: number }> {
   try {
-    let query = `
-      SELECT se.*, u.username, u.email 
-      FROM security_events se 
-      LEFT JOIN users u ON se.user_id = u.id 
-      WHERE 1=1
-    `;
-
+    // Base WHERE clause for both count and data queries
+    let whereClause = "WHERE 1=1";
     const params: any[] = [];
+    const countParams: any[] = [];
 
     // Apply filters
     if (options.userId) {
-      query += " AND se.user_id = ?";
+      whereClause += " AND se.user_id = ?";
       params.push(options.userId);
+      countParams.push(options.userId);
     }
 
     if (options.eventType) {
-      query += " AND se.event_type = ?";
+      whereClause += " AND se.event_type = ?";
       params.push(options.eventType);
+      countParams.push(options.eventType);
     }
 
     if (options.severity) {
-      query += " AND se.severity = ?";
+      whereClause += " AND se.severity = ?";
       params.push(options.severity);
+      countParams.push(options.severity);
     }
 
     if (options.startDate) {
-      query += " AND se.created_at >= ?";
+      whereClause += " AND se.created_at >= ?";
       params.push(options.startDate);
+      countParams.push(options.startDate);
     }
 
     if (options.endDate) {
-      query += " AND se.created_at <= ?";
+      whereClause += " AND se.created_at <= ?";
       params.push(options.endDate);
+      countParams.push(options.endDate);
     }
 
+    // Get total count first
+    const countQuery = `
+      SELECT COUNT(*) as total 
+      FROM security_events se 
+      LEFT JOIN users u ON se.user_id = u.id 
+      ${whereClause}
+    `;
+    
+    const [countResult] = await executeQuery<any[]>(countQuery, countParams);
+    const total = countResult?.total || 0;
+
+    // If total is 0, return early
+    if (total === 0) {
+      return { logs: [], total: 0 };
+    }
+
+    // Get the actual data
+    let dataQuery = `
+      SELECT se.*, u.username, u.email 
+      FROM security_events se 
+      LEFT JOIN users u ON se.user_id = u.id 
+      ${whereClause}
+    `;
+
     // Order by most recent first
-    query += " ORDER BY se.created_at DESC";
+    dataQuery += " ORDER BY se.created_at DESC";
 
     // Apply limit and offset
     if (options.limit) {
-      query += " LIMIT ?";
+      dataQuery += " LIMIT ?";
       params.push(options.limit);
 
       if (options.offset) {
-        query += " OFFSET ?";
+        dataQuery += " OFFSET ?";
         params.push(options.offset);
       }
     }
 
-    return await executeQuery<SecurityLog[]>(query, params);
+    const logs = await executeQuery<SecurityLog[]>(dataQuery, params);
+    return { logs, total };
   } catch (error) {
     console.error("Failed to get security logs:", error);
-    return [];
+    return { logs: [], total: 0 };
   }
 }
 
