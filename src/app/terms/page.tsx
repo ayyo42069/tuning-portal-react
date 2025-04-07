@@ -32,7 +32,7 @@ export default function TermsOfService() {
         <div className="mb-8 flex items-center">
           <Link
             href="/"
-            className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+            className="flex items-center text-white hover:text-blue-200 transition-colors"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
