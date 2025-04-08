@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Check,
   Users,
+  Database,
 } from "lucide-react";
 import {
   SecurityEventType,
@@ -578,13 +579,40 @@ export default function SecurityDashboard() {
             </h2>
             <div className="mt-2 mb-4">
               <Link
-                href="/admin/security/direct"
-                className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
+                href="/admin/security/direct-db"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors flex items-center w-fit"
               >
                 <Shield className="w-4 h-4 mr-1" />
-                Try Direct API Version
+                Try Direct-DB API
               </Link>
             </div>
+            {error && (
+              <div className="p-4 mb-6 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-red-900/30 dark:text-red-400 flex flex-col">
+                <div className="flex items-center mb-2">
+                  <AlertTriangle className="w-5 h-5 mr-2" />
+                  <span className="font-medium">Error: {error}</span>
+                </div>
+                <div className="ml-7 mb-3">
+                  <p>
+                    There was an error fetching security logs. This may be due
+                    to a database query issue.
+                  </p>
+                  <p className="mt-1">
+                    Try using the Direct-DB API endpoint which uses a simplified
+                    query approach:
+                  </p>
+                </div>
+                <div className="ml-7">
+                  <Link
+                    href="/admin/security/direct-db"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors flex items-center w-fit"
+                  >
+                    <Database className="w-4 h-4 mr-1" />
+                    Try Direct-DB API Endpoint
+                  </Link>
+                </div>
+              </div>
+            )}
 
             {/* Filters */}
             <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 mb-6">
