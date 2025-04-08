@@ -189,8 +189,9 @@ export async function GET(request: NextRequest) {
         LIMIT ? OFFSET ?
       `;
 
-      // Add limit and offset to params
-      const dataParams = [...params, limit, offset];
+      // Maintain parameter array consistency
+      const dataParams =
+        params.length > 0 ? params.concat([limit, offset]) : [limit, offset];
 
       // Log the final query and parameters for debugging
       console.log(`Direct-DB API: Final query: ${dataQuery}`);
