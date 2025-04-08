@@ -157,7 +157,12 @@ export async function GET(request: NextRequest) {
 
     try {
       // Always pass params array even if empty
-      const countResults = await executeQuery(countQuery, params);
+      // Create a defensive copy of params to avoid any reference issues
+      const safeParams = Array.isArray(params) ? [...params] : [];
+      const countResults = await executeQuery(
+        countQuery,
+        safeParams.length > 0 ? safeParams : []
+      );
       const total =
         Array.isArray(countResults) &&
         countResults.length > 0 &&
@@ -189,13 +194,19 @@ export async function GET(request: NextRequest) {
       `;
 
       // Always use the params array and append limit/offset
-      const dataParams = [...params, limit, offset];
+      // Create a new array to avoid modifying the original params
+      const dataParams = Array.isArray(params)
+        ? [...params, limit, offset]
+        : [limit, offset];
 
       // Log the final query and parameters for debugging
       console.log(`Direct-DB API: Final query: ${dataQuery}`);
       console.log(`Direct-DB API: Final params:`, dataParams);
 
-      const logs = await executeQuery(dataQuery, dataParams);
+      // Ensure we're passing a valid array to executeQuery
+      // Create a defensive copy and handle empty arrays properly
+      const safeDataParams = Array.isArray(dataParams) ? [...dataParams] : [];
+      const logs = await executeQuery(dataQuery, safeDataParams.length > 0 ? safeDataParams : []);
 
       console.log(
         `Direct-DB API: Retrieved ${

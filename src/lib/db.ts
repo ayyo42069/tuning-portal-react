@@ -37,6 +37,8 @@ export async function executeQuery<T>(
   params: any[] = [],
   options: { cache?: boolean; cacheTTL?: number } = {}
 ): Promise<T> {
+  // Ensure params is always a valid array
+  const validParams = Array.isArray(params) ? params : [];
   const startTime = getPerformanceNow();
   const cacheKey = options.cache ? `${query}-${JSON.stringify(params)}` : "";
 
@@ -61,8 +63,9 @@ export async function executeQuery<T>(
       console.log(`Query params:`, params);
     }
 
-    // Ensure params is always an array, even if empty
-    const safeParams = Array.isArray(params) ? params : [];
+    // Use the validated params we created at the beginning of the function
+    // For MySQL prepared statements, we need to handle empty arrays properly
+    const safeParams = validParams.length > 0 ? validParams : [];
     const [results] = await connection.execute(query, safeParams);
 
     // Enhanced logging for security queries
@@ -139,7 +142,9 @@ export async function executeTransaction<T>(
       // Handle single query or multiple queries
       if (typeof queries === "string") {
         // Ensure params is always an array, even if empty
-        const safeParams = Array.isArray(params) ? params : [];
+        // For MySQL prepared statements, we need to handle empty arrays properly
+        const validParams = Array.isArray(params) ? params : [];
+        const safeParams = validParams.length > 0 ? validParams : [];
         [results] = await connection.query(queries, safeParams);
       } else {
         results = [];
