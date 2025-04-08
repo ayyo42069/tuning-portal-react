@@ -575,6 +575,15 @@ export default function SecurityDashboard() {
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Security Event Logs
             </h2>
+            <div className="mt-2 mb-4">
+              <a
+                href="/admin/security/direct"
+                className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
+              >
+                <Shield className="w-4 h-4 mr-1" />
+                Try Direct API Version
+              </a>
+            </div>
 
             {/* Filters */}
             <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 mb-6">
