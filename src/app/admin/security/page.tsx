@@ -125,8 +125,11 @@ export default function SecurityDashboard() {
       }
       const data = await response.json();
 
+      console.log("Security logs API response:", data);
+
       // Check if data.logs exists and is an array
       if (data.logs && Array.isArray(data.logs)) {
+        console.log(`Received ${data.logs.length} security logs from API`);
         setLogs(data.logs);
         setTotalLogs(data.total || data.logs.length); // Use total if provided, otherwise use length
       } else {

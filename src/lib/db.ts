@@ -54,7 +54,29 @@ export async function executeQuery<T>(
   let connection;
   try {
     connection = await pool.getConnection();
+
+    // Log security-related queries for debugging
+    if (query.includes("security_events")) {
+      console.log(`Executing security query: ${query.substring(0, 100)}...`);
+      console.log(`Query params:`, params);
+    }
+
     const [results] = await connection.execute(query, params);
+
+    // Enhanced logging for security queries
+    if (query.includes("security_events")) {
+      const resultCount = Array.isArray(results) ? results.length : "unknown";
+      console.log(`Security query returned ${resultCount} results`);
+
+      // If it's a COUNT query, log the actual count
+      if (
+        query.includes("COUNT(*)") &&
+        Array.isArray(results) &&
+        results.length > 0
+      ) {
+        console.log(`Count result:`, results[0]);
+      }
+    }
 
     // Store in cache if caching is enabled
     if (options.cache) {
@@ -72,6 +94,10 @@ export async function executeQuery<T>(
     return results as T;
   } catch (error) {
     console.error("Database query error:", error);
+    if (query.includes("security_events")) {
+      console.error(`Failed security query: ${query.substring(0, 100)}...`);
+      console.error(`Query params:`, params);
+    }
     throw error;
   } finally {
     if (connection) connection.release();

@@ -113,6 +113,10 @@ export async function GET(request: NextRequest) {
     // Get security logs
     const { logs, total } = await getSecurityLogs(queryOptions);
 
+    console.log(
+      `API: Retrieved ${logs.length} security logs, total count: ${total}`
+    );
+
     // Return the logs and total count
     return NextResponse.json({ logs, total });
   } catch (error) {

@@ -321,13 +321,19 @@ export async function getSecurityLogs(
       ${whereClause}
     `;
 
-    const [countResult] = await executeQuery<any[]>(countQuery, countParams);
+    const countResults = await executeQuery<any[]>(countQuery, countParams);
+    // Ensure we have a valid count result
+    const countResult =
+      Array.isArray(countResults) && countResults.length > 0
+        ? countResults[0]
+        : { total: 0 };
     const total = countResult?.total || 0;
 
-    // If total is 0, return early
-    if (total === 0) {
-      return { logs: [], total: 0 };
-    }
+    // Log the count for debugging
+    console.log(`Security logs count: ${total}`);
+
+    // Don't return early even if total is 0, still attempt to query
+    // This helps diagnose if there's a counting issue vs. a data retrieval issue
 
     // Get the actual data
     let dataQuery = `
