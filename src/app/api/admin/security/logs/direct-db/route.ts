@@ -18,9 +18,11 @@ export async function GET(request: NextRequest) {
     const authResult = await authenticateUser(request);
 
     if (!authResult.success) {
+      // Return a consistent 401 status for authentication failures
+      // instead of using the status from authResult which might be 200
       return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
+        { error: authResult.error || "Not authenticated" },
+        { status: 401 }
       );
     }
 
@@ -55,6 +57,7 @@ export async function GET(request: NextRequest) {
       if (!isNaN(userId) && userId > 0) {
         whereClause += " AND se.user_id = ?";
         params.push(userId);
+        console.log(`Direct-DB API: Added userId filter: ${userId}`);
       }
     }
 
@@ -69,6 +72,7 @@ export async function GET(request: NextRequest) {
       ) {
         whereClause += " AND se.event_type = ?";
         params.push(eventType);
+        console.log(`Direct-DB API: Added eventType filter: ${eventType}`);
       }
     }
 
@@ -83,27 +87,50 @@ export async function GET(request: NextRequest) {
       ) {
         whereClause += " AND se.severity = ?";
         params.push(severity);
+        console.log(`Direct-DB API: Added severity filter: ${severity}`);
       }
     }
 
-    // Handle date filters with explicit date formatting
+    // Handle date filters with simplified string handling
     if (searchParams.has("startDate")) {
       const startDateStr = searchParams.get("startDate");
-      const startDate = new Date(startDateStr || "");
-      if (!isNaN(startDate.getTime())) {
-        whereClause += " AND se.created_at >= ?";
-        // Format date as MySQL-compatible string
-        params.push(startDate.toISOString().slice(0, 19).replace("T", " "));
+      if (startDateStr && startDateStr.trim() !== "") {
+        try {
+          // Add time to ensure full day coverage
+          const startDateWithTime = `${startDateStr} 00:00:00`;
+          whereClause += " AND se.created_at >= ?";
+          params.push(startDateWithTime);
+          console.log(
+            `Direct-DB API: Added startDate filter: ${startDateWithTime}`
+          );
+        } catch (e) {
+          console.error(
+            "Direct-DB API: Invalid startDate format:",
+            startDateStr,
+            e
+          );
+        }
       }
     }
 
     if (searchParams.has("endDate")) {
       const endDateStr = searchParams.get("endDate");
-      const endDate = new Date(endDateStr || "");
-      if (!isNaN(endDate.getTime())) {
-        whereClause += " AND se.created_at <= ?";
-        // Format date as MySQL-compatible string
-        params.push(endDate.toISOString().slice(0, 19).replace("T", " "));
+      if (endDateStr && endDateStr.trim() !== "") {
+        try {
+          // Add time to ensure full day coverage
+          const endDateWithTime = `${endDateStr} 23:59:59`;
+          whereClause += " AND se.created_at <= ?";
+          params.push(endDateWithTime);
+          console.log(
+            `Direct-DB API: Added endDate filter: ${endDateWithTime}`
+          );
+        } catch (e) {
+          console.error(
+            "Direct-DB API: Invalid endDate format:",
+            endDateStr,
+            e
+          );
+        }
       }
     }
 
@@ -159,6 +186,10 @@ export async function GET(request: NextRequest) {
 
       // Add limit and offset to params
       const dataParams = [...params, limit, offset];
+
+      // Log the final query and parameters for debugging
+      console.log(`Direct-DB API: Final query: ${dataQuery}`);
+      console.log(`Direct-DB API: Final params:`, dataParams);
 
       const logs = await executeQuery(dataQuery, dataParams);
 
