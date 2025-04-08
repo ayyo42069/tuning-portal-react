@@ -147,9 +147,11 @@ export async function GET(request: NextRequest) {
     console.log(`Direct-DB API: Params:`, params);
 
     // Get total count with a simpler query
+    // Include the LEFT JOIN in the count query to match the data query structure
     const countQuery = `
       SELECT COUNT(*) as total 
       FROM security_events se 
+      LEFT JOIN users u ON se.user_id = u.id
       ${whereClause}
     `;
 
