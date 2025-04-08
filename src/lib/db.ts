@@ -76,6 +76,18 @@ export async function executeQuery<T>(
       ) {
         console.log(`Count result:`, results[0]);
       }
+
+      // Debug log the actual results for security queries
+      if (Array.isArray(results)) {
+        console.log(
+          `Security query results sample:`,
+          results.length > 0
+            ? JSON.stringify(results[0]).substring(0, 200) + "..."
+            : "empty array"
+        );
+      } else {
+        console.log(`Security query results (non-array):`, typeof results);
+      }
     }
 
     // Store in cache if caching is enabled

@@ -331,13 +331,15 @@ export async function getSecurityLogs(
 
     // Log the count for debugging
     console.log(`Security logs count: ${total}`);
+    console.log(`Count query: ${countQuery}`);
+    console.log(`Count params:`, countParams);
 
     // Don't return early even if total is 0, still attempt to query
     // This helps diagnose if there's a counting issue vs. a data retrieval issue
 
     // Get the actual data
     let dataQuery = `
-      SELECT se.*, u.username, u.email 
+      SELECT se.id, se.user_id, se.event_type, se.severity, se.ip_address, se.user_agent, se.details, se.created_at, u.username, u.email 
       FROM security_events se 
       LEFT JOIN users u ON se.user_id = u.id 
       ${whereClause}
@@ -357,7 +359,19 @@ export async function getSecurityLogs(
       }
     }
 
+    // Log the query and parameters for debugging
+    console.log(`Security logs data query: ${dataQuery}`);
+    console.log(`Security logs params:`, params);
+
     const logs = await executeQuery<SecurityLog[]>(dataQuery, params);
+
+    // Log the raw query results
+    console.log(
+      `Raw security logs result:`,
+      logs
+        ? `Found ${Array.isArray(logs) ? logs.length : "non-array"} results`
+        : "null result"
+    );
 
     // Ensure logs is always an array, even if the query returns null or undefined
     const safetyLogs = Array.isArray(logs) ? logs : [];
@@ -374,6 +388,11 @@ export async function getSecurityLogs(
       }
       return log;
     });
+
+    // Log the processed logs
+    console.log(
+      `Processed security logs: returning ${processedLogs.length} logs`
+    );
 
     return { logs: processedLogs, total };
   } catch (error) {

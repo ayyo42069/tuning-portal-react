@@ -117,6 +117,19 @@ export async function GET(request: NextRequest) {
       `API: Retrieved ${logs.length} security logs, total count: ${total}`
     );
 
+    // Debug log the actual logs being returned
+    if (logs.length === 0) {
+      console.log(
+        "No logs found in API response despite database having records"
+      );
+      console.log("Query options:", JSON.stringify(queryOptions));
+    } else {
+      console.log(
+        "First log sample:",
+        JSON.stringify(logs[0]).substring(0, 200)
+      );
+    }
+
     // Return the logs and total count
     return NextResponse.json({ logs, total });
   } catch (error) {
