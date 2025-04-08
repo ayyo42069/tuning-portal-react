@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     // Parse query parameters
     const searchParams = request.nextUrl.searchParams;
-    const limit = parseInt(searchParams.get("limit") || "50", 10);
+    const limit = parseInt(searchParams.get("limit") || "1000", 10);
     const offset = parseInt(searchParams.get("offset") || "0", 10);
 
     // Build query filters
@@ -156,9 +156,8 @@ export async function GET(request: NextRequest) {
     `;
 
     try {
-      // Handle empty params case by passing undefined instead of empty array
-      const queryParams = params.length > 0 ? params : undefined;
-      const countResults = await executeQuery(countQuery, queryParams);
+      // Always pass params array, even if empty
+      const countResults = await executeQuery(countQuery, params);
       const total =
         Array.isArray(countResults) &&
         countResults.length > 0 &&
@@ -189,9 +188,8 @@ export async function GET(request: NextRequest) {
         LIMIT ? OFFSET ?
       `;
 
-      // Maintain parameter array consistency
-      const dataParams =
-        params.length > 0 ? params.concat([limit, offset]) : [limit, offset];
+      // Always use the params array and append limit/offset
+      const dataParams = [...params, limit, offset];
 
       // Log the final query and parameters for debugging
       console.log(`Direct-DB API: Final query: ${dataQuery}`);
