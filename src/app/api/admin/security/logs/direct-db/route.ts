@@ -156,8 +156,11 @@ export async function GET(request: NextRequest) {
     `;
 
     try {
-      // Always pass params array, even if empty
-      const countResults = await executeQuery(countQuery, params);
+      // Only pass params array if it has values
+      const countResults =
+        params.length > 0
+          ? await executeQuery(countQuery, params)
+          : await executeQuery(countQuery);
       const total =
         Array.isArray(countResults) &&
         countResults.length > 0 &&
