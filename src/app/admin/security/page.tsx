@@ -16,6 +16,7 @@ import {
   SecurityEventType,
   SecurityEventSeverity,
 } from "@/lib/securityLogging";
+import Link from "next/link";
 
 // Define interfaces for the component
 interface SecurityLog {
@@ -576,13 +577,13 @@ export default function SecurityDashboard() {
               Security Event Logs
             </h2>
             <div className="mt-2 mb-4">
-              <a
+              <Link
                 href="/admin/security/direct"
                 className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
               >
                 <Shield className="w-4 h-4 mr-1" />
                 Try Direct API Version
-              </a>
+              </Link>
             </div>
 
             {/* Filters */}
