@@ -47,15 +47,15 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get("offset") || "0", 10);
 
     // Build query filters
-    let whereClause = "WHERE 1=1";
-    const params: any[] = [];
+    let whereClause = "";
+    const queryParams = [];
 
     // Handle userId filter with explicit type conversion
     if (searchParams.has("userId")) {
       const userId = parseInt(searchParams.get("userId") || "0", 10);
       if (!isNaN(userId) && userId > 0) {
-        whereClause += " AND se.user_id = ?";
-        params.push(userId);
+        whereClause += whereClause ? " AND se.user_id = ?" : "se.user_id = ?";
+        queryParams.push(userId);
         console.log(`Direct-DB API: Added userId filter: ${userId}`);
       }
     }
@@ -69,8 +69,10 @@ export async function GET(request: NextRequest) {
           eventType as SecurityEventType
         )
       ) {
-        whereClause += " AND se.event_type = ?";
-        params.push(eventType);
+        whereClause += whereClause
+          ? " AND se.event_type = ?"
+          : "se.event_type = ?";
+        queryParams.push(eventType);
         console.log(`Direct-DB API: Added eventType filter: ${eventType}`);
       }
     }
@@ -84,8 +86,8 @@ export async function GET(request: NextRequest) {
           severity as SecurityEventSeverity
         )
       ) {
-        whereClause += " AND se.severity = ?";
-        params.push(severity);
+        whereClause += whereClause ? " AND se.severity = ?" : "se.severity = ?";
+        queryParams.push(severity);
         console.log(`Direct-DB API: Added severity filter: ${severity}`);
       }
     }
@@ -97,8 +99,10 @@ export async function GET(request: NextRequest) {
         try {
           // Add time to ensure full day coverage
           const startDateWithTime = `${startDateStr} 00:00:00`;
-          whereClause += " AND se.created_at >= ?";
-          params.push(startDateWithTime);
+          whereClause += whereClause
+            ? " AND se.created_at >= ?"
+            : "se.created_at >= ?";
+          queryParams.push(startDateWithTime);
           console.log(
             `Direct-DB API: Added startDate filter: ${startDateWithTime}`
           );
@@ -118,8 +122,10 @@ export async function GET(request: NextRequest) {
         try {
           // Add time to ensure full day coverage
           const endDateWithTime = `${endDateStr} 23:59:59`;
-          whereClause += " AND se.created_at <= ?";
-          params.push(endDateWithTime);
+          whereClause += whereClause
+            ? " AND se.created_at <= ?"
+            : "se.created_at <= ?";
+          queryParams.push(endDateWithTime);
           console.log(
             `Direct-DB API: Added endDate filter: ${endDateWithTime}`
           );
@@ -141,28 +147,30 @@ export async function GET(request: NextRequest) {
       true
     );
 
+    // Prepare the WHERE clause for the SQL query
+    const finalWhereClause = whereClause ? `WHERE ${whereClause}` : "";
+
     // Log query details for debugging
     console.log("Direct-DB API: Executing database query for security logs");
-    console.log(`Direct-DB API: Where clause: ${whereClause}`);
-    console.log(`Direct-DB API: Params:`, params);
-
-    // Get total count with a simpler query
-    // Include the LEFT JOIN in the count query to match the data query structure
-    const countQuery = `
-      SELECT COUNT(*) as total 
-      FROM security_events se 
-      LEFT JOIN users u ON se.user_id = u.id
-      ${whereClause}
-    `;
+    console.log(`Direct-DB API: Where clause: ${finalWhereClause}`);
+    console.log(`Direct-DB API: Params:`, queryParams);
 
     try {
-      // Always pass params array even if empty
-      // Create a defensive copy of params to avoid any reference issues
-      const safeParams = Array.isArray(params) ? [...params] : [];
-      const countResults = await executeQuery(
-        countQuery,
-        safeParams.length > 0 ? safeParams : []
-      );
+      // Get total count
+      const countQuery = `
+        SELECT COUNT(*) as total 
+        FROM security_events se 
+        LEFT JOIN users u ON se.user_id = u.id
+        ${finalWhereClause}
+      `;
+
+      console.log(`Direct-DB API: Count query: ${countQuery}`);
+      console.log(`Direct-DB API: Count params:`, queryParams);
+
+      // Execute count query
+      const countResults = await executeQuery(countQuery, queryParams);
+
+      // Extract total count with proper type checking
       const total =
         Array.isArray(countResults) &&
         countResults.length > 0 &&
@@ -172,8 +180,7 @@ export async function GET(request: NextRequest) {
 
       console.log(`Direct-DB API: Total security logs count: ${total}`);
 
-      // Get the actual data with a simpler query
-      // Use explicit column selection instead of * to avoid potential issues
+      // Prepare data query with explicit column selection
       const dataQuery = `
         SELECT 
           se.id, 
@@ -188,25 +195,19 @@ export async function GET(request: NextRequest) {
           u.email 
         FROM security_events se 
         LEFT JOIN users u ON se.user_id = u.id 
-        ${whereClause}
+        ${finalWhereClause}
         ORDER BY se.created_at DESC 
         LIMIT ? OFFSET ?
       `;
 
-      // Always use the params array and append limit/offset
-      // Create a new array to avoid modifying the original params
-      const dataParams = Array.isArray(params)
-        ? [...params, limit, offset]
-        : [limit, offset];
+      // Create a new array with all parameters including pagination
+      const dataParams = [...queryParams, limit, offset];
 
-      // Log the final query and parameters for debugging
-      console.log(`Direct-DB API: Final query: ${dataQuery}`);
-      console.log(`Direct-DB API: Final params:`, dataParams);
+      console.log(`Direct-DB API: Data query: ${dataQuery}`);
+      console.log(`Direct-DB API: Data params:`, dataParams);
 
-      // Ensure we're passing a valid array to executeQuery
-      // Create a defensive copy and handle empty arrays properly
-      const safeDataParams = Array.isArray(dataParams) ? [...dataParams] : [];
-      const logs = await executeQuery(dataQuery, safeDataParams.length > 0 ? safeDataParams : []);
+      // Execute data query
+      const logs = await executeQuery(dataQuery, dataParams);
 
       console.log(
         `Direct-DB API: Retrieved ${
@@ -252,8 +253,6 @@ export async function GET(request: NextRequest) {
         {
           error: "Database query error",
           details: dbError instanceof Error ? dbError.message : String(dbError),
-          query: countQuery,
-          params: params,
           direct_db: true,
         },
         { status: 500 }
