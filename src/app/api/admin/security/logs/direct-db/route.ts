@@ -156,7 +156,9 @@ export async function GET(request: NextRequest) {
     `;
 
     try {
-      const countResults = await executeQuery(countQuery, params);
+      // Handle empty params case by passing undefined instead of empty array
+      const queryParams = params.length > 0 ? params : undefined;
+      const countResults = await executeQuery(countQuery, queryParams);
       const total =
         Array.isArray(countResults) && countResults.length > 0
           ? countResults[0].total
