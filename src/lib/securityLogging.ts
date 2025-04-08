@@ -320,7 +320,7 @@ export async function getSecurityLogs(
       LEFT JOIN users u ON se.user_id = u.id 
       ${whereClause}
     `;
-    
+
     const [countResult] = await executeQuery<any[]>(countQuery, countParams);
     const total = countResult?.total || 0;
 
@@ -352,7 +352,24 @@ export async function getSecurityLogs(
     }
 
     const logs = await executeQuery<SecurityLog[]>(dataQuery, params);
-    return { logs, total };
+
+    // Ensure logs is always an array, even if the query returns null or undefined
+    const safetyLogs = Array.isArray(logs) ? logs : [];
+
+    // Convert any JSON strings in details field to objects
+    const processedLogs = safetyLogs.map((log) => {
+      if (log.details && typeof log.details === "string") {
+        try {
+          log.details = JSON.parse(log.details);
+        } catch (e) {
+          // If parsing fails, keep the original string
+          console.error("Failed to parse log details JSON:", e);
+        }
+      }
+      return log;
+    });
+
+    return { logs: processedLogs, total };
   } catch (error) {
     console.error("Failed to get security logs:", error);
     return { logs: [], total: 0 };
@@ -366,7 +383,7 @@ export async function getSecurityLogs(
  */
 export async function getUnresolvedAlerts(limit: number = 100): Promise<any[]> {
   try {
-    return await executeQuery(
+    const alerts = await executeQuery(
       `SELECT sa.*, se.event_type, se.ip_address, u.username, u.email 
        FROM security_alerts sa 
        JOIN security_events se ON sa.event_id = se.id 
@@ -376,6 +393,28 @@ export async function getUnresolvedAlerts(limit: number = 100): Promise<any[]> {
        LIMIT ?`,
       [limit]
     );
+
+    // Ensure alerts is always an array, even if the query returns null or undefined
+    const safetyAlerts = Array.isArray(alerts) ? alerts : [];
+
+    // Process any JSON fields if needed
+    const processedAlerts = safetyAlerts.map((alert) => {
+      // Process message field if it's a JSON string
+      if (alert.message && typeof alert.message === "string") {
+        try {
+          // Check if it's a JSON string before parsing
+          if (alert.message.startsWith("{") || alert.message.startsWith("[")) {
+            alert.message = JSON.parse(alert.message);
+          }
+        } catch (e) {
+          // If parsing fails, keep the original string
+          console.error("Failed to parse alert message JSON:", e);
+        }
+      }
+      return alert;
+    });
+
+    return processedAlerts;
   } catch (error) {
     console.error("Failed to get unresolved alerts:", error);
     return [];
@@ -425,56 +464,79 @@ export async function getSecurityLogStats(
   days: number = 30
 ): Promise<SecurityLogStats> {
   try {
-    // Get total events in the period
+    // Get total events in the specified time period
     const [totalResult] = await executeQuery<any[]>(
-      "SELECT COUNT(*) as total FROM security_events WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)",
+      `SELECT COUNT(*) as total FROM security_events WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)`,
       [days]
     );
+    const totalEvents = totalResult?.total || 0;
 
     // Get events by type
-    const eventsByType = await executeQuery<any[]>(
-      "SELECT event_type, COUNT(*) as count FROM security_events WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY) GROUP BY event_type",
+    const eventsByTypeResult = await executeQuery<any[]>(
+      `SELECT event_type, COUNT(*) as count 
+       FROM security_events 
+       WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY) 
+       GROUP BY event_type`,
       [days]
     );
+    const eventsByType: Record<string, number> = {};
+    // Ensure eventsByTypeResult is an array
+    const safeEventsByTypeResult = Array.isArray(eventsByTypeResult)
+      ? eventsByTypeResult
+      : [];
+    safeEventsByTypeResult.forEach((row) => {
+      eventsByType[row.event_type] = row.count;
+    });
 
     // Get events by severity
-    const eventsBySeverity = await executeQuery<any[]>(
-      "SELECT severity, COUNT(*) as count FROM security_events WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY) GROUP BY severity",
+    const eventsBySeverityResult = await executeQuery<any[]>(
+      `SELECT severity, COUNT(*) as count 
+       FROM security_events 
+       WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY) 
+       GROUP BY severity`,
       [days]
     );
+    const eventsBySeverity: Record<string, number> = {};
+    // Ensure eventsBySeverityResult is an array
+    const safeEventsBySeverityResult = Array.isArray(eventsBySeverityResult)
+      ? eventsBySeverityResult
+      : [];
+    safeEventsBySeverityResult.forEach((row) => {
+      eventsBySeverity[row.severity] = row.count;
+    });
 
     // Get recent failed logins (last 24 hours)
     const [failedLoginsResult] = await executeQuery<any[]>(
-      "SELECT COUNT(*) as count FROM security_events WHERE event_type = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 1 DAY)",
+      `SELECT COUNT(*) as count 
+       FROM security_events 
+       WHERE event_type = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 1 DAY)`,
       [SecurityEventType.LOGIN_FAILURE]
     );
+    const recentFailedLogins = failedLoginsResult?.count || 0;
 
     // Get recent suspicious activities (last 24 hours)
     const [suspiciousActivitiesResult] = await executeQuery<any[]>(
-      "SELECT COUNT(*) as count FROM security_events WHERE severity IN (?, ?) AND created_at >= DATE_SUB(NOW(), INTERVAL 1 DAY)",
-      [SecurityEventSeverity.ERROR, SecurityEventSeverity.CRITICAL]
+      `SELECT COUNT(*) as count 
+       FROM security_events 
+       WHERE (event_type = ? OR event_type = ? OR severity = ?) 
+       AND created_at >= DATE_SUB(NOW(), INTERVAL 1 DAY)`,
+      [
+        SecurityEventType.SUSPICIOUS_ACTIVITY,
+        SecurityEventType.GEOGRAPHIC_ANOMALY,
+        SecurityEventSeverity.CRITICAL,
+      ]
     );
-
-    // Format the results
-    const eventsByTypeMap: Record<string, number> = {};
-    eventsByType.forEach((item) => {
-      eventsByTypeMap[item.event_type] = item.count;
-    });
-
-    const eventsBySeverityMap: Record<string, number> = {};
-    eventsBySeverity.forEach((item) => {
-      eventsBySeverityMap[item.severity] = item.count;
-    });
+    const recentSuspiciousActivities = suspiciousActivitiesResult?.count || 0;
 
     return {
-      totalEvents: totalResult.total || 0,
-      eventsByType: eventsByTypeMap,
-      eventsBySeverity: eventsBySeverityMap,
-      recentFailedLogins: failedLoginsResult.count || 0,
-      recentSuspiciousActivities: suspiciousActivitiesResult.count || 0,
+      totalEvents,
+      eventsByType,
+      eventsBySeverity,
+      recentFailedLogins,
+      recentSuspiciousActivities,
     };
   } catch (error) {
-    console.error("Failed to get security log stats:", error);
+    console.error("Failed to get security log statistics:", error);
     return {
       totalEvents: 0,
       eventsByType: {},
