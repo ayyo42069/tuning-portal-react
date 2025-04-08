@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
     const sessionCookieHeader = serialize("session_id", sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax", // Changed from strict to lax to ensure cookie is sent with requests
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: "/",
     });

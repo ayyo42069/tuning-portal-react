@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
     const sessionCookieHeader = serialize("session_id", sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax", // Changed from strict to lax to match auth_token cookie settings
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: "/",
     });

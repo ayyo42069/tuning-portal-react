@@ -90,7 +90,7 @@ export function setAuthCookie(token: string): string {
   return serialize("auth_token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax", // Changed from strict to lax to allow cross-origin requests
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: "/",
   });

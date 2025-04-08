@@ -18,11 +18,10 @@ export async function GET(request: NextRequest) {
     const authResult = await authenticateUser(request);
 
     if (!authResult.success) {
-      // Return a consistent 401 status for authentication failures
-      // instead of using the status from authResult which might be 200
+      // Use the status from authResult to maintain consistency with other routes
       return NextResponse.json(
         { error: authResult.error || "Not authenticated" },
-        { status: 401 }
+        { status: authResult.status || 401 }
       );
     }
 
