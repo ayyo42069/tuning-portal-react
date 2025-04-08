@@ -160,8 +160,10 @@ export async function GET(request: NextRequest) {
       const queryParams = params.length > 0 ? params : undefined;
       const countResults = await executeQuery(countQuery, queryParams);
       const total =
-        Array.isArray(countResults) && countResults.length > 0
-          ? countResults[0].total
+        Array.isArray(countResults) &&
+        countResults.length > 0 &&
+        countResults[0].total !== undefined
+          ? Number(countResults[0].total)
           : 0;
 
       console.log(`Direct-DB API: Total security logs count: ${total}`);
