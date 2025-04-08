@@ -61,7 +61,9 @@ export async function executeQuery<T>(
       console.log(`Query params:`, params);
     }
 
-    const [results] = await connection.execute(query, params);
+    // Ensure params is always an array, even if empty
+    const safeParams = Array.isArray(params) ? params : [];
+    const [results] = await connection.execute(query, safeParams);
 
     // Enhanced logging for security queries
     if (query.includes("security_events")) {
@@ -136,14 +138,15 @@ export async function executeTransaction<T>(
 
       // Handle single query or multiple queries
       if (typeof queries === "string") {
-        [results] = await connection.query(queries, params);
+        // Ensure params is always an array, even if empty
+        const safeParams = Array.isArray(params) ? params : [];
+        [results] = await connection.query(queries, safeParams);
       } else {
         results = [];
         for (let i = 0; i < queries.length; i++) {
-          const [result] = await connection.execute(
-            queries[i],
-            params[i] || []
-          );
+          // Ensure params[i] is always an array, even if undefined
+          const safeParams = Array.isArray(params[i]) ? params[i] : [];
+          const [result] = await connection.execute(queries[i], safeParams);
           results.push(result);
         }
       }
