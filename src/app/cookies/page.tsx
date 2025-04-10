@@ -178,6 +178,16 @@ export default function CookiePolicy() {
                 our contact form on the website.
               </p>
             </div>
+
+            {/* Back to Top Button */}
+            <div className="mt-8 text-center">
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                Back to Top
+              </button>
+            </div>
           </div>
         </div>
       </div>

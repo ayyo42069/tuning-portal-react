@@ -277,6 +277,16 @@ export default function TermsOfService() {
                 at support@tuning-portal.eu.
               </p>
             </div>
+
+            {/* Back to Top Button */}
+            <div className="mt-8 text-center">
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                Back to Top
+              </button>
+            </div>
           </div>
         </div>
 
