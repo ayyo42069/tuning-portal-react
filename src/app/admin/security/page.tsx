@@ -562,15 +562,6 @@ export default function SecurityDashboard() {
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Security Event Logs
             </h2>
-            <div className="mt-2 mb-4">
-              <Link
-                href="/admin/security/direct-db"
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors flex items-center w-fit"
-              >
-                <Shield className="w-4 h-4 mr-1" />
-                Try Direct-DB API
-              </Link>
-            </div>
             {error && (
               <div className="p-4 mb-6 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-red-900/30 dark:text-red-400 flex flex-col">
                 <div className="flex items-center mb-2">
@@ -582,19 +573,6 @@ export default function SecurityDashboard() {
                     There was an error fetching security logs. This may be due
                     to a database query issue.
                   </p>
-                  <p className="mt-1">
-                    Try using the Direct-DB API endpoint which uses a simplified
-                    query approach:
-                  </p>
-                </div>
-                <div className="ml-7">
-                  <Link
-                    href="/admin/security/direct-db"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors flex items-center w-fit"
-                  >
-                    <Database className="w-4 h-4 mr-1" />
-                    Try Direct-DB API Endpoint
-                  </Link>
                 </div>
               </div>
             )}
