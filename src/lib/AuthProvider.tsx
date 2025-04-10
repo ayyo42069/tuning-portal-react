@@ -42,6 +42,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Check session status and refresh user data
   const checkSession = useCallback(async () => {
     try {
+      // Define protected routes that require authentication
+      const protectedRoutes = ['/dashboard', '/admin', '/profile', '/settings'];
+      const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+
       // First check session status
       const sessionResponse = await fetch("/api/auth/session-status", {
         credentials: "include",
@@ -49,8 +53,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (!sessionResponse.ok) {
         console.error("Session check failed:", sessionResponse.status);
-        // Only redirect if we're not already on an auth page
-        if (!pathname.startsWith("/auth/")) {
+        // Only redirect if we're on a protected route
+        if (isProtectedRoute && !pathname.startsWith("/auth/")) {
           router.push("/auth/login");
         }
         setUser(null);
@@ -60,8 +64,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const sessionData = await sessionResponse.json();
 
       if (!sessionData.success) {
-        // Only redirect if we're not already on an auth page
-        if (!pathname.startsWith("/auth/")) {
+        // Only redirect if we're on a protected route
+        if (isProtectedRoute && !pathname.startsWith("/auth/")) {
           router.push("/auth/login");
         }
         setUser(null);
@@ -105,7 +109,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setUser(null);
         localStorage.removeItem("auth_state");
-        if (!pathname.startsWith("/auth/")) {
+        // Only redirect if we're on a protected route
+        const protectedRoutes = ['/dashboard', '/admin', '/profile', '/settings'];
+        const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+        if (isProtectedRoute && !pathname.startsWith("/auth/")) {
           router.push("/auth/login");
         }
       }
