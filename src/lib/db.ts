@@ -11,7 +11,6 @@ const dbConfig = {
   connectionLimit: 25, // Increased from 10 for better concurrency
   queueLimit: 0,
   connectTimeout: 10000, // 10 seconds timeout
-  acquireTimeout: 10000, // 10 seconds timeout for acquiring connection
   namedPlaceholders: true, // More efficient parameter binding
   enableKeepAlive: true, // Keep connections alive.
   keepAliveInitialDelay: 10000, // 10 seconds initial delay
