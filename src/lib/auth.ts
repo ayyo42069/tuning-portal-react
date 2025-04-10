@@ -10,12 +10,6 @@ interface User {
   role: "user" | "admin";
 }
 
-interface Session {
-  id: string;
-  user_id: number;
-  expires_at: Date;
-}
-
 // Password encryption using AES-256
 export async function hashPassword(password: string): Promise<string> {
   return encryptMessage(password);
@@ -61,28 +55,6 @@ export function verifyToken(token: string): any {
     console.error("Token verification failed:", error);
     return null;
   }
-}
-
-// Create session
-export async function createSession(userId: number): Promise<string> {
-  const sessionId = Math.random().toString(36).substring(2);
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 30); // Increased from 7 to 30 days
-
-  await executeQuery(
-    "INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)",
-    [sessionId, userId, expiresAt]
-  );
-
-  return sessionId;
-}
-
-// Get session
-export async function getSession(sessionId: string): Promise<Session | null> {
-  return await getRow<Session>(
-    "SELECT * FROM sessions WHERE id = ? AND expires_at > NOW()",
-    [sessionId]
-  );
 }
 
 // Set auth cookie

@@ -104,20 +104,8 @@ export async function POST(request: NextRequest) {
     // Generate JWT token
     const token = generateToken(user);
 
-    // Create a session for the user
-    const sessionId = await createSession(user.id);
-
     // Set auth cookie with the token
     const authCookieHeader = setAuthCookie(token);
-
-    // Set session cookie
-    const sessionCookieHeader = serialize("session_id", sessionId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: "/",
-    });
 
     // Log successful login with geolocation tracking
     await logAuthSuccess(user.id, request);
@@ -141,9 +129,8 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
 
-    // Add the cookies to the response
+    // Add the auth cookie to the response
     response.headers.append("Set-Cookie", authCookieHeader);
-    response.headers.append("Set-Cookie", sessionCookieHeader);
 
     return response;
   } catch (error) {

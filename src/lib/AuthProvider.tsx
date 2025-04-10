@@ -218,20 +218,3 @@ export function useAuth() {
   }
   return context;
 }
-
-// Add a hook to check for session termination in dashboard components
-export function useSessionTerminationCheck() {
-  const { refreshUser } = useAuth();
-
-  useEffect(() => {
-    // Check session status immediately when component mounts
-    refreshUser();
-
-    // Set up a frequent check for session termination
-    const checkInterval = setInterval(() => {
-      refreshUser();
-    }, 15 * 1000); // Check every 15 seconds
-
-    return () => clearInterval(checkInterval);
-  }, [refreshUser]);
-}

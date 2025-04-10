@@ -213,42 +213,6 @@ export async function logApiAccess(
 }
 
 /**
- * Log session events (creation, expiration, invalidation)
- * @param userId The user ID
- * @param sessionId The session ID
- * @param eventType The session event type
- * @param request The Next.js request object
- * @returns The event ID
- */
-export async function logSessionEvent(
-  userId: number,
-  sessionId: string,
-  eventType:
-    | SecurityEventType.SESSION_CREATED
-    | SecurityEventType.SESSION_EXPIRED
-    | SecurityEventType.SESSION_INVALIDATED,
-  request: NextRequest
-): Promise<number> {
-  const ip = getClientIp(request);
-  const userAgent = getUserAgent(request);
-
-  // Log the session event
-  const eventId = await logSecurityEvent({
-    user_id: userId,
-    event_type: eventType,
-    severity: SecurityEventSeverity.INFO,
-    ip_address: ip,
-    user_agent: userAgent,
-    details: {
-      sessionId,
-      timestamp: new Date().toISOString(),
-    },
-  });
-
-  return eventId;
-}
-
-/**
  * Log admin actions
  * @param adminId The admin user ID
  * @param actionType The type of admin action

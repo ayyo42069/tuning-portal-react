@@ -85,9 +85,6 @@ export async function GET(request: NextRequest) {
     // Generate authentication token
     const authToken = generateToken(user);
 
-    // Create a session for the user
-    const sessionId = await createSession(user.id);
-
     // Create response with auth cookie
     const response = NextResponse.json({
       success: true,
@@ -97,18 +94,8 @@ export async function GET(request: NextRequest) {
     // Set authentication cookie
     const authCookieHeader = setAuthCookie(authToken);
 
-    // Set session cookie
-    const sessionCookieHeader = serialize("session_id", sessionId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax", // Changed from strict to lax to match auth_token cookie settings
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: "/",
-    });
-
-    // Add the cookies to the response
+    // Add the cookie to the response
     response.headers.append("Set-Cookie", authCookieHeader);
-    response.headers.append("Set-Cookie", sessionCookieHeader);
 
     return response;
   } catch (error) {

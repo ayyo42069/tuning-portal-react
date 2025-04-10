@@ -22,7 +22,7 @@ interface AuthResult {
 
 /**
  * Authentication middleware for API routes
- * Verifies both JWT token and session for enhanced security
+ * Verifies JWT token for authentication
  */
 export async function authenticateUser(request: NextRequest): Promise<AuthResult> {
   try {
@@ -49,90 +49,6 @@ export async function authenticateUser(request: NextRequest): Promise<AuthResult
       };
     }
 
-    // Get session ID from cookies and verify session
-    const sessionId = request.cookies.get("session_id")?.value;
-
-    // Always require a valid session for authentication
-    if (!sessionId) {
-      return {
-        success: false,
-        error: "No active session",
-        status: 401,
-        isAuthenticated: false,
-        redirectTo: "/auth/login",
-      };
-    }
-
-    const session = await getRow<{ user_id: number; expires_at: string }>(
-      "SELECT user_id, expires_at FROM sessions WHERE id = ?",
-      [sessionId]
-    );
-
-    // If session doesn't exist or doesn't match the user ID from the token
-    if (!session || session.user_id !== decodedToken.id) {
-      return {
-        success: false,
-        error: "Session terminated",
-        status: 401,
-        isAuthenticated: false,
-        redirectTo: "/auth/login",
-      };
-    }
-
-    // Check if session is expired
-    const expiresAt = new Date(session.expires_at);
-    const now = new Date();
-    
-    // If session is expired
-    if (expiresAt < now) {
-      return {
-        success: false,
-        error: "Session expired",
-        status: 401,
-        isAuthenticated: false,
-        redirectTo: "/auth/login",
-      };
-    }
-    
-    // Check if session is about to expire (within 1 day)
-    const oneDayFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    
-    // If session is about to expire, refresh it
-    if (expiresAt < oneDayFromNow) {
-      // Extend session expiration by 30 days
-      const newExpiresAt = new Date();
-      newExpiresAt.setDate(newExpiresAt.getDate() + 30);
-      
-      await executeQuery(
-        "UPDATE sessions SET expires_at = ? WHERE id = ?",
-        [newExpiresAt, sessionId]
-      );
-      
-      console.log(`Session ${sessionId} refreshed for user ${session.user_id}`);
-      
-      // Also refresh the JWT token
-      const newToken = generateToken({
-        id: decodedToken.id,
-        username: decodedToken.username,
-        email: decodedToken.email,
-        role: decodedToken.role
-      });
-      
-      // Return the new token so the API route can set it
-      return {
-        success: true,
-        status: 200,
-        isAuthenticated: true,
-        newToken
-      };
-    }
-
-    // Update session last activity
-    await executeQuery(
-      "UPDATE sessions SET last_activity = NOW() WHERE id = ?",
-      [sessionId]
-    );
-
     // Get user data from database including credits and ban information
     const user = await getRow<UserDB>(
       `SELECT u.id, u.username, u.email, u.role, u.created_at, 
@@ -155,15 +71,11 @@ export async function authenticateUser(request: NextRequest): Promise<AuthResult
 
     // Check if user is banned
     if (user.is_banned) {
-      const banExpired =
-        user.ban_expires_at && new Date(user.ban_expires_at) < new Date();
-
+      const banExpired = user.ban_expires_at && new Date(user.ban_expires_at) < new Date();
       if (!banExpired) {
         return {
           success: false,
-          error: `Your account has been banned. Reason: ${
-            user.ban_reason || "Violation of terms of service"
-          }`,
+          error: `Account banned: ${user.ban_reason || "Violation of terms of service"}`,
           status: 403,
           isAuthenticated: false,
         };
@@ -174,7 +86,16 @@ export async function authenticateUser(request: NextRequest): Promise<AuthResult
       success: true,
       status: 200,
       isAuthenticated: true,
-      user,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role as "user" | "admin",
+        credits: user.credits,
+        isBanned: user.is_banned,
+        banReason: user.ban_reason,
+        banExpiresAt: user.ban_expires_at
+      }
     };
   } catch (error) {
     console.error("Authentication error:", error);
