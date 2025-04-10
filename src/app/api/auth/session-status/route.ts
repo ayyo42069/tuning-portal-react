@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateUser } from "@/lib/authMiddleware";
 import { executeQuery } from "@/lib/db";
+import { verifyToken } from "@/lib/auth";
+
+interface Session {
+  user_id: number;
+  expires_at: Date;
+}
+
+interface User {
+  id: number;
+  email: string;
+  role: string;
+  is_banned: boolean;
+  ban_reason: string | null;
+  ban_expires_at: Date | null;
+}
 
 /**
  * GET handler for checking session termination status
@@ -8,66 +23,80 @@ import { executeQuery } from "@/lib/db";
  */
 export async function GET(request: NextRequest) {
   try {
-    // Get the user ID from the query parameters
-    const searchParams = request.nextUrl.searchParams;
-    const userId = searchParams.get("userId");
+    // Get token from cookie
+    const token = request.cookies.get("auth_token")?.value;
+    const sessionId = request.cookies.get("session_id")?.value;
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
-      );
+    if (!token || !sessionId) {
+      return NextResponse.json({ success: false });
     }
 
-    // Authenticate the user
-    const authResult = await authenticateUser(request);
-
-    // If authentication fails, the session is already terminated or invalid
-    if (!authResult.success) {
-      return NextResponse.json({ terminated: true, reason: "Session invalid" });
+    // Verify token
+    const decoded = verifyToken(token);
+    if (!decoded) {
+      return NextResponse.json({ success: false });
     }
 
-    // Verify that the authenticated user matches the requested user ID
-    if (authResult.user?.id.toString() !== userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
-
-    // Check if there are any active sessions for this user
-    const sessions = await executeQuery<any[]>(
-      "SELECT COUNT(*) as count FROM sessions WHERE user_id = ?",
-      [userId]
+    // Get session from database
+    const [session] = await executeQuery<Session[]>(
+      "SELECT user_id, expires_at FROM sessions WHERE id = ?",
+      [sessionId]
     );
 
-    // Check if there are any termination records for this user
-    const terminations = await executeQuery<any[]>(
-      "SELECT * FROM session_terminations WHERE user_id = ? AND acknowledged = FALSE ORDER BY terminated_at DESC LIMIT 1",
-      [userId]
-    );
+    if (!session) {
+      return NextResponse.json({ success: false });
+    }
 
-    // If there are no active sessions or there is a termination record, the session is terminated
-    const isTerminated = sessions[0].count === 0 || terminations.length > 0;
+    // Check if session is expired or about to expire (within 1 day)
+    const expiresAt = new Date(session.expires_at);
+    const now = new Date();
+    const oneDayFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
-    // If there is a termination record, mark it as acknowledged
-    if (terminations.length > 0) {
+    // If session is expired or about to expire, refresh it
+    if (expiresAt <= oneDayFromNow) {
+      const newExpiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
       await executeQuery(
-        "UPDATE session_terminations SET acknowledged = TRUE WHERE id = ?",
-        [terminations[0].id]
+        "UPDATE sessions SET expires_at = ?, last_activity = NOW() WHERE id = ?",
+        [newExpiresAt, sessionId]
+      );
+    } else {
+      // Update last activity even if not refreshing
+      await executeQuery(
+        "UPDATE sessions SET last_activity = NOW() WHERE id = ?",
+        [sessionId]
       );
     }
 
-    return NextResponse.json({
-      terminated: isTerminated,
-      reason: isTerminated
-        ? terminations.length > 0
-          ? terminations[0].reason
-          : "No active sessions"
-        : null,
+    // Get user data
+    const [user] = await executeQuery<User[]>(
+      "SELECT id, email, role, is_banned, ban_reason, ban_expires_at FROM users WHERE id = ?",
+      [session.user_id]
+    );
+
+    if (!user) {
+      return NextResponse.json({ success: false });
+    }
+
+    // Check if user is banned
+    if (user.is_banned) {
+      return NextResponse.json({ 
+        success: false,
+        error: "Account banned",
+        banReason: user.ban_reason,
+        banExpiresAt: user.ban_expires_at
+      });
+    }
+
+    return NextResponse.json({ 
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role
+      }
     });
   } catch (error) {
-    console.error("Error checking session status:", error);
-    return NextResponse.json(
-      { error: "Failed to check session status" },
-      { status: 500 }
-    );
+    console.error("Session status check failed:", error);
+    return NextResponse.json({ success: false });
   }
 }

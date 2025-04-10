@@ -6,7 +6,9 @@ import {
   useState,
   useEffect,
   ReactNode,
+  useCallback,
 } from "react";
+import { useRouter, usePathname } from "next/navigation";
 // Define User interface with credits and ban status
 interface User {
   id: number;
@@ -32,199 +34,113 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
-  // Fetch current user on component mount and handle localStorage persistence
-  useEffect(() => {
-    // Check if we have auth data in localStorage first
-    const storedAuthData = localStorage.getItem("auth_state");
-    if (storedAuthData) {
-      try {
-        // Parse stored auth data
-        const parsedAuthData = JSON.parse(storedAuthData);
-        // Set user from localStorage first for immediate UI update
-        setUser(parsedAuthData);
-      } catch (error) {
-        console.error("Error parsing stored auth data:", error);
-        // Clear invalid data
-        localStorage.removeItem("auth_state");
-      }
-    }
-
-    // Always refresh user data from server to ensure it's up-to-date
-    refreshUser();
-
-    // Check specifically for session termination
-    checkSessionTermination();
-
-    // Set up intervals for regular checks
-    const refreshInterval = setInterval(() => {
-      refreshUser();
-    }, 60 * 1000); // Refresh user data every minute
-
-    const terminationCheckInterval = setInterval(() => {
-      checkSessionTermination();
-    }, 15 * 1000); // Check for termination more frequently (every 15 seconds)
-
-    // Clean up intervals on unmount
-    return () => {
-      clearInterval(refreshInterval);
-      clearInterval(terminationCheckInterval);
-    };
-  }, []);
-
-  // Handle F5 refresh and tab/browser close events
-  useEffect(() => {
-    // Add event listener for beforeunload to ensure auth state is saved
-    const handleBeforeUnload = () => {
-      // Ensure the latest auth state is persisted
-      if (user) {
-        localStorage.setItem("auth_state", JSON.stringify(user));
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [user]);
-
-  // Check specifically for session termination
-  const checkSessionTermination = async (): Promise<void> => {
-    // Only check if user is logged in
-    if (!user) return;
-
+  // Check session status and refresh user data
+  const checkSession = useCallback(async () => {
     try {
-      const userId = user.id;
-      const response = await fetch(
-        `/api/auth/session-status?userId=${userId}`,
-        {
-          credentials: "include",
-          // Use cache: 'no-store' to prevent caching
-          cache: "no-store",
-          headers: {
-            // Add a timestamp to prevent caching
-            "Cache-Control": "no-cache",
-            Pragma: "no-cache",
-            "X-Request-Time": Date.now().toString(),
-          },
-        }
-      );
-
+      const response = await fetch("/api/auth/session-status", {
+        credentials: "include",
+      });
       const data = await response.json();
 
-      if (data.terminated) {
-        // Session has been terminated
-        console.log("Session termination detected");
-
-        // Clear all auth state
+      if (!data.success) {
+        // Only redirect if we're not already on an auth page and there's no stored auth state
+        const storedAuth = localStorage.getItem("auth_state");
+        if (!pathname.startsWith("/auth/") && !storedAuth) {
+          router.push("/auth/login");
+        }
         setUser(null);
-        localStorage.removeItem("auth_state");
-        // Redirect to terminated page
-        window.location.href = "/auth/terminated";
+        return;
       }
+
+      // Refresh user data if session is valid
+      await refreshUser();
     } catch (error) {
-      console.error("Error checking session termination:", error);
-      // Don't clear auth state on network errors to prevent false logouts
+      console.error("Session check failed:", error);
+      // Don't immediately log out on network errors
+      if (!pathname.startsWith("/auth/")) {
+        setError("Failed to verify session. Please try again.");
+      }
     }
-  };
+  }, [pathname, router]);
 
-  const refreshUser = async (): Promise<void> => {
+  // Refresh user data
+  const refreshUser = useCallback(async () => {
     try {
-      setIsLoading(true);
-      setError(null);
-
       const response = await fetch("/api/auth/me", {
         credentials: "include",
       });
-
       const data = await response.json();
-      if (response.ok && data.user) {
-        // Create user object with all necessary properties
-        const userData = {
-          ...data.user,
-          credits: data.user.credits !== undefined ? data.user.credits : 0,
-          isBanned: data.user.isBanned || false,
-          banReason: data.user.banReason || null,
-          banExpiresAt: data.user.banExpiresAt || null,
-        };
 
-        // Set user in state
-        setUser(userData);
-
-        // Store in localStorage for persistence across page refreshes
-        localStorage.setItem("auth_state", JSON.stringify(userData));
-
-        // Handle banned user
-        if (userData.isBanned) {
-          setError(
-            `Your account has been banned. Reason: ${userData.banReason}`
-          );
-          // Redirect to banned user page
-          window.location.href = "/auth/banned";
-          return;
-        }
+      if (data.success) {
+        setUser(data.user);
+        setError(null);
+        // Update stored auth state
+        localStorage.setItem("auth_state", JSON.stringify(data.user));
       } else {
-        // User is not logged in or session expired
         setUser(null);
-        // Clear localStorage
         localStorage.removeItem("auth_state");
-        // Clear auth_session and auth_token, session_id cookies to prevent redirect loop
-        document.cookie =
-          "auth_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        document.cookie =
-          "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        document.cookie =
-          "session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-
-        // Check for session termination specifically
-        if (
-          data.error === "Session terminated" ||
-          data.redirectTo === "/auth/terminated"
-        ) {
-          // Use setTimeout to ensure state is cleared before redirect
-          setTimeout(() => {
-            window.location.href = "/auth/terminated";
-          }, 100);
-          return;
-        }
-        // Handle other session termination and authentication errors
-        else if (data.redirectTo) {
-          // Clear all auth state before redirecting
-          setUser(null);
-          localStorage.removeItem("auth_state");
-          // Use setTimeout to ensure state is cleared before redirect
-          setTimeout(() => {
-            window.location.href = data.redirectTo;
-          }, 100);
-          return;
-        } else if (window.location.pathname.startsWith("/dashboard")) {
-          // Redirect to login if unauthorized access to dashboard
-          setTimeout(() => {
-            window.location.href = "/auth/login";
-          }, 100);
-          return;
+        if (!pathname.startsWith("/auth/")) {
+          router.push("/auth/login");
         }
       }
     } catch (error) {
-      console.error("Error fetching current user:", error);
-      setError("Failed to authenticate user");
-      setUser(null);
-      // Clear localStorage on error
-      localStorage.removeItem("auth_state");
-    } finally {
-      setIsLoading(false);
+      console.error("Failed to refresh user data:", error);
+      // Don't immediately log out on network errors
+      if (!pathname.startsWith("/auth/")) {
+        setError("Failed to refresh user data. Please try again.");
+      }
     }
-  };
+  }, [pathname, router]);
+
+  // Initial session check
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        await checkSession();
+      } catch (error) {
+        console.error("Initial session check failed:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
+  }, [checkSession]);
+
+  // Set up periodic session checks (every 5 minutes instead of every minute)
+  useEffect(() => {
+    const interval = setInterval(checkSession, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [checkSession]);
+
+  // Refresh user data periodically (every 15 minutes)
+  useEffect(() => {
+    const interval = setInterval(refreshUser, 15 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [refreshUser]);
+
+  // Handle session termination
+  const handleSessionTermination = useCallback(async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setUser(null);
+      router.push("/auth/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  }, [router]);
 
   const login = async (
     username: string,
     password: string
   ): Promise<boolean> => {
     try {
-      setIsLoading(true);
+      setLoading(true);
       setError(null);
 
       const response = await fetch("/api/auth/login", {
@@ -263,7 +179,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.setItem("auth_state", JSON.stringify(userData));
 
           // Redirect to banned page
-          window.location.href = "/auth/banned";
+          router.push("/auth/banned");
           return false;
         }
 
@@ -441,13 +357,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError("An error occurred during login");
       return false;
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   const logout = async (): Promise<void> => {
     try {
-      setIsLoading(true);
+      setLoading(true);
 
       const response = await fetch("/api/auth/logout", {
         method: "POST",
@@ -477,7 +393,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       localStorage.removeItem("auth_state");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -485,7 +401,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        isLoading,
+        isLoading: loading,
         error,
         login,
         logout,

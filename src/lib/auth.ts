@@ -44,7 +44,7 @@ export function generateToken(user: User): string {
   return sign(
     { id: user.id, username: user.username, role: user.role },
     process.env.JWT_SECRET as string,
-    { expiresIn: "7d" }
+    { expiresIn: "30d" }
   );
 }
 
@@ -67,7 +67,7 @@ export function verifyToken(token: string): any {
 export async function createSession(userId: number): Promise<string> {
   const sessionId = Math.random().toString(36).substring(2);
   const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
+  expiresAt.setDate(expiresAt.getDate() + 30); // Increased from 7 to 30 days
 
   await executeQuery(
     "INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)",
@@ -91,7 +91,7 @@ export function setAuthCookie(token: string): string {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax", // Changed from strict to lax to allow cross-origin requests
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: 60 * 60 * 24 * 30, // Increased from 7 to 30 days
     path: "/",
   });
 }
