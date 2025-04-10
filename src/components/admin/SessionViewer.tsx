@@ -10,7 +10,6 @@ interface Session {
   email: string;
   ip_address: string;
   user_agent: string;
-  last_activity: string;
   created_at: string;
   expires_at: string;
 }

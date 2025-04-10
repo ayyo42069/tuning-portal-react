@@ -63,9 +63,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ sessions });
   } catch (error) {
-    console.error("Error fetching active sessions:", error);
+    console.error("Error fetching sessions:", error);
     return NextResponse.json(
-      { error: "Failed to fetch active sessions" },
+      { error: "Failed to fetch sessions" },
       { status: 500 }
     );
   }

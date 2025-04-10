@@ -145,12 +145,6 @@ export async function authenticateUser(request: NextRequest): Promise<AuthResult
       }
     }
 
-    // Update session last activity
-    await executeQuery(
-      "UPDATE sessions SET last_activity = NOW() WHERE id = ?",
-      [sessionId]
-    );
-
     return {
       success: true,
       status: 200,
