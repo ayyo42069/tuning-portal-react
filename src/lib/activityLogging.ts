@@ -32,23 +32,6 @@ export async function logUserActivity(
     const ip_address = getClientIp(request);
     const user_agent = getUserAgent(request);
 
-    // Create user activity logs table if it doesn't exist
-    await executeQuery(`
-      CREATE TABLE IF NOT EXISTS user_activity_logs (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        activity_type VARCHAR(50) NOT NULL,
-        ip_address VARCHAR(45) NOT NULL,
-        user_agent VARCHAR(255) NOT NULL,
-        details JSON,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        INDEX idx_user_activity_user (user_id),
-        INDEX idx_user_activity_type (activity_type),
-        INDEX idx_user_activity_created (created_at)
-      )
-    `);
-
     // Insert the activity log
     const result = await executeQuery<any>(
       `INSERT INTO user_activity_logs 
