@@ -11,8 +11,10 @@ interface Session {
 
 interface User {
   id: number;
+  username: string;
   email: string;
   role: string;
+  credits: number;
   is_banned: boolean;
   ban_reason: string | null;
   ban_expires_at: Date | null;
@@ -94,7 +96,11 @@ export async function GET(request: NextRequest) {
 
     // Get user data
     const [user] = await executeQuery<User[]>(
-      "SELECT id, email, role, is_banned, ban_reason, ban_expires_at FROM users WHERE id = ?",
+      `SELECT u.id, u.username, u.email, u.role, u.is_banned, u.ban_reason, u.ban_expires_at,
+              COALESCE(uc.credits, 0) as credits
+       FROM users u 
+       LEFT JOIN user_credits uc ON u.id = uc.user_id 
+       WHERE u.id = ?`,
       [session.user_id]
     );
 
@@ -116,8 +122,13 @@ export async function GET(request: NextRequest) {
       success: true,
       user: {
         id: user.id,
+        username: user.username,
         email: user.email,
-        role: user.role
+        role: user.role,
+        credits: user.credits,
+        isBanned: user.is_banned,
+        banReason: user.ban_reason,
+        banExpiresAt: user.ban_expires_at
       }
     });
   } catch (error) {

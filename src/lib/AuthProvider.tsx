@@ -184,7 +184,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const data = await response.json();
 
-      if (response.ok) {
+      if (response.ok && data.success) {
         // Create user object with all necessary properties
         const userData = {
           ...data.user,
@@ -213,170 +213,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return false;
         }
 
-        // Immediately trigger data fetching for notifications and other user data using React Query
-        // This ensures the dashboard shows the latest data without requiring a manual refresh
-        try {
-          // Get access to the QueryClient instance
-          const queryClientModule = await import("./QueryProvider");
-          const queryClient = queryClientModule.getQueryClient();
+        // Wait a moment for cookies to be set
+        await new Promise(resolve => setTimeout(resolve, 100));
 
-          if (queryClient) {
-            // Import query keys from useDataFetching
-            const { queryKeys } = await import("./hooks/useDataFetching");
+        // Verify the session was created successfully
+        const sessionCheck = await fetch("/api/auth/session-status", {
+          credentials: "include",
+        });
 
-            // Invalidate all relevant queries to trigger immediate refetching
-            queryClient.invalidateQueries({ queryKey: [queryKeys.user] });
-            queryClient.invalidateQueries({
-              queryKey: [queryKeys.notifications],
-            });
-            queryClient.invalidateQueries({ queryKey: [queryKeys.credits] });
-            queryClient.invalidateQueries({
-              queryKey: [queryKeys.tuningFiles],
-            });
-
-            // Prefetch critical data to ensure it's immediately available
-            queryClient.prefetchQuery({
-              queryKey: [queryKeys.user, userData.id],
-              queryFn: async () => {
-                const response = await fetch("/api/user/profile", {
-                  credentials: "include",
-                });
-                if (!response.ok)
-                  throw new Error("Failed to fetch user profile");
-                return response.json();
-              },
-            });
-
-            // Also prefetch notifications
-            queryClient.prefetchQuery({
-              queryKey: [queryKeys.notifications, userData.id],
-              queryFn: async () => {
-                const response = await fetch("/api/notifications", {
-                  credentials: "include",
-                });
-                if (!response.ok)
-                  throw new Error("Failed to fetch notifications");
-                const data = await response.json();
-                return data.notifications;
-              },
-            });
-
-            // Prefetch credit transactions and update user state with latest credit balance
-            queryClient.prefetchQuery({
-              queryKey: [queryKeys.credits, userData.id],
-              queryFn: async () => {
-                // First get the latest credit balance
-                const balanceResponse = await fetch("/api/credits/balance", {
-                  credentials: "include",
-                });
-                if (balanceResponse.ok) {
-                  const balanceData = await balanceResponse.json();
-                  // Update user state with the latest credit balance
-                  const updatedUserData = {
-                    ...userData,
-                    credits: balanceData.credits,
-                  };
-                  setUser(updatedUserData);
-                  // Update localStorage with the latest credit information
-                  localStorage.setItem(
-                    "auth_state",
-                    JSON.stringify(updatedUserData)
-                  );
-                }
-
-                // Then fetch transactions as before
-                const response = await fetch("/api/credits/transactions", {
-                  credentials: "include",
-                });
-                if (!response.ok)
-                  throw new Error("Failed to fetch credit transactions");
-                return response.json();
-              },
-            });
-
-            // Prefetch tuning files if needed
-            queryClient.prefetchQuery({
-              queryKey: [queryKeys.tuningFiles, userData.id],
-              queryFn: async () => {
-                const response = await fetch("/api/tuning/history", {
-                  credentials: "include",
-                });
-                if (!response.ok)
-                  throw new Error("Failed to fetch tuning files");
-                const data = await response.json();
-                return data.tuningFiles;
-              },
-            });
-          } else {
-            // Fallback to direct fetch calls if queryClient is not available
-            const notificationsModule = await import("./NotificationProvider");
-            if (
-              notificationsModule &&
-              typeof notificationsModule.fetchNotificationsGlobal === "function"
-            ) {
-              notificationsModule.fetchNotificationsGlobal();
-            } else {
-              // Fallback: try to fetch notifications directly
-              fetch("/api/notifications", { credentials: "include" });
-            }
-
-            // Fetch user profile data to ensure credits and other info are up-to-date
-            fetch("/api/user/profile", { credentials: "include" })
-              .then((response) => {
-                if (response.ok) return response.json();
-                throw new Error("Failed to fetch user profile");
-              })
-              .then((data) => {
-                if (data.user) {
-                  // Update user state with the latest user data
-                  const updatedUserData = {
-                    ...userData,
-                    credits: data.user.credits || 0,
-                  };
-                  setUser(updatedUserData);
-                  localStorage.setItem(
-                    "auth_state",
-                    JSON.stringify(updatedUserData)
-                  );
-                }
-              })
-              .catch((error) =>
-                console.error("Error updating user data:", error)
-              );
-
-            // Fetch credit balance directly and update user state
-            fetch("/api/credits/balance", { credentials: "include" })
-              .then((response) => {
-                if (response.ok) return response.json();
-                throw new Error("Failed to fetch credit balance");
-              })
-              .then((data) => {
-                // Update user state with the latest credit balance
-                const updatedUserData = {
-                  ...userData,
-                  credits: data.credits,
-                };
-                setUser(updatedUserData);
-                localStorage.setItem(
-                  "auth_state",
-                  JSON.stringify(updatedUserData)
-                );
-              })
-              .catch((error) =>
-                console.error("Error updating credit balance:", error)
-              );
-
-            // Fetch credit transactions if needed
-            fetch("/api/credits/transactions", { credentials: "include" });
-
-            // Fetch tuning files history
-            fetch("/api/tuning/history", { credentials: "include" });
-          }
-        } catch (fetchError) {
-          // Log but don't fail the login process if these fetches fail
-          console.error("Error pre-fetching user data:", fetchError);
+        if (!sessionCheck.ok) {
+          console.error("Session verification failed:", sessionCheck.status);
+          setError("Failed to establish session. Please try again.");
+          return false;
         }
 
+        const sessionData = await sessionCheck.json();
+        if (!sessionData.success) {
+          console.error("Session verification failed:", sessionData);
+          setError("Failed to establish session. Please try again.");
+          return false;
+        }
+
+        // Redirect to dashboard on successful login
+        router.push("/dashboard");
         return true;
       } else {
         setError(data.error || "Login failed");
