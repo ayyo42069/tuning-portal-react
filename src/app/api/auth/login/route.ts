@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRow } from "@/lib/db";
+import { compare } from "bcrypt";
 import {
-  verifyPassword,
   generateToken,
   setAuthCookie,
   createSession,
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
-    const isPasswordValid = await verifyPassword(password, user.password);
+    const isPasswordValid = await compare(password, user.password);
     if (!isPasswordValid) {
       // Log failed login attempt due to invalid password
       await logAuthFailure(username, request, "Invalid password");
@@ -102,12 +102,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate JWT token
-    const token = generateToken({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-    });
+    const token = generateToken(user);
 
     // Create a session for the user
     const sessionId = await createSession(user.id);
@@ -119,7 +114,7 @@ export async function POST(request: NextRequest) {
     const sessionCookieHeader = serialize("session_id", sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax", // Changed from strict to lax to ensure cookie is sent with requests
+      sameSite: "strict",
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: "/",
     });
@@ -154,7 +149,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(
-      { error: "An error occurred during login" },
+      { error: "An error occurred during login. Please try again later." },
       { status: 500 }
     );
   }

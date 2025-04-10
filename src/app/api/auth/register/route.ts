@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { executeQuery, executeTransaction } from "@/lib/db";
+import { hash } from "bcrypt";
 import {
-  hashPassword,
   generateToken,
   setAuthCookie,
   createSession,
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Hash password
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await hash(password, 10);
 
     // Log registration attempt (without sensitive data)
     console.log(
