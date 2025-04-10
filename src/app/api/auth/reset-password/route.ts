@@ -57,18 +57,23 @@ export async function POST(request: NextRequest) {
 
     console.log(`Attempting to update password for user ID: ${userId}`);
 
-    // Use executeTransaction to handle all database operations
-    await executeTransaction([
-      "UPDATE users SET password = ? WHERE id = ?",
-      "UPDATE password_reset_tokens SET used = 1 WHERE id = ?",
-      "DELETE FROM sessions WHERE user_id = ?"
-    ], [
-      [hashedPassword, userId],
-      [tokenId],
-      [userId]
-    ]);
+    try {
+      // Use executeTransaction to handle all database operations
+      await executeTransaction([
+        "UPDATE users SET password = ? WHERE id = ?",
+        "UPDATE password_reset_tokens SET used = 1 WHERE id = ?",
+        "DELETE FROM sessions WHERE user_id = ?"
+      ], [
+        [hashedPassword, userId],
+        [tokenId],
+        [userId]
+      ]);
 
-    console.log(`Password update successful for user ID: ${userId}`);
+      console.log(`Password update successful for user ID: ${userId}`);
+    } catch (error) {
+      console.error(`Error updating password for user ID: ${userId}`, error);
+      throw error;
+    }
 
     // Send confirmation email
     await sendEmail({
