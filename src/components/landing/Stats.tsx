@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 interface StatsProps {
   inView: boolean;
@@ -11,14 +12,32 @@ interface StatsData {
   users: number;
   files: number;
   satisfaction: number;
+  manufacturers: number;
+  models: number;
+  completedFiles: number;
+  avgProcessingTime: number;
+  topManufacturers: Array<{
+    name: string;
+    file_count: number;
+  }>;
+  lastUpdated: string;
 }
 
 export const Stats = ({ inView }: StatsProps) => {
-  const [count, setCount] = useState({ users: 0, files: 0, satisfaction: 0 });
+  const [count, setCount] = useState({
+    users: 0,
+    files: 0,
+    satisfaction: 0,
+    manufacturers: 0,
+    models: 0,
+    completedFiles: 0,
+    avgProcessingTime: 0,
+  });
   const [hasAnimated, setHasAnimated] = useState(false);
   const [statsData, setStatsData] = useState<StatsData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -47,28 +66,49 @@ export const Stats = ({ inView }: StatsProps) => {
       try {
         setIsLoading(true);
         setError(null);
-        const response = await fetch("/api/stats");
+        const response = await fetch("/api/landing/stats");
 
         if (!response.ok) {
           throw new Error("Failed to fetch statistics");
         }
 
         const data = await response.json();
-        console.log("Stats API response:", data); // Debug logging
+        console.log("Landing Stats API response:", data); // Debug logging
 
         // Ensure we have valid numbers
         const validatedData = {
           users: Math.max(1, Number(data.users) || 0),
           files: Math.max(1, Number(data.files) || 0),
           satisfaction: Math.max(1, Number(data.satisfaction) || 0),
+          manufacturers: Math.max(1, Number(data.manufacturers) || 0),
+          models: Math.max(1, Number(data.models) || 0),
+          completedFiles: Math.max(1, Number(data.completedFiles) || 0),
+          avgProcessingTime: Math.max(1, Number(data.avgProcessingTime) || 0),
+          topManufacturers: data.topManufacturers || [],
+          lastUpdated: data.lastUpdated || new Date().toISOString(),
         };
 
         setStatsData(validatedData);
+        setLastUpdated(validatedData.lastUpdated);
       } catch (err) {
         console.error("Error fetching stats:", err);
         setError("Failed to load statistics");
         // Use fallback data if fetch fails
-        setStatsData({ users: 10, files: 25, satisfaction: 98 });
+        setStatsData({
+          users: 10,
+          files: 25,
+          satisfaction: 98,
+          manufacturers: 5,
+          models: 20,
+          completedFiles: 15,
+          avgProcessingTime: 24,
+          topManufacturers: [
+            { name: "VW", file_count: 10 },
+            { name: "BMW", file_count: 8 },
+            { name: "Audi", file_count: 7 },
+          ],
+          lastUpdated: new Date().toISOString(),
+        });
       } finally {
         setIsLoading(false);
       }
@@ -87,9 +127,21 @@ export const Stats = ({ inView }: StatsProps) => {
           users: statsData.users,
           files: statsData.files,
           satisfaction: statsData.satisfaction,
+          manufacturers: statsData.manufacturers,
+          models: statsData.models,
+          completedFiles: statsData.completedFiles,
+          avgProcessingTime: statsData.avgProcessingTime,
         });
       } else {
-        setCount({ users: 0, files: 0, satisfaction: 0 });
+        setCount({
+          users: 0,
+          files: 0,
+          satisfaction: 0,
+          manufacturers: 0,
+          models: 0,
+          completedFiles: 0,
+          avgProcessingTime: 0,
+        });
       }
     }
   }, [statsData, inView, hasAnimated]);
@@ -112,6 +164,10 @@ export const Stats = ({ inView }: StatsProps) => {
           users: Math.floor(progress * statsData.users),
           files: Math.floor(progress * statsData.files),
           satisfaction: Math.floor(progress * statsData.satisfaction),
+          manufacturers: Math.floor(progress * statsData.manufacturers),
+          models: Math.floor(progress * statsData.models),
+          completedFiles: Math.floor(progress * statsData.completedFiles),
+          avgProcessingTime: Math.floor(progress * statsData.avgProcessingTime),
         });
 
         if (step >= steps) {
@@ -120,6 +176,10 @@ export const Stats = ({ inView }: StatsProps) => {
             users: statsData.users,
             files: statsData.files,
             satisfaction: statsData.satisfaction,
+            manufacturers: statsData.manufacturers,
+            models: statsData.models,
+            completedFiles: statsData.completedFiles,
+            avgProcessingTime: statsData.avgProcessingTime,
           });
           clearInterval(timer);
         }
@@ -128,6 +188,22 @@ export const Stats = ({ inView }: StatsProps) => {
       return () => clearInterval(timer);
     }
   }, [inView, hasAnimated, statsData]);
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(date);
+    } catch (e) {
+      return 'Recently';
+    }
+  };
 
   return (
     <section className="py-20 relative overflow-hidden">
@@ -154,9 +230,14 @@ export const Stats = ({ inView }: StatsProps) => {
             Our Impact by the Numbers
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-cyan-500 to-blue-600 mx-auto"></div>
+          {lastUpdated && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              Last updated: {formatDate(lastUpdated)}
+            </p>
+          )}
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 text-center">
+        <div className="grid md:grid-cols-3 gap-8 text-center mb-12">
           <motion.div
             variants={itemVariants}
             className="p-8 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700"
@@ -248,7 +329,7 @@ export const Stats = ({ inView }: StatsProps) => {
                   strokeLinejoin="round"
                 />
                 <path
-                  d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
@@ -257,13 +338,91 @@ export const Stats = ({ inView }: StatsProps) => {
               </svg>
             </div>
             <div className="text-5xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-2">
-              {count.satisfaction.toLocaleString()}
+              {count.satisfaction}%
             </div>
             <div className="text-gray-600 dark:text-gray-300 text-lg">
               Customer Satisfaction
             </div>
           </motion.div>
         </div>
+
+        {/* Additional stats section */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <motion.div
+            variants={itemVariants}
+            className="p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-md border border-gray-100 dark:border-gray-700"
+          >
+            <div className="text-3xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-1">
+              {count.manufacturers}
+            </div>
+            <div className="text-gray-600 dark:text-gray-300 text-sm">
+              Vehicle Manufacturers
+            </div>
+          </motion.div>
+
+          <motion.div
+            variants={itemVariants}
+            className="p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-md border border-gray-100 dark:border-gray-700"
+          >
+            <div className="text-3xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-1">
+              {count.models}
+            </div>
+            <div className="text-gray-600 dark:text-gray-300 text-sm">
+              Vehicle Models Supported
+            </div>
+          </motion.div>
+
+          <motion.div
+            variants={itemVariants}
+            className="p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-md border border-gray-100 dark:border-gray-700"
+          >
+            <div className="text-3xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-1">
+              {count.completedFiles.toLocaleString()}
+            </div>
+            <div className="text-gray-600 dark:text-gray-300 text-sm">
+              Successfully Tuned Files
+            </div>
+          </motion.div>
+
+          <motion.div
+            variants={itemVariants}
+            className="p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-md border border-gray-100 dark:border-gray-700"
+          >
+            <div className="text-3xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-1">
+              {count.avgProcessingTime}
+            </div>
+            <div className="text-gray-600 dark:text-gray-300 text-sm">
+              Avg. Processing Hours
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Top manufacturers section */}
+        {statsData?.topManufacturers && statsData.topManufacturers.length > 0 && (
+          <motion.div
+            variants={itemVariants}
+            className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6"
+          >
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 text-center">
+              Top Supported Manufacturers
+            </h3>
+            <div className="grid grid-cols-3 gap-4">
+              {statsData.topManufacturers.map((manufacturer, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm"
+                >
+                  <div className="text-2xl font-bold text-cyan-500 dark:text-cyan-400 mb-1">
+                    {manufacturer.name}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">
+                    {manufacturer.file_count.toLocaleString()} files
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Decorative elements */}
         <div className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full bg-gradient-to-r from-cyan-500/10 to-blue-500/10 blur-3xl"></div>
