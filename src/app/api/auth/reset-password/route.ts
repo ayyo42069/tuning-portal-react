@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { executeQuery } from "@/lib/db";
+import { executeQuery, executeTransaction } from "@/lib/db";
 import { hash } from "bcrypt";
 import { sendEmail } from "@/lib/email";
 import { PasswordResetToken } from "@/lib/types/auth";
@@ -55,30 +55,16 @@ export async function POST(request: NextRequest) {
     // Hash the new password
     const hashedPassword = await hash(password, 10);
 
-    // Use a transaction to ensure all operations succeed or fail together
-    await executeQuery("START TRANSACTION");
-
-    try {
-      await executeQuery(
-        "UPDATE users SET password = ? WHERE id = ?",
-        [hashedPassword, userId]
-      );
-
-      await executeQuery(
-        "UPDATE password_reset_tokens SET used = 1, used_at = NOW() WHERE id = ?",
-        [tokenId]
-      );
-
-      await executeQuery(
-        "DELETE FROM sessions WHERE user_id = ?",
-        [userId]
-      );
-
-      await executeQuery("COMMIT");
-    } catch (error) {
-      await executeQuery("ROLLBACK");
-      throw error;
-    }
+    // Use executeTransaction to handle all database operations
+    await executeTransaction([
+      "UPDATE users SET password = ? WHERE id = ?",
+      "UPDATE password_reset_tokens SET used = 1, used_at = NOW() WHERE id = ?",
+      "DELETE FROM sessions WHERE user_id = ?"
+    ], [
+      [hashedPassword, userId],
+      [tokenId],
+      [userId]
+    ]);
 
     // Send confirmation email
     await sendEmail({
