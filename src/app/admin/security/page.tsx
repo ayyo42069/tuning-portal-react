@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import SessionViewer from "@/components/admin/SessionViewer";
 import {
   Shield,
   AlertTriangle,
@@ -83,9 +82,7 @@ export default function SecurityDashboard() {
   const [timeRange, setTimeRange] = useState<number>(30); // days
 
   // State for active tab
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "logs" | "alerts" | "sessions"
-  >("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "logs" | "alerts">("overview");
 
   // Fetch security stats
   const fetchSecurityStats = async () => {
@@ -288,19 +285,6 @@ export default function SecurityDashboard() {
                   {alerts.length}
                 </span>
               )}
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => setActiveTab("sessions")}
-              className={`inline-flex items-center px-4 py-2 rounded-t-lg ${
-                activeTab === "sessions"
-                  ? "border-b-2 border-blue-600 text-blue-600"
-                  : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-              }`}
-            >
-              <Users className="w-5 h-5 mr-2" />
-              User Sessions
             </button>
           </li>
         </ul>
@@ -859,32 +843,6 @@ export default function SecurityDashboard() {
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* Sessions Tab */}
-      {activeTab === "sessions" && (
-        <div>
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
-              Active User Sessions
-            </h2>
-
-            {/* Import the SessionViewer component */}
-            <div className="mt-4">
-              {/* @ts-ignore */}
-              <SessionViewer
-                onSessionTerminated={() => {
-                  // Refresh security stats when a session is terminated
-                  fetchSecurityStats();
-                }}
-                onUserBanned={() => {
-                  // Refresh security stats when a user is banned
-                  fetchSecurityStats();
-                }}
-              />
-            </div>
           </div>
         </div>
       )}
