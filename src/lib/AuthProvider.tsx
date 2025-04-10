@@ -69,7 +69,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error("[AuthProvider] Error checking session:", error);
-      await logout();
+      // Don't immediately log out on network errors
+      setError("Failed to verify session. Please try again.");
+      setLoading(false);
     }
   };
 
@@ -99,8 +101,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error("[AuthProvider] Error refreshing user data:", error);
-      // If there's an error refreshing user data, check session status
-      await checkSession();
+      // Don't immediately log out on network errors
+      setError("Failed to refresh user data. Please try again.");
+      setLoading(false);
     }
   };
 
@@ -126,8 +129,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error("[AuthProvider] Error refreshing token:", error);
-      // If there's an error refreshing token, check session status
-      await checkSession();
+      // Don't immediately log out on network errors
+      setError("Failed to refresh token. Please try again.");
+      setLoading(false);
     }
   };
 
@@ -180,10 +184,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [router]);
 
-  const login = async (
-    username: string,
-    password: string
-  ): Promise<boolean> => {
+  const login = async (username: string, password: string) => {
     try {
       console.log("[Auth] Attempting login...");
       setLoading(true);
@@ -202,91 +203,69 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
       console.log("[Auth] Login data:", data);
 
-      if (response.ok && data.success) {
+      if (data.success) {
         console.log("[Auth] Login successful");
-        // Create user object with all necessary properties
-        const userData = {
-          ...data.user,
-          credits: data.user.credits !== undefined ? data.user.credits : 0,
-          isBanned: data.user.isBanned || false,
-          banReason: data.user.banReason || null,
-          banExpiresAt: data.user.banExpiresAt || null,
-        };
-
-        // Set user in state
-        setUser(userData);
-
-        // Store in localStorage for persistence across page refreshes
-        localStorage.setItem("auth_state", JSON.stringify(userData));
-
-        // Check if user is banned
-        if (userData.isBanned) {
-          console.log("[Auth] User is banned");
-          setError(
-            `Your account has been banned. Reason: ${userData.banReason}`
-          );
-          // Still store the user data so the banned page can display ban details
-          localStorage.setItem("auth_state", JSON.stringify(userData));
-
-          // Redirect to banned page
-          router.push("/auth/banned");
-          return false;
-        }
-
-        // Wait a moment for cookies to be set
+        setUser(data.user);
+        setLoading(false);
+        setError(null);
+        
+        // Store auth state in localStorage
+        localStorage.setItem("auth_state", JSON.stringify(data.user));
+        
+        // Wait for cookies to be set
         console.log("[Auth] Waiting for cookies to be set...");
         await new Promise(resolve => setTimeout(resolve, 500));
-
-        // Redirect to dashboard on successful login
+        
+        // Redirect to dashboard
         console.log("[Auth] Redirecting to dashboard");
         router.push("/dashboard");
+        
         return true;
       } else {
         console.log("[Auth] Login failed:", data.error);
         setError(data.error || "Login failed");
+        setLoading(false);
         return false;
       }
     } catch (error) {
       console.error("[Auth] Login error:", error);
       setError("An error occurred during login");
-      return false;
-    } finally {
       setLoading(false);
+      return false;
     }
   };
 
-  const logout = async (): Promise<void> => {
+  const logout = async () => {
     try {
+      console.log("[Auth] Logging out...");
       setLoading(true);
-
+      
+      // Call logout API
       const response = await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
       });
-
-      if (response.ok) {
-        // Clear user state
-        setUser(null);
-        // Clear localStorage
-        localStorage.removeItem("auth_state");
-        // Clear auth_session and auth_token, session_id cookies to prevent redirect loop
-        document.cookie =
-          "auth_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        document.cookie =
-          "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        document.cookie =
-          "session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      } else {
-        const data = await response.json();
-        setError(data.error || "Logout failed");
-      }
-    } catch (error) {
-      console.error("Logout error:", error);
-      setError("An error occurred during logout");
-      // Still clear localStorage and state on error to prevent being stuck in a logged-in state
+      
+      console.log(`[Auth] Logout response: ${response.status}`);
+      
+      // Clear user state
       setUser(null);
+      
+      // Clear localStorage
       localStorage.removeItem("auth_state");
-    } finally {
+      
+      // Clear cookies
+      document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      document.cookie = "session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      
+      // Redirect to login page
+      console.log("[Auth] Redirecting to login page");
+      router.push("/auth/login");
+      
+      setLoading(false);
+    } catch (error) {
+      console.error("[Auth] Logout error:", error);
+      setError("An error occurred during logout");
       setLoading(false);
     }
   };

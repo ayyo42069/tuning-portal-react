@@ -71,75 +71,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false });
     }
 
-    // Check if session is about to expire (within 1 day)
-    const oneDayFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    
-    // If session is about to expire, refresh it
-    if (expiresAt <= oneDayFromNow) {
-      console.log(`[SessionStatus] Session about to expire, refreshing`);
-      const newExpiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
-      await executeQuery(
-        "UPDATE sessions SET expires_at = ?, last_activity = NOW() WHERE id = ?",
-        [newExpiresAt, sessionId]
-      );
-      
-      // Also refresh the JWT token
-      const newToken = generateToken({
-        id: session.user_id,
-        username: decoded.username,
-        email: decoded.email,
-        role: decoded.role
-      });
-      
-      // Get user data for the response
-      let user = null;
-      try {
-        const [userResult] = await executeQuery<User[]>(
-          `SELECT u.id, u.username, u.email, u.role, 
-                  COALESCE(uc.credits, 0) as credits,
-                  u.is_banned, u.ban_reason, u.ban_expires_at
-           FROM users u 
-           LEFT JOIN user_credits uc ON u.id = uc.user_id 
-           WHERE u.id = ?`,
-          [session.user_id]
-        );
-        
-        if (userResult) {
-          user = userResult;
-          console.log(`[SessionStatus] User data retrieved: ${user.username}`);
-        }
-      } catch (error) {
-        console.error("[SessionStatus] Error fetching user data:", error);
-      }
-      
-      // Create response with refreshed token and user data
-      const response = NextResponse.json({ 
-        success: true,
-        user: user ? {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-          credits: user.credits,
-          isBanned: user.is_banned,
-          banReason: user.ban_reason,
-          banExpiresAt: user.ban_expires_at
-        } : null
-      });
-      
-      // Set the new auth token cookie
-      const authCookieHeader = setAuthCookie(newToken);
-      response.headers.append("Set-Cookie", authCookieHeader);
-      
-      return response;
-    } else {
-      // Update last activity even if not refreshing
-      await executeQuery(
-        "UPDATE sessions SET last_activity = NOW() WHERE id = ?",
-        [sessionId]
-      );
-    }
-
     // Get user data
     let user = null;
     try {
@@ -156,15 +87,67 @@ export async function GET(request: NextRequest) {
       if (userResult) {
         user = userResult;
         console.log(`[SessionStatus] User data retrieved: ${user.username}`);
+      } else {
+        console.log(`[SessionStatus] No user found for ID: ${session.user_id}`);
+        return NextResponse.json({ success: false });
       }
     } catch (error) {
       console.error("[SessionStatus] Error fetching user data:", error);
+      return NextResponse.json({ success: false });
     }
 
-    // Return success response
+    // Check if session is about to expire (within 1 day)
+    const oneDayFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    
+    // If session is about to expire, refresh it
+    if (expiresAt <= oneDayFromNow) {
+      console.log(`[SessionStatus] Session about to expire, refreshing`);
+      const newExpiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+      await executeQuery(
+        "UPDATE sessions SET expires_at = ?, last_activity = NOW() WHERE id = ?",
+        [newExpiresAt, sessionId]
+      );
+      
+      // Also refresh the JWT token
+      const newToken = generateToken({
+        id: session.user_id,
+        username: user.username,
+        email: user.email,
+        role: user.role as "user" | "admin"
+      });
+      
+      // Create response with refreshed token and user data
+      const response = NextResponse.json({ 
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          credits: user.credits,
+          isBanned: user.is_banned,
+          banReason: user.ban_reason,
+          banExpiresAt: user.ban_expires_at
+        }
+      });
+      
+      // Set the new auth token cookie
+      const authCookieHeader = setAuthCookie(newToken);
+      response.headers.append("Set-Cookie", authCookieHeader);
+      
+      return response;
+    } else {
+      // Update last activity even if not refreshing
+      await executeQuery(
+        "UPDATE sessions SET last_activity = NOW() WHERE id = ?",
+        [sessionId]
+      );
+    }
+
+    // Return success response with user data
     const response = NextResponse.json({ 
       success: true,
-      user: user ? {
+      user: {
         id: user.id,
         username: user.username,
         email: user.email,
@@ -173,7 +156,7 @@ export async function GET(request: NextRequest) {
         isBanned: user.is_banned,
         banReason: user.ban_reason,
         banExpiresAt: user.ban_expires_at
-      } : null
+      }
     });
     
     console.log("[SessionStatus] Returning success response");
