@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { authenticateUser } from "@/lib/authMiddleware";
-import { executeQuery } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
+import { executeQuery } from "@/lib/db";
 
 interface User {
   id: number;
@@ -20,30 +19,27 @@ interface User {
  */
 export async function GET(request: NextRequest) {
   try {
-    console.log("[UserData] Getting user data");
+    console.log("[User] Processing user data request");
     
     // Get token from cookie
     const token = request.cookies.get("auth_token")?.value;
-    const sessionId = request.cookies.get("session_id")?.value;
-
-    console.log(`[UserData] Token exists: ${!!token}, Session ID exists: ${!!sessionId}`);
-
-    if (!token || !sessionId) {
-      console.log("[UserData] Missing token or session ID");
-      return NextResponse.json({ success: false }, { status: 401 });
+    
+    if (!token) {
+      console.log("[User] No auth token found");
+      return NextResponse.json({ success: false, error: "No auth token found" }, { status: 401 });
     }
-
+    
     // Verify token
     const decoded = verifyToken(token);
-    if (!decoded) {
-      console.log("[UserData] Invalid token");
-      return NextResponse.json({ success: false }, { status: 401 });
+    if (!decoded || !decoded.id) {
+      console.log("[User] Invalid token");
+      return NextResponse.json({ success: false, error: "Invalid token" }, { status: 401 });
     }
-
-    console.log(`[UserData] Token verified for user: ${decoded.id}`);
-
+    
+    console.log(`[User] Token verified for user: ${decoded.id}`);
+    
     // Get user data from database
-    const [userResult] = await executeQuery<User[]>(
+    const [user] = await executeQuery<User[]>(
       `SELECT u.id, u.username, u.email, u.role, 
               COALESCE(uc.credits, 0) as credits,
               u.is_banned, u.ban_reason, u.ban_expires_at
@@ -53,29 +49,29 @@ export async function GET(request: NextRequest) {
       [decoded.id]
     );
     
-    if (!userResult) {
-      console.log(`[UserData] No user found for ID: ${decoded.id}`);
+    if (!user) {
+      console.log(`[User] No user found for ID: ${decoded.id}`);
       return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
     }
     
-    console.log(`[UserData] User data retrieved: ${userResult.username}`);
+    console.log(`[User] User data retrieved: ${user.username}`);
     
-    // Return success response with user data
-    return NextResponse.json({ 
+    // Return user data
+    return NextResponse.json({
       success: true,
       user: {
-        id: userResult.id,
-        username: userResult.username,
-        email: userResult.email,
-        role: userResult.role,
-        credits: userResult.credits,
-        isBanned: userResult.is_banned,
-        banReason: userResult.ban_reason,
-        banExpiresAt: userResult.ban_expires_at
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role as "user" | "admin",
+        credits: user.credits,
+        isBanned: user.is_banned,
+        banReason: user.ban_reason,
+        banExpiresAt: user.ban_expires_at
       }
     });
   } catch (error) {
-    console.error("[UserData] Error getting user data:", error);
-    return NextResponse.json({ success: false, error: "Failed to get user data" }, { status: 500 });
+    console.error("[User] Error retrieving user data:", error);
+    return NextResponse.json({ success: false, error: "Failed to retrieve user data" }, { status: 500 });
   }
 } 

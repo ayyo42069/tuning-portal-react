@@ -72,17 +72,36 @@ export default function AuthDebugger() {
         </div>
       </div>
       
-      <div className="mt-4">
+      <div className="mt-4 flex space-x-2">
         <button 
           onClick={() => {
-            fetch("/api/auth/session-status", { credentials: "include" })
+            console.log("[AuthDebugger] Manually refreshing user data...");
+            fetch("/api/auth/user", { credentials: "include" })
               .then(res => res.json())
-              .then(data => console.log("Session status:", data))
-              .catch(err => console.error("Session check error:", err));
+              .then(data => console.log("[AuthDebugger] User data:", data))
+              .catch(err => console.error("[AuthDebugger] User data error:", err));
           }}
-          className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs"
+          className="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs"
         >
-          Check Session
+          Refresh User
+        </button>
+        
+        <button 
+          onClick={() => {
+            console.log("[AuthDebugger] Manually logging out...");
+            fetch("/api/auth/logout", { 
+              method: "POST",
+              credentials: "include" 
+            })
+              .then(() => {
+                console.log("[AuthDebugger] Logout successful");
+                window.location.href = "/auth/login";
+              })
+              .catch(err => console.error("[AuthDebugger] Logout error:", err));
+          }}
+          className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
+        >
+          Force Logout
         </button>
       </div>
     </div>

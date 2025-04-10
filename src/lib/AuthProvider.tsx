@@ -39,42 +39,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Check session status and refresh user data
-  const checkSession = async () => {
-    try {
-      console.log("[AuthProvider] Checking session status");
-      const response = await fetch("/api/auth/session-status", {
-        credentials: "include",
-      });
-
-      console.log(`[AuthProvider] Session status response: ${response.status}`);
-      const data = await response.json();
-      console.log("[AuthProvider] Session status data:", data);
-
-      if (!data.success) {
-        console.log("[AuthProvider] Session check failed, logging out");
-        await logout();
-        return;
-      }
-
-      if (data.user) {
-        console.log("[AuthProvider] User data received:", data.user);
-        setUser(data.user);
-        setLoading(false);
-        setError(null);
-      } else {
-        console.log("[AuthProvider] No user data in response, but session is valid");
-        // If we have a valid session but no user data, try to refresh user data
-        await refreshUserData();
-      }
-    } catch (error) {
-      console.error("[AuthProvider] Error checking session:", error);
-      // Don't immediately log out on network errors
-      setError("Failed to verify session. Please try again.");
-      setLoading(false);
-    }
-  };
-
   // Refresh user data
   const refreshUserData = async () => {
     try {
@@ -95,47 +59,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Update stored auth state
         localStorage.setItem("auth_state", JSON.stringify(data.user));
       } else {
-        console.log("[AuthProvider] Failed to refresh user data, checking session");
-        // If user data refresh fails, check session status
-        await checkSession();
+        console.log("[AuthProvider] Failed to refresh user data");
+        setError("Failed to refresh user data");
+        setLoading(false);
       }
     } catch (error) {
       console.error("[AuthProvider] Error refreshing user data:", error);
-      // Don't immediately log out on network errors
       setError("Failed to refresh user data. Please try again.");
       setLoading(false);
     }
   };
 
-  // Refresh token
-  const refreshToken = async () => {
-    try {
-      console.log("[AuthProvider] Refreshing token");
-      const response = await fetch("/api/auth/refresh", {
-        method: "POST",
-        credentials: "include",
-      });
-
-      console.log(`[AuthProvider] Token refresh response: ${response.status}`);
-      const data = await response.json();
-      console.log("[AuthProvider] Token refresh data:", data);
-
-      if (!data.success) {
-        console.log("[AuthProvider] Token refresh failed, checking session");
-        // If token refresh fails, check session status
-        await checkSession();
-      } else {
-        console.log("[AuthProvider] Token refreshed successfully");
-      }
-    } catch (error) {
-      console.error("[AuthProvider] Error refreshing token:", error);
-      // Don't immediately log out on network errors
-      setError("Failed to refresh token. Please try again.");
-      setLoading(false);
-    }
-  };
-
-  // Initial session check
+  // Initial auth check
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -147,42 +82,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
         
-        // Add a small delay before the initial check to allow cookies to be set
-        console.log("[Auth] Waiting for cookies to be set...");
-        await new Promise(resolve => setTimeout(resolve, 500));
-        await checkSession();
+        // Try to get user data from localStorage first
+        const storedAuthState = localStorage.getItem("auth_state");
+        if (storedAuthState) {
+          try {
+            const parsedUser = JSON.parse(storedAuthState);
+            console.log("[Auth] Found stored user data");
+            setUser(parsedUser);
+          } catch (e) {
+            console.error("[Auth] Error parsing stored auth state:", e);
+            localStorage.removeItem("auth_state");
+          }
+        }
+        
+        // Refresh user data from server
+        await refreshUserData();
       } catch (error) {
-        console.error("[Auth] Initial session check failed:", error);
+        console.error("[Auth] Initial auth check failed:", error);
       } finally {
         setLoading(false);
       }
     };
 
     initializeAuth();
-  }, [checkSession, pathname]);
-
-  // Set up periodic session checks (every 15 minutes instead of 5)
-  useEffect(() => {
-    const interval = setInterval(checkSession, 15 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [checkSession]);
+  }, [pathname]);
 
   // Refresh user data periodically (every 15 minutes)
   useEffect(() => {
     const interval = setInterval(refreshUserData, 15 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [refreshUserData]);
-
-  // Handle session termination
-  const handleSessionTermination = useCallback(async () => {
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      setUser(null);
-      router.push("/auth/login");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  }, [router]);
+  }, []);
 
   const login = async (username: string, password: string) => {
     try {
@@ -211,10 +140,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // Store auth state in localStorage
         localStorage.setItem("auth_state", JSON.stringify(data.user));
-        
-        // Wait for cookies to be set
-        console.log("[Auth] Waiting for cookies to be set...");
-        await new Promise(resolve => setTimeout(resolve, 500));
         
         // Redirect to dashboard
         console.log("[Auth] Redirecting to dashboard");
