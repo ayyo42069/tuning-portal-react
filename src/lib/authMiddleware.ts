@@ -108,6 +108,12 @@ export async function authenticateUser(request: NextRequest): Promise<AuthResult
       console.log(`Session ${sessionId} refreshed for user ${session.user_id}`);
     }
 
+    // Update session last activity
+    await executeQuery(
+      "UPDATE sessions SET last_activity = NOW() WHERE id = ?",
+      [sessionId]
+    );
+
     // Get user data from database including credits and ban information
     const user = await getRow<UserDB>(
       `SELECT u.id, u.username, u.email, u.role, u.created_at, 

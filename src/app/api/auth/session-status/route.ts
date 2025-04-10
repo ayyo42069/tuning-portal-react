@@ -6,6 +6,7 @@ import { verifyToken } from "@/lib/auth";
 interface Session {
   user_id: number;
   expires_at: Date;
+  last_activity: Date;
 }
 
 interface User {
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
 
     // Get session from database
     const [session] = await executeQuery<Session[]>(
-      "SELECT user_id, expires_at FROM sessions WHERE id = ?",
+      "SELECT user_id, expires_at, last_activity FROM sessions WHERE id = ?",
       [sessionId]
     );
 

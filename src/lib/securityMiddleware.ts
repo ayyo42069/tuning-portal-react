@@ -201,7 +201,7 @@ export async function logApiAccess(
 
   // Log user activity for API access
   if (userId) {
-    await logUserActivity(userId, request, ActivityType.API_ACCESS, {
+    await logUserActivity(userId, request, ActivityType.PROFILE_UPDATE, {
       endpoint,
       method,
       isSensitive,
