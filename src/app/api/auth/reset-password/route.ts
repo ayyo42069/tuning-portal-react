@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     // Use executeTransaction to handle all database operations
     await executeTransaction([
       "UPDATE users SET password = ? WHERE id = ?",
-      "UPDATE password_reset_tokens SET used = 1, used_at = NOW() WHERE id = ?",
+      "UPDATE password_reset_tokens SET used = 1 WHERE id = ?",
       "DELETE FROM sessions WHERE user_id = ?"
     ], [
       [hashedPassword, userId],
