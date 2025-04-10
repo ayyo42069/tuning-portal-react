@@ -46,12 +46,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const sessionResponse = await fetch("/api/auth/session-status", {
         credentials: "include",
       });
+      
+      if (!sessionResponse.ok) {
+        console.error("Session check failed:", sessionResponse.status);
+        // Only redirect if we're not already on an auth page
+        if (!pathname.startsWith("/auth/")) {
+          router.push("/auth/login");
+        }
+        setUser(null);
+        return;
+      }
+
       const sessionData = await sessionResponse.json();
 
       if (!sessionData.success) {
-        // Only redirect if we're not already on an auth page and there's no stored auth state
-        const storedAuth = localStorage.getItem("auth_state");
-        if (!pathname.startsWith("/auth/") && !storedAuth) {
+        // Only redirect if we're not already on an auth page
+        if (!pathname.startsWith("/auth/")) {
           router.push("/auth/login");
         }
         setUser(null);
@@ -65,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       if (!tokenResponse.ok) {
-        console.error("Token refresh failed");
+        console.error("Token refresh failed:", tokenResponse.status);
       }
 
       // Finally refresh user data
@@ -112,6 +122,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        // Add a small delay before the initial check to allow cookies to be set
+        await new Promise(resolve => setTimeout(resolve, 1000));
         await checkSession();
       } catch (error) {
         console.error("Initial session check failed:", error);
@@ -123,9 +135,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initializeAuth();
   }, [checkSession]);
 
-  // Set up periodic session checks (every 5 minutes)
+  // Set up periodic session checks (every 15 minutes instead of 5)
   useEffect(() => {
-    const interval = setInterval(checkSession, 5 * 60 * 1000);
+    const interval = setInterval(checkSession, 15 * 60 * 1000);
     return () => clearInterval(interval);
   }, [checkSession]);
 

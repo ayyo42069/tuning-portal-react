@@ -90,9 +90,10 @@ export function setAuthCookie(token: string): string {
   return serialize("auth_token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax", // Changed from strict to lax to allow cross-origin requests
-    maxAge: 60 * 60 * 24 * 30, // Increased from 7 to 30 days
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 30, // 30 days
     path: "/",
+    domain: process.env.NODE_ENV === "production" ? ".tuning-portal.eu" : undefined
   });
 }
 
