@@ -95,14 +95,36 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user data
-    const [user] = await executeQuery<User[]>(
-      `SELECT u.id, u.username, u.email, u.role, u.is_banned, u.ban_reason, u.ban_expires_at,
-              COALESCE(uc.credits, 0) as credits
-       FROM users u 
-       LEFT JOIN user_credits uc ON u.id = uc.user_id 
-       WHERE u.id = ?`,
-      [session.user_id]
-    );
+    let user = null;
+    try {
+      const [userResult] = await executeQuery<User[]>(
+        `SELECT u.id, u.username, u.email, u.role, u.is_banned, u.ban_reason, u.ban_expires_at,
+                COALESCE(uc.credits, 0) as credits
+         FROM users u 
+         LEFT JOIN user_credits uc ON u.id = uc.user_id 
+         WHERE u.id = ?`,
+        [session.user_id]
+      );
+      user = userResult;
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      // Try a simpler query if the first one fails
+      try {
+        const [userResult] = await executeQuery<User[]>(
+          `SELECT id, username, email, role, is_banned, ban_reason, ban_expires_at
+           FROM users 
+           WHERE id = ?`,
+          [session.user_id]
+        );
+        user = {
+          ...userResult,
+          credits: 0
+        };
+      } catch (innerError) {
+        console.error("Error fetching user data with fallback query:", innerError);
+        return NextResponse.json({ success: false });
+      }
+    }
 
     if (!user) {
       return NextResponse.json({ success: false });

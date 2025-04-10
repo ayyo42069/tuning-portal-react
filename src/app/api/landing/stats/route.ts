@@ -89,55 +89,85 @@ export async function GET(req: NextRequest) {
     }
 
     // Get vehicle manufacturers count
-    const manufacturersResult = await executeQuery<any[]>(
-      "SELECT COUNT(*) as total FROM manufacturers",
-      [],
-      { cache: true, cacheTTL: 300000 } // 5 minutes
-    );
-    const totalManufacturers = manufacturersResult[0]?.total || 0;
+    let totalManufacturers = 0;
+    try {
+      const manufacturersResult = await executeQuery<any[]>(
+        "SELECT COUNT(*) as total FROM manufacturers",
+        [],
+        { cache: true, cacheTTL: 300000 } // 5 minutes
+      );
+      totalManufacturers = manufacturersResult[0]?.total || 0;
+    } catch (error) {
+      console.error("Error fetching manufacturers count:", error);
+      // Continue with default value
+    }
 
     // Get vehicle models count
-    const modelsResult = await executeQuery<any[]>(
-      "SELECT COUNT(*) as total FROM models",
-      [],
-      { cache: true, cacheTTL: 300000 } // 5 minutes
-    );
-    const totalModels = modelsResult[0]?.total || 0;
+    let totalModels = 0;
+    try {
+      const modelsResult = await executeQuery<any[]>(
+        "SELECT COUNT(*) as total FROM models",
+        [],
+        { cache: true, cacheTTL: 300000 } // 5 minutes
+      );
+      totalModels = modelsResult[0]?.total || 0;
+    } catch (error) {
+      console.error("Error fetching models count:", error);
+      // Continue with default value
+    }
 
     // Get completed tuning files count
-    const completedFilesResult = await executeQuery<any[]>(
-      "SELECT COUNT(*) as total FROM ecu_files WHERE status = 'completed'",
-      [],
-      { cache: true, cacheTTL: 300000 } // 5 minutes
-    );
-    const completedFiles = completedFilesResult[0]?.total || 0;
+    let completedFiles = 0;
+    try {
+      const completedFilesResult = await executeQuery<any[]>(
+        "SELECT COUNT(*) as total FROM ecu_files WHERE status = 'completed'",
+        [],
+        { cache: true, cacheTTL: 300000 } // 5 minutes
+      );
+      completedFiles = completedFilesResult[0]?.total || 0;
+    } catch (error) {
+      console.error("Error fetching completed files count:", error);
+      // Continue with default value
+    }
 
     // Get average processing time for completed files
-    const processingTimeResult = await executeQuery<any[]>(
-      `SELECT 
-        ROUND(AVG(TIMESTAMPDIFF(HOUR, created_at, updated_at))) as avg_hours 
-       FROM ecu_files 
-       WHERE status = 'completed' AND updated_at IS NOT NULL`,
-      [],
-      { cache: true, cacheTTL: 300000 } // 5 minutes
-    );
-    const avgProcessingTime = processingTimeResult[0]?.avg_hours || 0;
+    let avgProcessingTime = 0;
+    try {
+      const processingTimeResult = await executeQuery<any[]>(
+        `SELECT 
+          ROUND(AVG(TIMESTAMPDIFF(HOUR, created_at, updated_at))) as avg_hours 
+         FROM ecu_files 
+         WHERE status = 'completed' AND updated_at IS NOT NULL`,
+        [],
+        { cache: true, cacheTTL: 300000 } // 5 minutes
+      );
+      avgProcessingTime = processingTimeResult[0]?.avg_hours || 0;
+    } catch (error) {
+      console.error("Error fetching processing time:", error);
+      // Continue with default value
+    }
 
     // Get top 3 manufacturers by file count
-    const topManufacturersResult = await executeQuery<any[]>(
-      `SELECT 
-        m.name, 
-        COUNT(ef.id) as file_count 
-       FROM manufacturers m
-       JOIN models md ON m.id = md.manufacturer_id
-       JOIN ecu_files ef ON md.id = ef.model_id
-       GROUP BY m.id, m.name
-       ORDER BY file_count DESC
-       LIMIT 3`,
-      [],
-      { cache: true, cacheTTL: 300000 } // 5 minutes
-    );
-    const topManufacturers = topManufacturersResult || [];
+    let topManufacturers = [];
+    try {
+      const topManufacturersResult = await executeQuery<any[]>(
+        `SELECT 
+          m.name, 
+          COUNT(ef.id) as file_count 
+         FROM manufacturers m
+         JOIN models md ON m.id = md.manufacturer_id
+         JOIN ecu_files ef ON md.id = ef.model_id
+         GROUP BY m.id, m.name
+         ORDER BY file_count DESC
+         LIMIT 3`,
+        [],
+        { cache: true, cacheTTL: 300000 } // 5 minutes
+      );
+      topManufacturers = topManufacturersResult || [];
+    } catch (error) {
+      console.error("Error fetching top manufacturers:", error);
+      // Continue with default value
+    }
 
     return NextResponse.json({
       users: totalUsers,

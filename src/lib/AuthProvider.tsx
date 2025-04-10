@@ -214,25 +214,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Wait a moment for cookies to be set
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        // Verify the session was created successfully
-        const sessionCheck = await fetch("/api/auth/session-status", {
-          credentials: "include",
-        });
-
-        if (!sessionCheck.ok) {
-          console.error("Session verification failed:", sessionCheck.status);
-          setError("Failed to establish session. Please try again.");
-          return false;
-        }
-
-        const sessionData = await sessionCheck.json();
-        if (!sessionData.success) {
-          console.error("Session verification failed:", sessionData);
-          setError("Failed to establish session. Please try again.");
-          return false;
-        }
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         // Redirect to dashboard on successful login
         router.push("/dashboard");
