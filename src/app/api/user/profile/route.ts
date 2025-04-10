@@ -1,45 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
+import { authenticateUser } from "@/lib/authMiddleware";
 import { getRow } from "@/lib/db";
-import { verifyToken, getAuthCookie } from "@/lib/auth";
+import { getAuthCookie, verifyToken, setAuthCookie } from "@/lib/auth";
 import { logApiAccess } from "@/lib/securityMiddleware";
 
 interface User {
   id: number;
   username: string;
   email: string;
-  role: "user" | "admin";
+  role: string;
   credits: number;
 }
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the auth token from cookies
-    const cookies = request.headers.get("cookie") || "";
-    console.log("Cookies received:", cookies ? "Present" : "None");
-    const token = getAuthCookie(cookies);
-    console.log("Auth token extracted:", token ? "Present" : "None");
-
-    if (!token) {
-      console.log("Authentication failed: No token found");
+    // Authenticate the user
+    const authResult = await authenticateUser(request);
+    
+    if (!authResult.success) {
       return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
+        { error: authResult.error || "Authentication required" },
+        { status: authResult.status }
       );
     }
-
-    // Verify the token
-    console.log("Verifying token...");
-    const decoded = verifyToken(token);
-    console.log("Token verification result:", decoded ? "Valid" : "Invalid");
-
-    if (!decoded || !decoded.id) {
-      console.log("Authentication failed: Invalid token");
-      return NextResponse.json(
-        { error: "Invalid authentication token" },
-        { status: 401 }
-      );
-    }
-
+    
     // Get user data from database including credits
     // Adding cache: false to ensure we always get the latest credit balance
     const user = await getRow<User>(
@@ -47,7 +31,7 @@ export async function GET(request: NextRequest) {
        FROM users u 
        LEFT JOIN user_credits uc ON u.id = uc.user_id 
        WHERE u.id = ?`,
-      [decoded.id],
+      [authResult.user?.id],
       { cache: false }
     );
 
@@ -57,20 +41,28 @@ export async function GET(request: NextRequest) {
 
     // Log API access for profile data (sensitive information)
     await logApiAccess(
-      decoded.id,
+      user.id,
       request,
       "/api/user/profile",
       true // Mark as sensitive data
     );
 
-    // Return user data
-    return NextResponse.json(
+    // Create response with user data
+    const response = NextResponse.json(
       {
         success: true,
         user,
       },
       { status: 200 }
     );
+    
+    // If a new token was generated, set it in the response
+    if (authResult.newToken) {
+      const authCookieHeader = setAuthCookie(authResult.newToken);
+      response.headers.append("Set-Cookie", authCookieHeader);
+    }
+
+    return response;
   } catch (error) {
     console.error("Profile fetch error:", error);
     return NextResponse.json(

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateUser } from "@/lib/authMiddleware";
 import { executeQuery } from "@/lib/db";
-import { verifyToken } from "@/lib/auth";
+import { verifyToken, generateToken, setAuthCookie } from "@/lib/auth";
 
 interface Session {
   user_id: number;
@@ -60,6 +60,30 @@ export async function GET(request: NextRequest) {
         "UPDATE sessions SET expires_at = ?, last_activity = NOW() WHERE id = ?",
         [newExpiresAt, sessionId]
       );
+      
+      // Also refresh the JWT token
+      const newToken = generateToken({
+        id: session.user_id,
+        username: decoded.username,
+        email: decoded.email,
+        role: decoded.role
+      });
+      
+      // Create response with refreshed token
+      const response = NextResponse.json({ 
+        success: true,
+        user: {
+          id: session.user_id,
+          email: decoded.email,
+          role: decoded.role
+        }
+      });
+      
+      // Set the new auth token cookie
+      const authCookieHeader = setAuthCookie(newToken);
+      response.headers.append("Set-Cookie", authCookieHeader);
+      
+      return response;
     } else {
       // Update last activity even if not refreshing
       await executeQuery(

@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { verifyToken } from "./auth";
+import { verifyToken, generateToken, setAuthCookie } from "./auth";
 import { getRow, executeQuery } from "./db";
 import { User } from "./types/auth";
 
@@ -17,6 +17,7 @@ interface AuthResult {
   isAuthenticated: boolean;
   redirectTo?: string;
   user?: UserDB;
+  newToken?: string;
 }
 
 /**
@@ -106,6 +107,22 @@ export async function authenticateUser(request: NextRequest): Promise<AuthResult
       );
       
       console.log(`Session ${sessionId} refreshed for user ${session.user_id}`);
+      
+      // Also refresh the JWT token
+      const newToken = generateToken({
+        id: decodedToken.id,
+        username: decodedToken.username,
+        email: decodedToken.email,
+        role: decodedToken.role
+      });
+      
+      // Return the new token so the API route can set it
+      return {
+        success: true,
+        status: 200,
+        isAuthenticated: true,
+        newToken
+      };
     }
 
     // Update session last activity

@@ -42,12 +42,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Check session status and refresh user data
   const checkSession = useCallback(async () => {
     try {
-      const response = await fetch("/api/auth/session-status", {
+      // First check session status
+      const sessionResponse = await fetch("/api/auth/session-status", {
         credentials: "include",
       });
-      const data = await response.json();
+      const sessionData = await sessionResponse.json();
 
-      if (!data.success) {
+      if (!sessionData.success) {
         // Only redirect if we're not already on an auth page and there's no stored auth state
         const storedAuth = localStorage.getItem("auth_state");
         if (!pathname.startsWith("/auth/") && !storedAuth) {
@@ -57,7 +58,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Refresh user data if session is valid
+      // Then refresh the token
+      const tokenResponse = await fetch("/api/auth/refresh-token", {
+        method: "POST",
+        credentials: "include",
+      });
+      
+      if (!tokenResponse.ok) {
+        console.error("Token refresh failed");
+      }
+
+      // Finally refresh user data
       await refreshUser();
     } catch (error) {
       console.error("Session check failed:", error);
@@ -112,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initializeAuth();
   }, [checkSession]);
 
-  // Set up periodic session checks (every 5 minutes instead of every minute)
+  // Set up periodic session checks (every 5 minutes)
   useEffect(() => {
     const interval = setInterval(checkSession, 5 * 60 * 1000);
     return () => clearInterval(interval);
