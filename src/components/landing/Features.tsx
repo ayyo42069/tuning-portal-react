@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 interface FeaturesProps {
   inView: boolean;
@@ -107,6 +108,27 @@ export const Features = ({ inView }: FeaturesProps) => {
     },
   ];
 
+  const testimonials = [
+    {
+      quote: "The performance increase after tuning was incredible. My car feels like a completely different machine!",
+      author: "Michael T.",
+      role: "BMW M3 Owner",
+      rating: 5
+    },
+    {
+      quote: "Professional service from start to finish. The team was responsive and delivered exactly what I needed.",
+      author: "Sarah L.",
+      role: "Audi RS6 Owner",
+      rating: 5
+    },
+    {
+      quote: "I was skeptical at first, but the results speak for themselves. Fuel efficiency improved by 15%!",
+      author: "David R.",
+      role: "VW Golf R Owner",
+      rating: 5
+    }
+  ];
+
   return (
     <section className="py-20 relative overflow-hidden">
       {/* Background with subtle pattern */}
@@ -138,7 +160,7 @@ export const Features = ({ inView }: FeaturesProps) => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
           {features.map((feature, index) => (
             <motion.div
               key={index}
@@ -157,6 +179,87 @@ export const Features = ({ inView }: FeaturesProps) => {
             </motion.div>
           ))}
         </div>
+
+        {/* Process section */}
+        <motion.div variants={itemVariants} className="mb-20">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              Our Tuning Process
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-cyan-500 to-blue-600 mx-auto mb-6"></div>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Simple, efficient, and professional - from start to finish
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-6">
+            {[
+              { number: "01", title: "Upload", description: "Submit your ECU file through our secure portal" },
+              { number: "02", title: "Analyze", description: "Our experts analyze your vehicle's data" },
+              { number: "03", title: "Tune", description: "Custom tuning based on your requirements" },
+              { number: "04", title: "Deliver", description: "Receive your optimized ECU file" }
+            ].map((step, index) => (
+              <motion.div
+                key={index}
+                variants={itemVariants}
+                className="relative p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700"
+              >
+                <div className="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                  {step.number}
+                </div>
+                <div className="pt-8">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    {step.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    {step.description}
+                  </p>
+                </div>
+                {index < 3 && (
+                  <div className="hidden md:block absolute top-1/2 -right-3 w-6 h-0.5 bg-gradient-to-r from-cyan-500 to-blue-600"></div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Testimonials section */}
+        <motion.div variants={itemVariants}>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              What Our Customers Say
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-cyan-500 to-blue-600 mx-auto mb-6"></div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={index}
+                variants={itemVariants}
+                className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700"
+              >
+                <div className="flex mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 mb-4 italic">"{testimonial.quote}"</p>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold mr-3">
+                    {testimonial.author.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 dark:text-white">{testimonial.author}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{testimonial.role}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       </motion.div>
     </section>
   );
