@@ -56,14 +56,29 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await hash(password, 10);
 
     // Use a transaction to ensure all operations succeed or fail together
-    await executeQuery(
-      `START TRANSACTION;
-       UPDATE users SET password = ? WHERE id = ?;
-       UPDATE password_reset_tokens SET used = 1, used_at = NOW() WHERE id = ?;
-       DELETE FROM sessions WHERE user_id = ?;
-       COMMIT;`,
-      [hashedPassword, userId, tokenId, userId]
-    );
+    await executeQuery("START TRANSACTION");
+
+    try {
+      await executeQuery(
+        "UPDATE users SET password = ? WHERE id = ?",
+        [hashedPassword, userId]
+      );
+
+      await executeQuery(
+        "UPDATE password_reset_tokens SET used = 1, used_at = NOW() WHERE id = ?",
+        [tokenId]
+      );
+
+      await executeQuery(
+        "DELETE FROM sessions WHERE user_id = ?",
+        [userId]
+      );
+
+      await executeQuery("COMMIT");
+    } catch (error) {
+      await executeQuery("ROLLBACK");
+      throw error;
+    }
 
     // Send confirmation email
     await sendEmail({
