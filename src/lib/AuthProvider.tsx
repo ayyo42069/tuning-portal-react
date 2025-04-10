@@ -45,6 +45,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Define protected routes that require authentication
       const protectedRoutes = ['/dashboard', '/admin', '/profile', '/settings'];
       const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+      const isAuthRoute = pathname.startsWith("/auth/");
+
+      // Skip session check if we're already on the login page
+      if (isAuthRoute) {
+        setLoading(false);
+        return;
+      }
 
       // First check session status
       const sessionResponse = await fetch("/api/auth/session-status", {
@@ -54,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!sessionResponse.ok) {
         console.error("Session check failed:", sessionResponse.status);
         // Only redirect if we're on a protected route
-        if (isProtectedRoute && !pathname.startsWith("/auth/")) {
+        if (isProtectedRoute) {
           router.push("/auth/login");
         }
         setUser(null);
@@ -65,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!sessionData.success) {
         // Only redirect if we're on a protected route
-        if (isProtectedRoute && !pathname.startsWith("/auth/")) {
+        if (isProtectedRoute) {
           router.push("/auth/login");
         }
         setUser(null);
@@ -129,8 +136,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        // Check if we're on an auth route to avoid redirect loops
+        if (pathname.startsWith("/auth/")) {
+          setLoading(false);
+          return;
+        }
+        
         // Add a small delay before the initial check to allow cookies to be set
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
         await checkSession();
       } catch (error) {
         console.error("Initial session check failed:", error);
@@ -140,7 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     initializeAuth();
-  }, [checkSession]);
+  }, [checkSession, pathname]);
 
   // Set up periodic session checks (every 15 minutes instead of 5)
   useEffect(() => {

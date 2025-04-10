@@ -93,7 +93,8 @@ export function setAuthCookie(token: string): string {
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 30, // 30 days
     path: "/",
-    domain: process.env.NODE_ENV === "production" ? ".tuning-portal.eu" : undefined
+    // Remove domain setting to allow cookies to work in all environments
+    // domain: process.env.NODE_ENV === "production" ? ".tuning-portal.eu" : undefined
   });
 }
 

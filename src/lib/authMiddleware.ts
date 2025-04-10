@@ -59,7 +59,7 @@ export async function authenticateUser(request: NextRequest): Promise<AuthResult
         error: "No active session",
         status: 401,
         isAuthenticated: false,
-        redirectTo: "/auth/terminated",
+        redirectTo: "/auth/login",
       };
     }
 
@@ -75,14 +75,13 @@ export async function authenticateUser(request: NextRequest): Promise<AuthResult
         error: "Session terminated",
         status: 401,
         isAuthenticated: false,
-        redirectTo: "/auth/terminated",
+        redirectTo: "/auth/login",
       };
     }
 
-    // Check if session is expired or about to expire (within 1 day)
+    // Check if session is expired
     const expiresAt = new Date(session.expires_at);
     const now = new Date();
-    const oneDayFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     
     // If session is expired
     if (expiresAt < now) {
@@ -95,7 +94,10 @@ export async function authenticateUser(request: NextRequest): Promise<AuthResult
       };
     }
     
-    // If session is about to expire (within 1 day), refresh it
+    // Check if session is about to expire (within 1 day)
+    const oneDayFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    
+    // If session is about to expire, refresh it
     if (expiresAt < oneDayFromNow) {
       // Extend session expiration by 30 days
       const newExpiresAt = new Date();

@@ -50,12 +50,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false });
     }
 
-    // Check if session is expired or about to expire (within 1 day)
+    // Check if session is expired
     const expiresAt = new Date(session.expires_at);
     const now = new Date();
-    const oneDayFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    
+    // If session is expired
+    if (expiresAt < now) {
+      return NextResponse.json({ success: false });
+    }
 
-    // If session is expired or about to expire, refresh it
+    // Check if session is about to expire (within 1 day)
+    const oneDayFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    
+    // If session is about to expire, refresh it
     if (expiresAt <= oneDayFromNow) {
       const newExpiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
       await executeQuery(
@@ -98,51 +105,26 @@ export async function GET(request: NextRequest) {
     let user = null;
     try {
       const [userResult] = await executeQuery<User[]>(
-        `SELECT u.id, u.username, u.email, u.role, u.is_banned, u.ban_reason, u.ban_expires_at,
-                COALESCE(uc.credits, 0) as credits
+        `SELECT u.id, u.username, u.email, u.role, 
+                COALESCE(uc.credits, 0) as credits,
+                u.is_banned, u.ban_reason, u.ban_expires_at
          FROM users u 
          LEFT JOIN user_credits uc ON u.id = uc.user_id 
          WHERE u.id = ?`,
         [session.user_id]
       );
-      user = userResult;
+      
+      if (userResult) {
+        user = userResult;
+      }
     } catch (error) {
       console.error("Error fetching user data:", error);
-      // Try a simpler query if the first one fails
-      try {
-        const [userResult] = await executeQuery<User[]>(
-          `SELECT id, username, email, role, is_banned, ban_reason, ban_expires_at
-           FROM users 
-           WHERE id = ?`,
-          [session.user_id]
-        );
-        user = {
-          ...userResult,
-          credits: 0
-        };
-      } catch (innerError) {
-        console.error("Error fetching user data with fallback query:", innerError);
-        return NextResponse.json({ success: false });
-      }
     }
 
-    if (!user) {
-      return NextResponse.json({ success: false });
-    }
-
-    // Check if user is banned
-    if (user.is_banned) {
-      return NextResponse.json({ 
-        success: false,
-        error: "Account banned",
-        banReason: user.ban_reason,
-        banExpiresAt: user.ban_expires_at
-      });
-    }
-
+    // Return success response
     return NextResponse.json({ 
       success: true,
-      user: {
+      user: user ? {
         id: user.id,
         username: user.username,
         email: user.email,
@@ -151,7 +133,7 @@ export async function GET(request: NextRequest) {
         isBanned: user.is_banned,
         banReason: user.ban_reason,
         banExpiresAt: user.ban_expires_at
-      }
+      } : null
     });
   } catch (error) {
     console.error("Session status check failed:", error);
