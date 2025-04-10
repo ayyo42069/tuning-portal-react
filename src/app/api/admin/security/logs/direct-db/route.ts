@@ -65,15 +65,24 @@ export async function GET(request: NextRequest) {
       const eventType = searchParams.get("eventType");
       if (
         eventType &&
-        Object.values(SecurityEventType).includes(
+        (Object.values(SecurityEventType).includes(
           eventType as SecurityEventType
-        )
+        ) || eventType === "api_access")
       ) {
-        whereClause += whereClause
-          ? " AND se.event_type = ?"
-          : "se.event_type = ?";
-        queryParams.push(eventType);
-        console.log(`Direct-DB API: Added eventType filter: ${eventType}`);
+        if (eventType === "api_access") {
+          whereClause += whereClause
+            ? " AND (se.event_type = ? OR se.event_type = ?)"
+            : "(se.event_type = ? OR se.event_type = ?)";
+          queryParams.push("api_access");
+          queryParams.push("sensitive_data_access");
+          console.log(`Direct-DB API: Added api_access filter`);
+        } else {
+          whereClause += whereClause
+            ? " AND se.event_type = ?"
+            : "se.event_type = ?";
+          queryParams.push(eventType);
+          console.log(`Direct-DB API: Added eventType filter: ${eventType}`);
+        }
       }
     }
 

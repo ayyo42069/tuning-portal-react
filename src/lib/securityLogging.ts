@@ -85,6 +85,7 @@ export interface SecurityLogStats {
   eventsBySeverity: Record<string, number>;
   recentFailedLogins: number;
   recentSuspiciousActivities: number;
+  recentApiAccess: number;
 }
 
 /**
@@ -292,9 +293,18 @@ export async function getSecurityLogs(
     }
 
     if (options.eventType) {
-      whereClause += " AND se.event_type = ?";
-      params.push(options.eventType);
-      countParams.push(options.eventType);
+      // Special handling for api_access which can come from user_activity_logs
+      if (options.eventType === "api_access") {
+        whereClause += " AND (se.event_type = ? OR se.event_type = ?)";
+        params.push("api_access");
+        params.push("sensitive_data_access");
+        countParams.push("api_access");
+        countParams.push("sensitive_data_access");
+      } else {
+        whereClause += " AND se.event_type = ?";
+        params.push(options.eventType);
+        countParams.push(options.eventType);
+      }
     }
 
     if (options.severity) {
@@ -545,15 +555,29 @@ export async function getSecurityLogStats(
     const [suspiciousActivitiesResult] = await executeQuery<any[]>(
       `SELECT COUNT(*) as count 
        FROM security_events 
-       WHERE (event_type = ? OR event_type = ? OR severity = ?) 
+       WHERE (event_type = ? OR event_type = ? OR event_type = ? OR severity = ?) 
        AND created_at >= DATE_SUB(NOW(), INTERVAL 1 DAY)`,
       [
         SecurityEventType.SUSPICIOUS_ACTIVITY,
         SecurityEventType.GEOGRAPHIC_ANOMALY,
+        SecurityEventType.SENSITIVE_DATA_ACCESS,
         SecurityEventSeverity.CRITICAL,
       ]
     );
     const recentSuspiciousActivities = suspiciousActivitiesResult?.count || 0;
+
+    // Get API access count (last 24 hours)
+    const [apiAccessResult] = await executeQuery<any[]>(
+      `SELECT COUNT(*) as count 
+       FROM security_events 
+       WHERE (event_type = ? OR event_type = ?) 
+       AND created_at >= DATE_SUB(NOW(), INTERVAL 1 DAY)`,
+      [
+        SecurityEventType.API_ACCESS,
+        SecurityEventType.SENSITIVE_DATA_ACCESS,
+      ]
+    );
+    const recentApiAccess = apiAccessResult?.count || 0;
 
     return {
       totalEvents,
@@ -561,6 +585,7 @@ export async function getSecurityLogStats(
       eventsBySeverity,
       recentFailedLogins,
       recentSuspiciousActivities,
+      recentApiAccess,
     };
   } catch (error) {
     console.error("Failed to get security log statistics:", error);
@@ -570,6 +595,7 @@ export async function getSecurityLogStats(
       eventsBySeverity: {},
       recentFailedLogins: 0,
       recentSuspiciousActivities: 0,
+      recentApiAccess: 0,
     };
   }
 }

@@ -54,6 +54,7 @@ interface SecurityStats {
   eventsBySeverity: Record<string, number>;
   recentFailedLogins: number;
   recentSuspiciousActivities: number;
+  recentApiAccess: number;
 }
 
 export default function SecurityDashboard() {
@@ -633,6 +634,7 @@ export default function SecurityDashboard() {
                         {type.replace(/_/g, " ")}
                       </option>
                     ))}
+                    <option value="api_access">API Access</option>
                   </select>
                 </div>
                 <div className="flex-1">

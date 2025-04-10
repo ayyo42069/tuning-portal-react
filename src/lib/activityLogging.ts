@@ -10,7 +10,8 @@ export enum ActivityType {
   PASSWORD_RESET = "password_reset",
   EMAIL_VERIFICATION = "email_verification",
   PROFILE_UPDATE = "profile_update",
-  FAILED_LOGIN = "failed_login"
+  FAILED_LOGIN = "failed_login",
+  API_ACCESS = "api_access"
 }
 
 /**
