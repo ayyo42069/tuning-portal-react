@@ -19,6 +19,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 import OpeningHours from "@/components/OpeningHours";
 import { useAuth, useSessionTerminationCheck } from "@/lib/AuthProvider";
+import FloatingTicketButton from "@/components/FloatingTicketButton";
 
 interface User {
   id: number;
@@ -268,6 +269,7 @@ export default function DashboardLayout({
           <div className="p-4 md:p-8">{children}</div>
         </div>
       </div>
+      <FloatingTicketButton />
     </div>
   );
 }

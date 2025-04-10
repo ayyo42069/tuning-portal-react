@@ -5,7 +5,6 @@ import { ThemeProvider } from "@/lib/ThemeProvider";
 import { NotificationProvider } from "@/lib/NotificationProvider";
 import { AuthProvider } from "@/lib/AuthProvider";
 import { QueryProvider } from "@/lib/QueryProvider";
-import FloatingTicketButton from "@/components/FloatingTicketButton";
 
 import "./globals.css";
 
@@ -124,10 +123,7 @@ export default function RootLayout({
         <ThemeProvider>
           <QueryProvider>
             <AuthProvider>
-              <NotificationProvider>
-                {children}
-                <FloatingTicketButton />
-              </NotificationProvider>
+              <NotificationProvider>{children}</NotificationProvider>
             </AuthProvider>
           </QueryProvider>
         </ThemeProvider>

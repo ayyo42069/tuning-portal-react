@@ -20,6 +20,13 @@ const dbConfig = {
 // Create a connection pool
 const pool = mysql.createPool(dbConfig);
 
+// Export the pool as db for direct use in API routes
+export const db = {
+  query: async (sql: string, params: any[] = []) => {
+    return executeQuery(sql, params);
+  },
+};
+
 // Query cache for frequently executed queries
 const queryCache = new Map<string, { result: any; timestamp: number }>();
 const CACHE_TTL = 60000; // 1 minute cache TTL

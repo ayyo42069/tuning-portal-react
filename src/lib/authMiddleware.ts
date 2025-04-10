@@ -1,25 +1,29 @@
-import { NextRequest, NextResponse } from "next/server";
-import { verifyToken, getSession, getAuthCookie } from "./auth";
-import { getRow } from "./db";
-import { logUserActivity, ActivityType } from "./activityLogging";
+import { NextRequest } from "next/server";
+import { verifyToken } from "./auth";
+import { getRow, executeQuery } from "./db";
+import { User } from "./types/auth";
 
-interface UserDB {
-  id: number;
-  username: string;
-  email: string;
-  role: string;
-  created_at: string;
-  credits?: number;
-  is_banned?: boolean;
-  ban_reason?: string;
-  ban_expires_at?: string;
+interface UserDB extends User {
+  credits: number;
+  is_banned: boolean;
+  ban_reason: string | null;
+  ban_expires_at: string | null;
+}
+
+interface AuthResult {
+  success: boolean;
+  error?: string;
+  status: number;
+  isAuthenticated: boolean;
+  redirectTo?: string;
+  user?: UserDB;
 }
 
 /**
  * Authentication middleware for API routes
  * Verifies both JWT token and session for enhanced security
  */
-export async function authenticateUser(request: NextRequest) {
+export async function authenticateUser(request: NextRequest): Promise<AuthResult> {
   try {
     // Get the auth token from cookies
     const authToken = request.cookies.get("auth_token")?.value;
@@ -28,7 +32,7 @@ export async function authenticateUser(request: NextRequest) {
       return {
         success: false,
         error: "Not authenticated",
-        status: 200, // Changed from 401 to 200 to avoid console errors
+        status: 401,
         isAuthenticated: false,
       };
     }
@@ -39,7 +43,7 @@ export async function authenticateUser(request: NextRequest) {
       return {
         success: false,
         error: "Invalid authentication token",
-        status: 200, // Changed from 401 to 200 to avoid console errors
+        status: 401,
         isAuthenticated: false,
       };
     }
@@ -52,20 +56,23 @@ export async function authenticateUser(request: NextRequest) {
       return {
         success: false,
         error: "No active session",
-        status: 200,
+        status: 401,
         isAuthenticated: false,
         redirectTo: "/auth/terminated",
       };
     }
 
-    const session = await getSession(sessionId);
+    const session = await getRow<{ user_id: number; expires_at: string }>(
+      "SELECT user_id, expires_at FROM sessions WHERE id = ? AND expires_at > NOW()",
+      [sessionId]
+    );
 
     // If session doesn't exist, has expired, or doesn't match the user ID from the token
     if (!session || session.user_id !== decodedToken.id) {
       return {
         success: false,
         error: "Session terminated",
-        status: 200,
+        status: 401,
         isAuthenticated: false,
         redirectTo: "/auth/terminated",
       };
@@ -86,62 +93,47 @@ export async function authenticateUser(request: NextRequest) {
       return {
         success: false,
         error: "User not found",
-        status: 404,
+        status: 401,
+        isAuthenticated: false,
       };
     }
 
     // Check if user is banned
     if (user.is_banned) {
-      // Check if ban has expired
       const banExpired =
         user.ban_expires_at && new Date(user.ban_expires_at) < new Date();
 
       if (!banExpired) {
         return {
           success: false,
-          error: "Your account has been banned",
+          error: `Your account has been banned. Reason: ${
+            user.ban_reason || "Violation of terms of service"
+          }`,
           status: 403,
           isAuthenticated: false,
-          user: {
-            id: user.id,
-            username: user.username,
-            role: user.role,
-            isBanned: true,
-            banReason: user.ban_reason,
-            banExpiresAt: user.ban_expires_at,
-          },
         };
       }
-      // If ban has expired, continue with authentication
     }
 
-    // Log user activity
-    await logUserActivity(user.id, request, ActivityType.LOGIN, {
-      method: "jwt",
-      timestamp: new Date().toISOString(),
-    });
+    // Update session last activity
+    await executeQuery(
+      "UPDATE sessions SET last_activity = NOW() WHERE id = ?",
+      [sessionId]
+    );
 
-    // Return success with user data including credits and ban information
     return {
       success: true,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        createdAt: user.created_at,
-        credits: user.credits || 0,
-        isBanned: user.is_banned || false,
-        banReason: user.ban_reason || null,
-        banExpiresAt: user.ban_expires_at || null,
-      },
+      status: 200,
+      isAuthenticated: true,
+      user,
     };
   } catch (error) {
     console.error("Authentication error:", error);
     return {
       success: false,
-      error: "Failed to authenticate user",
+      error: "Authentication failed",
       status: 500,
+      isAuthenticated: false,
     };
   }
 }

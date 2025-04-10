@@ -11,6 +11,8 @@ export enum SecurityEventType {
   EMAIL_VERIFICATION = "email_verification",
   PASSWORD_RESET_REQUEST = "password_reset_request",
   PASSWORD_RESET_COMPLETE = "password_reset_complete",
+  PASSWORD_RESET_REQUESTED = "password_reset_requested",
+  PASSWORD_RESET_COMPLETED = "password_reset_completed",
   PASSWORD_CHANGE = "password_change",
 
   // Account management events

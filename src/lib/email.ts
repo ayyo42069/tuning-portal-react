@@ -198,6 +198,84 @@ export async function sendVerificationEmail(
 }
 
 // Verify a token with enhanced security checks
+// Send a generic email with customizable content
+export async function sendEmail({
+  to,
+  subject,
+  html,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+}): Promise<boolean> {
+  try {
+    // Add a unique tracking ID for this email
+    const emailTrackingId = uuidv4().substring(0, 8);
+
+    const mailOptions = {
+      from: process.env.EMAIL_FROM,
+      to,
+      subject,
+      html,
+      headers: {
+        "X-Priority": "1", // High priority
+        "X-Tracking-ID": emailTrackingId,
+      },
+    };
+
+    // Send the email with improved timeout and retry mechanism
+    const sendWithRetry = async (attempts = 3, timeout = 30000) => {
+      for (let attempt = 1; attempt <= attempts; attempt++) {
+        try {
+          // Create a timeout promise that rejects after specified time
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(
+              () =>
+                reject(
+                  new Error(`Email sending timed out after ${timeout / 1000}s`)
+                ),
+              timeout
+            );
+          });
+
+          // Race the email sending against the timeout
+          const info = (await Promise.race([
+            transporter.sendMail(mailOptions),
+            timeoutPromise,
+          ])) as any;
+
+          console.log(
+            `Email sent successfully on attempt ${attempt}: ${info.messageId}, tracking ID: ${emailTrackingId}`
+          );
+          return info;
+        } catch (error) {
+          console.error(
+            `Email sending attempt ${attempt}/${attempts} failed:`,
+            error
+          );
+
+          // If this was the last attempt, throw the error
+          if (attempt === attempts) throw error;
+
+          // Otherwise wait before retrying (exponential backoff)
+          const backoffTime = Math.min(Math.pow(2, attempt) * 500, 5000); // 1s, 2s, 4s up to max 5s
+          console.log(`Retrying in ${backoffTime / 1000}s...`);
+          await new Promise((resolve) => setTimeout(resolve, backoffTime));
+        }
+      }
+      // This should never be reached due to the throw in the last attempt
+      throw new Error("All email sending attempts failed");
+    };
+
+    // Execute the send with retry function
+    await sendWithRetry();
+    return true;
+  } catch (error) {
+    console.error("Error sending email:", error);
+    return false;
+  }
+}
+
 export async function verifyEmailToken(
   token: string
 ): Promise<{ success: boolean; userId?: number; reason?: string }> {

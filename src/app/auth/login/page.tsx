@@ -303,6 +303,15 @@ export default function Login() {
               {loading ? "Signing in..." : "Sign in"}
             </button>
           </div>
+
+          <div className="text-center mt-4">
+            <Link
+              href="/auth/forgot-password"
+              className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
+            >
+              Forgot your password?
+            </Link>
+          </div>
         </form>
 
         <div className="flex items-center justify-center mt-6">
