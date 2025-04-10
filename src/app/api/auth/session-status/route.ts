@@ -91,14 +91,40 @@ export async function GET(request: NextRequest) {
         role: decoded.role
       });
       
-      // Create response with refreshed token
+      // Get user data for the response
+      let user = null;
+      try {
+        const [userResult] = await executeQuery<User[]>(
+          `SELECT u.id, u.username, u.email, u.role, 
+                  COALESCE(uc.credits, 0) as credits,
+                  u.is_banned, u.ban_reason, u.ban_expires_at
+           FROM users u 
+           LEFT JOIN user_credits uc ON u.id = uc.user_id 
+           WHERE u.id = ?`,
+          [session.user_id]
+        );
+        
+        if (userResult) {
+          user = userResult;
+          console.log(`[SessionStatus] User data retrieved: ${user.username}`);
+        }
+      } catch (error) {
+        console.error("[SessionStatus] Error fetching user data:", error);
+      }
+      
+      // Create response with refreshed token and user data
       const response = NextResponse.json({ 
         success: true,
-        user: {
-          id: session.user_id,
-          email: decoded.email,
-          role: decoded.role
-        }
+        user: user ? {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          credits: user.credits,
+          isBanned: user.is_banned,
+          banReason: user.ban_reason,
+          banExpiresAt: user.ban_expires_at
+        } : null
       });
       
       // Set the new auth token cookie

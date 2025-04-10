@@ -63,8 +63,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
         setError(null);
       } else {
-        console.log("[AuthProvider] No user data in response");
-        await logout();
+        console.log("[AuthProvider] No user data in response, but session is valid");
+        // If we have a valid session but no user data, try to refresh user data
+        await refreshUserData();
       }
     } catch (error) {
       console.error("[AuthProvider] Error checking session:", error);
@@ -92,12 +93,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Update stored auth state
         localStorage.setItem("auth_state", JSON.stringify(data.user));
       } else {
-        console.log("[AuthProvider] Failed to refresh user data");
-        await logout();
+        console.log("[AuthProvider] Failed to refresh user data, checking session");
+        // If user data refresh fails, check session status
+        await checkSession();
       }
     } catch (error) {
       console.error("[AuthProvider] Error refreshing user data:", error);
-      await logout();
+      // If there's an error refreshing user data, check session status
+      await checkSession();
     }
   };
 
@@ -115,12 +118,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("[AuthProvider] Token refresh data:", data);
 
       if (!data.success) {
-        console.log("[AuthProvider] Token refresh failed");
-        await logout();
+        console.log("[AuthProvider] Token refresh failed, checking session");
+        // If token refresh fails, check session status
+        await checkSession();
+      } else {
+        console.log("[AuthProvider] Token refreshed successfully");
       }
     } catch (error) {
       console.error("[AuthProvider] Error refreshing token:", error);
-      await logout();
+      // If there's an error refreshing token, check session status
+      await checkSession();
     }
   };
 
