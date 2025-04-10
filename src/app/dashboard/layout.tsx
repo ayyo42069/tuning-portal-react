@@ -20,6 +20,7 @@ import NotificationBell from "@/components/NotificationBell";
 import OpeningHours from "@/components/OpeningHours";
 import { useAuth, useSessionTerminationCheck } from "@/lib/AuthProvider";
 import FloatingTicketButton from "@/components/FloatingTicketButton";
+import DashboardDebug from "./components/DashboardDebug";
 
 interface User {
   id: number;
@@ -44,6 +45,7 @@ export default function DashboardLayout({
   // Check if user is authenticated, redirect if not
   useEffect(() => {
     if (!isLoading && !user) {
+      console.log("[DashboardLayout] No user found, redirecting to login");
       router.push("/auth/login");
     }
   }, [user, isLoading, router]);
@@ -76,200 +78,205 @@ export default function DashboardLayout({
   }, [sidebarOpen]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-800 dark:from-blue-950 dark:to-blue-900 relative overflow-hidden">
-      {/* SVG Pattern Background */}
-      <div className="absolute inset-0 z-0 opacity-10">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "url('/patterns/hexagons.svg')",
-            backgroundSize: "30px",
-            filter: "blur(0.5px)",
-          }}
-        ></div>
-      </div>
-
-      {/* Circuit board pattern overlay */}
-      <div className="absolute inset-0 z-0 opacity-5">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "url('/patterns/circuit-board.svg')",
-            backgroundSize: "300px",
-          }}
-        ></div>
-      </div>
-
-      {/* Animated elements */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
-        <motion.div
-          initial={{ x: -100, opacity: 0.2 }}
-          animate={{ x: 0, opacity: 0.15 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-          className="absolute w-[600px] h-[600px] rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 -top-64 -left-64 will-change-transform"
-        />
-        <motion.div
-          initial={{ x: 100, opacity: 0.2 }}
-          animate={{ x: 0, opacity: 0.15 }}
-          transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
-          className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 top-1/3 -right-64 will-change-transform"
-        />
-        <motion.div
-          initial={{ y: 100, opacity: 0.2 }}
-          animate={{ y: 0, opacity: 0.15 }}
-          transition={{ duration: 1.5, ease: "easeOut", delay: 0.4 }}
-          className="absolute w-[400px] h-[400px] rounded-full bg-gradient-to-r from-purple-500 to-pink-500 -bottom-32 left-1/3 will-change-transform"
-        />
-      </div>
-
-      <div className="flex flex-col md:flex-row relative z-10">
-        {/* Mobile menu button */}
-        <div className="md:hidden fixed top-4 left-4 z-50">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-md bg-white dark:bg-gray-800 shadow-md"
-            aria-label="Toggle menu"
-          >
-            {sidebarOpen ? (
-              <X className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-            ) : (
-              <Menu className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-            )}
-          </button>
+    <div className="flex flex-col min-h-screen bg-background">
+      {/* Debug component */}
+      <DashboardDebug />
+      
+      <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-800 dark:from-blue-950 dark:to-blue-900 relative overflow-hidden">
+        {/* SVG Pattern Background */}
+        <div className="absolute inset-0 z-0 opacity-10">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url('/patterns/hexagons.svg')",
+              backgroundSize: "30px",
+              filter: "blur(0.5px)",
+            }}
+          ></div>
         </div>
 
-        {/* Sidebar */}
-        <div
-          id="sidebar"
-          className={`${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } md:translate-x-0 fixed md:static z-40 w-72 min-h-screen bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 shadow-lg transition-transform duration-300 ease-in-out`}
-        >
-          <div className="p-6 flex flex-col h-full">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Tuning Portal
-              </h2>
-            </div>
+        {/* Circuit board pattern overlay */}
+        <div className="absolute inset-0 z-0 opacity-5">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url('/patterns/circuit-board.svg')",
+              backgroundSize: "300px",
+            }}
+          ></div>
+        </div>
 
-            {/* User Profile Section */}
-            <div className="mb-6 pb-6 border-b border-white/20 dark:border-gray-700/30">
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-lg shadow-cyan-500/20 transition-all duration-300">
-                  {user?.username?.charAt(0).toUpperCase() || "U"}
-                </div>
-                <div>
-                  <div className="font-medium text-white text-lg">
-                    {user?.username}
+        {/* Animated elements */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+          <motion.div
+            initial={{ x: -100, opacity: 0.2 }}
+            animate={{ x: 0, opacity: 0.15 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            className="absolute w-[600px] h-[600px] rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 -top-64 -left-64 will-change-transform"
+          />
+          <motion.div
+            initial={{ x: 100, opacity: 0.2 }}
+            animate={{ x: 0, opacity: 0.15 }}
+            transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
+            className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 top-1/3 -right-64 will-change-transform"
+          />
+          <motion.div
+            initial={{ y: 100, opacity: 0.2 }}
+            animate={{ y: 0, opacity: 0.15 }}
+            transition={{ duration: 1.5, ease: "easeOut", delay: 0.4 }}
+            className="absolute w-[400px] h-[400px] rounded-full bg-gradient-to-r from-purple-500 to-pink-500 -bottom-32 left-1/3 will-change-transform"
+          />
+        </div>
+
+        <div className="flex flex-col md:flex-row relative z-10">
+          {/* Mobile menu button */}
+          <div className="md:hidden fixed top-4 left-4 z-50">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 rounded-md bg-white dark:bg-gray-800 shadow-md"
+              aria-label="Toggle menu"
+            >
+              {sidebarOpen ? (
+                <X className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+              ) : (
+                <Menu className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+              )}
+            </button>
+          </div>
+
+          {/* Sidebar */}
+          <div
+            id="sidebar"
+            className={`${
+              sidebarOpen ? "translate-x-0" : "-translate-x-full"
+            } md:translate-x-0 fixed md:static z-40 w-72 min-h-screen bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 shadow-lg transition-transform duration-300 ease-in-out`}
+          >
+            <div className="p-6 flex flex-col h-full">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Tuning Portal
+                </h2>
+              </div>
+
+              {/* User Profile Section */}
+              <div className="mb-6 pb-6 border-b border-white/20 dark:border-gray-700/30">
+                <div className="flex items-center space-x-3 mb-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-lg shadow-cyan-500/20 transition-all duration-300">
+                    {user?.username?.charAt(0).toUpperCase() || "U"}
                   </div>
-                  <div className="text-sm text-blue-100">
-                    <span className="bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent font-semibold">
-                      {user?.credits}
-                    </span>{" "}
-                    Credits
+                  <div>
+                    <div className="font-medium text-white text-lg">
+                      {user?.username}
+                    </div>
+                    <div className="text-sm text-blue-100">
+                      <span className="bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent font-semibold">
+                        {user?.credits}
+                      </span>{" "}
+                      Credits
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <nav className="space-y-2">
-              <Link
-                href="/dashboard"
-                className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-                onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-              >
-                <Home className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-                Dashboard
-              </Link>
-              <Link
-                href="/dashboard/tuning-history"
-                className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-                onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-              >
-                <History className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-                Tuning History
-              </Link>
-              <Link
-                href="/dashboard/credits"
-                className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-                onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-              >
-                <CreditCard className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-                Credits
-              </Link>
-              <Link
-                href="/dashboard/notifications"
-                className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-                onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-              >
-                <Bell className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-                Notifications
-              </Link>
-              {user?.role === "admin" && (
+              <nav className="space-y-2">
                 <Link
-                  href="/admin"
+                  href="/dashboard"
                   className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-                  onClick={() =>
-                    window.innerWidth < 768 && setSidebarOpen(false)
-                  }
+                  onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
                 >
-                  <Settings className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-                  Admin Portal
+                  <Home className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
+                  Dashboard
                 </Link>
-              )}
-            </nav>
+                <Link
+                  href="/dashboard/tuning-history"
+                  className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
+                  onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+                >
+                  <History className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
+                  Tuning History
+                </Link>
+                <Link
+                  href="/dashboard/credits"
+                  className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
+                  onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+                >
+                  <CreditCard className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
+                  Credits
+                </Link>
+                <Link
+                  href="/dashboard/notifications"
+                  className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
+                  onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+                >
+                  <Bell className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
+                  Notifications
+                </Link>
+                {user?.role === "admin" && (
+                  <Link
+                    href="/admin"
+                    className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
+                    onClick={() =>
+                      window.innerWidth < 768 && setSidebarOpen(false)
+                    }
+                  >
+                    <Settings className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
+                    Admin Portal
+                  </Link>
+                )}
+              </nav>
 
-            {/* Opening Hours Component */}
-            <OpeningHours />
+              {/* Opening Hours Component */}
+              <OpeningHours />
+            </div>
+          </div>
+
+          {/* Main content */}
+          <div className="flex-1 md:ml-0 w-full">
+            {/* Header */}
+            <header className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border-b border-white/20 dark:border-gray-700/30 shadow-lg pt-16 md:pt-0">
+              <div className="max-w-7xl mx-auto py-4 md:py-6 px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center space-x-2">
+                    <div className="hidden md:flex items-center">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-semibold mr-3 shadow-lg shadow-cyan-500/20">
+                        {user?.username?.charAt(0).toUpperCase() || "U"}
+                      </div>
+                      <div>
+                        <h1 className="text-xl font-semibold text-white">
+                          Welcome,{" "}
+                          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-400 font-bold">
+                            {user?.username}
+                          </span>
+                        </h1>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-4">
+                    <div className="bg-white/10 dark:bg-blue-900/30 backdrop-blur-sm px-3 py-1.5 rounded-lg flex items-center border border-white/20 dark:border-blue-800/30">
+                      <CreditCard className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-2" />
+                      <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                        {user?.credits ?? 0} Credits
+                      </span>
+                    </div>
+                    <NotificationBell />
+                    <ThemeToggle />
+                    <button
+                      onClick={handleLogout}
+                      className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                      aria-label="Logout"
+                    >
+                      <LogOut className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </header>
+            <div className="p-4 md:p-8">{children}</div>
           </div>
         </div>
-
-        {/* Main content */}
-        <div className="flex-1 md:ml-0 w-full">
-          {/* Header */}
-          <header className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border-b border-white/20 dark:border-gray-700/30 shadow-lg pt-16 md:pt-0">
-            <div className="max-w-7xl mx-auto py-4 md:py-6 px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-2">
-                  <div className="hidden md:flex items-center">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-semibold mr-3 shadow-lg shadow-cyan-500/20">
-                      {user?.username?.charAt(0).toUpperCase() || "U"}
-                    </div>
-                    <div>
-                      <h1 className="text-xl font-semibold text-white">
-                        Welcome,{" "}
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-400 font-bold">
-                          {user?.username}
-                        </span>
-                      </h1>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="bg-white/10 dark:bg-blue-900/30 backdrop-blur-sm px-3 py-1.5 rounded-lg flex items-center border border-white/20 dark:border-blue-800/30">
-                    <CreditCard className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-2" />
-                    <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                      {user?.credits ?? 0} Credits
-                    </span>
-                  </div>
-                  <NotificationBell />
-                  <ThemeToggle />
-                  <button
-                    onClick={handleLogout}
-                    className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                    aria-label="Logout"
-                  >
-                    <LogOut className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </header>
-          <div className="p-4 md:p-8">{children}</div>
-        </div>
+        <FloatingTicketButton />
       </div>
-      <FloatingTicketButton />
     </div>
   );
 }

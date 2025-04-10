@@ -26,19 +26,27 @@ interface User {
  */
 export async function GET(request: NextRequest) {
   try {
+    console.log("[SessionStatus] Checking session status");
+    
     // Get token from cookie
     const token = request.cookies.get("auth_token")?.value;
     const sessionId = request.cookies.get("session_id")?.value;
 
+    console.log(`[SessionStatus] Token exists: ${!!token}, Session ID exists: ${!!sessionId}`);
+
     if (!token || !sessionId) {
+      console.log("[SessionStatus] Missing token or session ID");
       return NextResponse.json({ success: false });
     }
 
     // Verify token
     const decoded = verifyToken(token);
     if (!decoded) {
+      console.log("[SessionStatus] Invalid token");
       return NextResponse.json({ success: false });
     }
+
+    console.log(`[SessionStatus] Token verified for user: ${decoded.id}`);
 
     // Get session from database
     const [session] = await executeQuery<Session[]>(
@@ -47,8 +55,11 @@ export async function GET(request: NextRequest) {
     );
 
     if (!session) {
+      console.log(`[SessionStatus] No session found for ID: ${sessionId}`);
       return NextResponse.json({ success: false });
     }
+
+    console.log(`[SessionStatus] Session found for user: ${session.user_id}`);
 
     // Check if session is expired
     const expiresAt = new Date(session.expires_at);
@@ -56,6 +67,7 @@ export async function GET(request: NextRequest) {
     
     // If session is expired
     if (expiresAt < now) {
+      console.log(`[SessionStatus] Session expired at: ${expiresAt}`);
       return NextResponse.json({ success: false });
     }
 
@@ -64,6 +76,7 @@ export async function GET(request: NextRequest) {
     
     // If session is about to expire, refresh it
     if (expiresAt <= oneDayFromNow) {
+      console.log(`[SessionStatus] Session about to expire, refreshing`);
       const newExpiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
       await executeQuery(
         "UPDATE sessions SET expires_at = ?, last_activity = NOW() WHERE id = ?",
@@ -116,13 +129,14 @@ export async function GET(request: NextRequest) {
       
       if (userResult) {
         user = userResult;
+        console.log(`[SessionStatus] User data retrieved: ${user.username}`);
       }
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.error("[SessionStatus] Error fetching user data:", error);
     }
 
     // Return success response
-    return NextResponse.json({ 
+    const response = NextResponse.json({ 
       success: true,
       user: user ? {
         id: user.id,
@@ -135,8 +149,11 @@ export async function GET(request: NextRequest) {
         banExpiresAt: user.ban_expires_at
       } : null
     });
+    
+    console.log("[SessionStatus] Returning success response");
+    return response;
   } catch (error) {
-    console.error("Session status check failed:", error);
+    console.error("[SessionStatus] Session status check failed:", error);
     return NextResponse.json({ success: false });
   }
 }

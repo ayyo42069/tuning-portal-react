@@ -40,113 +40,108 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   // Check session status and refresh user data
-  const checkSession = useCallback(async () => {
+  const checkSession = async () => {
     try {
-      // Define protected routes that require authentication
-      const protectedRoutes = ['/dashboard', '/admin', '/profile', '/settings'];
-      const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
-      const isAuthRoute = pathname.startsWith("/auth/");
+      console.log("[AuthProvider] Checking session status");
+      const response = await fetch("/api/auth/session-status", {
+        credentials: "include",
+      });
 
-      // Skip session check if we're already on the login page
-      if (isAuthRoute) {
+      console.log(`[AuthProvider] Session status response: ${response.status}`);
+      const data = await response.json();
+      console.log("[AuthProvider] Session status data:", data);
+
+      if (!data.success) {
+        console.log("[AuthProvider] Session check failed, logging out");
+        await logout();
+        return;
+      }
+
+      if (data.user) {
+        console.log("[AuthProvider] User data received:", data.user);
+        setUser(data.user);
         setLoading(false);
-        return;
+        setError(null);
+      } else {
+        console.log("[AuthProvider] No user data in response");
+        await logout();
       }
-
-      // First check session status
-      const sessionResponse = await fetch("/api/auth/session-status", {
-        credentials: "include",
-      });
-      
-      if (!sessionResponse.ok) {
-        console.error("Session check failed:", sessionResponse.status);
-        // Only redirect if we're on a protected route
-        if (isProtectedRoute) {
-          router.push("/auth/login");
-        }
-        setUser(null);
-        return;
-      }
-
-      const sessionData = await sessionResponse.json();
-
-      if (!sessionData.success) {
-        // Only redirect if we're on a protected route
-        if (isProtectedRoute) {
-          router.push("/auth/login");
-        }
-        setUser(null);
-        return;
-      }
-
-      // Then refresh the token
-      const tokenResponse = await fetch("/api/auth/refresh-token", {
-        method: "POST",
-        credentials: "include",
-      });
-      
-      if (!tokenResponse.ok) {
-        console.error("Token refresh failed:", tokenResponse.status);
-      }
-
-      // Finally refresh user data
-      await refreshUser();
     } catch (error) {
-      console.error("Session check failed:", error);
-      // Don't immediately log out on network errors
-      if (!pathname.startsWith("/auth/")) {
-        setError("Failed to verify session. Please try again.");
-      }
+      console.error("[AuthProvider] Error checking session:", error);
+      await logout();
     }
-  }, [pathname, router]);
+  };
 
   // Refresh user data
-  const refreshUser = useCallback(async () => {
+  const refreshUserData = async () => {
     try {
-      const response = await fetch("/api/auth/me", {
+      console.log("[AuthProvider] Refreshing user data");
+      const response = await fetch("/api/auth/user", {
         credentials: "include",
       });
-      const data = await response.json();
 
-      if (data.success) {
+      console.log(`[AuthProvider] User data response: ${response.status}`);
+      const data = await response.json();
+      console.log("[AuthProvider] User data:", data);
+
+      if (data.success && data.user) {
+        console.log("[AuthProvider] Setting new user data");
         setUser(data.user);
+        setLoading(false);
         setError(null);
         // Update stored auth state
         localStorage.setItem("auth_state", JSON.stringify(data.user));
       } else {
-        setUser(null);
-        localStorage.removeItem("auth_state");
-        // Only redirect if we're on a protected route
-        const protectedRoutes = ['/dashboard', '/admin', '/profile', '/settings'];
-        const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
-        if (isProtectedRoute && !pathname.startsWith("/auth/")) {
-          router.push("/auth/login");
-        }
+        console.log("[AuthProvider] Failed to refresh user data");
+        await logout();
       }
     } catch (error) {
-      console.error("Failed to refresh user data:", error);
-      // Don't immediately log out on network errors
-      if (!pathname.startsWith("/auth/")) {
-        setError("Failed to refresh user data. Please try again.");
-      }
+      console.error("[AuthProvider] Error refreshing user data:", error);
+      await logout();
     }
-  }, [pathname, router]);
+  };
+
+  // Refresh token
+  const refreshToken = async () => {
+    try {
+      console.log("[AuthProvider] Refreshing token");
+      const response = await fetch("/api/auth/refresh", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      console.log(`[AuthProvider] Token refresh response: ${response.status}`);
+      const data = await response.json();
+      console.log("[AuthProvider] Token refresh data:", data);
+
+      if (!data.success) {
+        console.log("[AuthProvider] Token refresh failed");
+        await logout();
+      }
+    } catch (error) {
+      console.error("[AuthProvider] Error refreshing token:", error);
+      await logout();
+    }
+  };
 
   // Initial session check
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        console.log("[Auth] Initializing auth...");
         // Check if we're on an auth route to avoid redirect loops
         if (pathname.startsWith("/auth/")) {
+          console.log("[Auth] On auth route, skipping initialization");
           setLoading(false);
           return;
         }
         
         // Add a small delay before the initial check to allow cookies to be set
+        console.log("[Auth] Waiting for cookies to be set...");
         await new Promise(resolve => setTimeout(resolve, 500));
         await checkSession();
       } catch (error) {
-        console.error("Initial session check failed:", error);
+        console.error("[Auth] Initial session check failed:", error);
       } finally {
         setLoading(false);
       }
@@ -163,9 +158,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Refresh user data periodically (every 15 minutes)
   useEffect(() => {
-    const interval = setInterval(refreshUser, 15 * 60 * 1000);
+    const interval = setInterval(refreshUserData, 15 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [refreshUser]);
+  }, [refreshUserData]);
 
   // Handle session termination
   const handleSessionTermination = useCallback(async () => {
@@ -183,6 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string
   ): Promise<boolean> => {
     try {
+      console.log("[Auth] Attempting login...");
       setLoading(true);
       setError(null);
 
@@ -195,9 +191,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         credentials: "include",
       });
 
+      console.log(`[Auth] Login response: ${response.status}`);
       const data = await response.json();
+      console.log("[Auth] Login data:", data);
 
       if (response.ok && data.success) {
+        console.log("[Auth] Login successful");
         // Create user object with all necessary properties
         const userData = {
           ...data.user,
@@ -215,6 +214,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Check if user is banned
         if (userData.isBanned) {
+          console.log("[Auth] User is banned");
           setError(
             `Your account has been banned. Reason: ${userData.banReason}`
           );
@@ -227,17 +227,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Wait a moment for cookies to be set
+        console.log("[Auth] Waiting for cookies to be set...");
         await new Promise(resolve => setTimeout(resolve, 500));
 
         // Redirect to dashboard on successful login
+        console.log("[Auth] Redirecting to dashboard");
         router.push("/dashboard");
         return true;
       } else {
+        console.log("[Auth] Login failed:", data.error);
         setError(data.error || "Login failed");
         return false;
       }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("[Auth] Login error:", error);
       setError("An error occurred during login");
       return false;
     } finally {
@@ -289,7 +292,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         error,
         login,
         logout,
-        refreshUser,
+        refreshUser: refreshUserData,
       }}
     >
       {children}

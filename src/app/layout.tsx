@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/lib/ThemeProvider";
 import { NotificationProvider } from "@/lib/NotificationProvider";
 import { AuthProvider } from "@/lib/AuthProvider";
 import { QueryProvider } from "@/lib/QueryProvider";
+import AuthDebugger from "@/components/AuthDebugger";
 
 import "./globals.css";
 
@@ -123,7 +124,10 @@ export default function RootLayout({
         <ThemeProvider>
           <QueryProvider>
             <AuthProvider>
-              <NotificationProvider>{children}</NotificationProvider>
+              <NotificationProvider>
+                {children}
+                <AuthDebugger />
+              </NotificationProvider>
             </AuthProvider>
           </QueryProvider>
         </ThemeProvider>
