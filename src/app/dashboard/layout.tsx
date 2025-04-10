@@ -106,18 +106,12 @@ export default function DashboardLayout({
         <header className="relative z-10 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border-b border-white/20 dark:border-gray-700/30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold">
-                  {user?.username?.charAt(0).toUpperCase() || "U"}
-                </div>
-                <div>
-                  <h2 className="text-xl font-semibold text-white">
-                    Welcome, {user?.username || "User"}
-                  </h2>
-                  <p className="text-blue-200/70 text-sm">{user?.email || ""}</p>
-                </div>
+              {/* Left side - Tuning Portal text */}
+              <div className="flex items-center">
+                <h1 className="text-2xl font-bold text-white">Tuning Portal</h1>
               </div>
 
+              {/* Right side - Controls */}
               <div className="flex items-center space-x-4">
                 <div className="bg-blue-500/20 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg flex items-center">
                   <CreditCard className="h-4 w-4 text-blue-200 mr-1.5" />
@@ -138,6 +132,23 @@ export default function DashboardLayout({
             </div>
           </div>
         </header>
+
+        {/* Welcome message after sidebar */}
+        <div className="relative z-10 ml-72 hidden md:block">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold">
+                {user?.username?.charAt(0).toUpperCase() || "U"}
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-white">
+                  Welcome, {user?.username || "User"}
+                </h2>
+                <p className="text-blue-200/70 text-sm">{user?.email || ""}</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Animated elements */}
         <div className="absolute inset-0 z-0 overflow-hidden">
