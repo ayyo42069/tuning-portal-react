@@ -20,11 +20,6 @@ export enum SecurityEventType {
   ACCOUNT_UNLOCK = "account_unlock",
   ACCOUNT_UPDATE = "account_update",
 
-  // Session events
-  SESSION_CREATED = "session_created",
-  SESSION_EXPIRED = "session_expired",
-  SESSION_INVALIDATED = "session_invalidated",
-
   // Admin actions
   ADMIN_USER_UPDATE = "admin_user_update",
   ADMIN_PERMISSION_CHANGE = "admin_permission_change",

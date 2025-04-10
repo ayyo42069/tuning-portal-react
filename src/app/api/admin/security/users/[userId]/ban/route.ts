@@ -94,9 +94,6 @@ export async function POST(
       [reason, banExpiresAt, authResult.user.id, userId]
     );
 
-    // Terminate all active sessions for this user
-    await executeQuery("DELETE FROM sessions WHERE user_id = ?", [userId]);
-
     // Log admin action
     await logAdminAction(
       authResult.user.id,

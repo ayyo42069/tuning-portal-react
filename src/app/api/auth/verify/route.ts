@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyEmailToken } from "@/lib/email";
-import { generateToken, setAuthCookie, createSession } from "@/lib/auth";
-import { serialize } from "cookie";
+import { generateToken, setAuthCookie } from "@/lib/auth";
 import { getRow } from "@/lib/db";
 import {
   rateLimitByIpAndIdentifier,

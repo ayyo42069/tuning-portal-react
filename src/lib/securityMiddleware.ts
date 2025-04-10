@@ -49,13 +49,13 @@ export async function logAuthSuccess(
 
   // Log the successful login event
   const eventId = await logSecurityEvent({
-    user_id: userId,
-    event_type: SecurityEventType.LOGIN_SUCCESS,
+    userId: userId,
+    eventType: SecurityEventType.LOGIN_SUCCESS,
     severity: SecurityEventSeverity.INFO,
-    ip_address: ip,
-    user_agent: userAgent,
+    ipAddress: ip,
+    userAgent: userAgent,
     details: {
-      method: "jwt+session",
+      method: "jwt",
       timestamp: new Date().toISOString(),
     },
   });
@@ -98,11 +98,11 @@ export async function logAuthFailure(
 
   // Log the failed login event
   const eventId = await logSecurityEvent({
-    user_id: userId,
-    event_type: SecurityEventType.LOGIN_FAILURE,
+    userId: userId,
+    eventType: SecurityEventType.LOGIN_FAILURE,
     severity: SecurityEventSeverity.WARNING,
-    ip_address: ip,
-    user_agent: userAgent,
+    ipAddress: ip,
+    userAgent: userAgent,
     details: {
       username,
       reason,
@@ -130,11 +130,11 @@ export async function logAuthFailure(
 
       // Log account lockout event
       await logSecurityEvent({
-        user_id: userId,
-        event_type: SecurityEventType.ACCOUNT_LOCKOUT,
+        userId: userId,
+        eventType: SecurityEventType.ACCOUNT_LOCKOUT,
         severity: SecurityEventSeverity.ERROR,
-        ip_address: ip,
-        user_agent: userAgent,
+        ipAddress: ip,
+        userAgent: userAgent,
         details: {
           reason: "Multiple failed login attempts",
           lockUntil: lockUntil.toISOString(),
@@ -143,13 +143,14 @@ export async function logAuthFailure(
       });
 
       // Create a security alert
-      await createSecurityAlert(
+      await createSecurityAlert({
         eventId,
-        "account_lockout",
-        SecurityEventSeverity.ERROR,
-        `Account locked after ${loginAttempts} failed login attempts`,
-        userId
-      );
+        alertType: "account_lockout",
+        severity: SecurityEventSeverity.ERROR,
+        message: `Account locked after ${loginAttempts} failed login attempts`,
+        userId,
+        isResolved: false
+      });
     }
 
     // Check for brute force attacks (multiple failures from same IP)
@@ -185,13 +186,13 @@ export async function logApiAccess(
 
   // Log the API access event
   const eventId = await logSecurityEvent({
-    user_id: userId, // Now this matches the expected type
-    event_type: isSensitive
+    userId: userId, // Now this matches the expected type
+    eventType: isSensitive
       ? SecurityEventType.SENSITIVE_DATA_ACCESS
       : SecurityEventType.API_ACCESS,
     severity,
-    ip_address: ip,
-    user_agent: userAgent,
+    ipAddress: ip,
+    userAgent: userAgent,
     details: {
       endpoint,
       method,
@@ -234,11 +235,11 @@ export async function logAdminAction(
 
   // Log the admin action event
   const eventId = await logSecurityEvent({
-    user_id: adminId,
-    event_type: actionType,
+    userId: adminId,
+    eventType: actionType,
     severity: SecurityEventSeverity.WARNING,
-    ip_address: ip,
-    user_agent: userAgent,
+    ipAddress: ip,
+    userAgent: userAgent,
     details: {
       ...details,
       timestamp: new Date().toISOString(),
@@ -295,11 +296,11 @@ async function checkGeographicAnomaly(
     if (isFirstAccess) {
       // Log the geographic anomaly
       const anomalyEventId = await logSecurityEvent({
-        user_id: userId,
-        event_type: SecurityEventType.GEOGRAPHIC_ANOMALY,
+        userId: userId,
+        eventType: SecurityEventType.GEOGRAPHIC_ANOMALY,
         severity: SecurityEventSeverity.WARNING,
-        ip_address: ip,
-        user_agent: userAgent,
+        ipAddress: ip,
+        userAgent: userAgent,
         details: {
           country: geoData.country,
           region: geoData.region,
@@ -309,13 +310,14 @@ async function checkGeographicAnomaly(
       });
 
       // Create a security alert for the new location
-      await createSecurityAlert(
-        anomalyEventId,
-        "new_location_access",
-        SecurityEventSeverity.WARNING,
-        `User accessed account from a new location: ${geoData.city}, ${geoData.region}, ${geoData.country}`,
-        userId
-      );
+      await createSecurityAlert({
+        eventId: anomalyEventId,
+        alertType: "new_location_access",
+        severity: SecurityEventSeverity.WARNING,
+        message: `User accessed account from a new location: ${geoData.city}, ${geoData.region}, ${geoData.country}`,
+        userId,
+        isResolved: false
+      });
     }
   } catch (error) {
     console.error("Failed to check geographic anomaly:", error);
@@ -348,11 +350,11 @@ async function checkBruteForceAttempts(
     if (failedAttempts >= 10) {
       // Log the suspicious activity
       const eventId = await logSecurityEvent({
-        user_id: undefined, // Changed from null to undefined
-        event_type: SecurityEventType.MULTIPLE_FAILED_ATTEMPTS,
+        userId: undefined, // Changed from null to undefined
+        eventType: SecurityEventType.MULTIPLE_FAILED_ATTEMPTS,
         severity: SecurityEventSeverity.ERROR,
-        ip_address: ip,
-        user_agent: "system",
+        ipAddress: ip,
+        userAgent: "system",
         details: {
           failedAttempts,
           timeWindow: "1 hour",
@@ -361,13 +363,14 @@ async function checkBruteForceAttempts(
       });
 
       // Create a security alert
-      await createSecurityAlert(
+      await createSecurityAlert({
         eventId,
-        "brute_force_attempt",
-        SecurityEventSeverity.ERROR,
-        `Possible brute force attack detected: ${failedAttempts} failed login attempts from IP ${ip} in the last hour`,
-        undefined // Changed from null to undefined
-      );
+        alertType: "brute_force_attempt",
+        severity: SecurityEventSeverity.ERROR,
+        message: `Possible brute force attack detected: ${failedAttempts} failed login attempts from IP ${ip} in the last hour`,
+        userId: undefined, // Changed from null to undefined
+        isResolved: false
+      });
     }
   } catch (error) {
     console.error("Failed to check brute force attempts:", error);
@@ -394,11 +397,11 @@ export async function logRegistration(
 
   // Log the registration event
   const eventId = await logSecurityEvent({
-    user_id: userId,
-    event_type: SecurityEventType.REGISTRATION,
+    userId: userId,
+    eventType: SecurityEventType.REGISTRATION,
     severity: SecurityEventSeverity.INFO,
-    ip_address: ip,
-    user_agent: userAgent,
+    ipAddress: ip,
+    userAgent: userAgent,
     details: {
       geolocation: {
         country: geoData.country,

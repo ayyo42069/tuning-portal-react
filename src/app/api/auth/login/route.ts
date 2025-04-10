@@ -4,9 +4,7 @@ import { compare } from "bcrypt";
 import {
   generateToken,
   setAuthCookie,
-  createSession,
 } from "@/lib/auth";
-import { serialize } from "cookie";
 import { logAuthSuccess, logAuthFailure } from "@/lib/securityMiddleware";
 
 interface LoginRequest {

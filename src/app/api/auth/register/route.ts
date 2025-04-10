@@ -4,9 +4,7 @@ import { hash } from "bcrypt";
 import {
   generateToken,
   setAuthCookie,
-  createSession,
 } from "@/lib/auth";
-import { serialize } from "cookie";
 import { generateVerificationToken, sendVerificationEmail } from "@/lib/email";
 import {
   rateLimitByIpAndIdentifier,
@@ -173,20 +171,8 @@ export async function POST(request: NextRequest) {
       // Generate JWT token
       const token = generateToken(user);
 
-      // Create a session for the user
-      const sessionId = await createSession(userId);
-
       // Set auth cookie with the token
       const authCookieHeader = setAuthCookie(token);
-
-      // Set session cookie
-      const sessionCookieHeader = serialize("session_id", sessionId, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-        path: "/",
-      });
 
       // Log registration with geolocation tracking
       const { logRegistration } = await import("@/lib/securityMiddleware");
@@ -203,9 +189,8 @@ export async function POST(request: NextRequest) {
         { status: 201 }
       );
 
-      // Add the cookies to the response
+      // Add the auth cookie to the response
       response.headers.append("Set-Cookie", authCookieHeader);
-      response.headers.append("Set-Cookie", sessionCookieHeader);
 
       return response;
     } catch (error) {
@@ -250,17 +235,6 @@ export async function POST(request: NextRequest) {
       userAgent,
       timestamp,
     });
-
-    // Return appropriate error message based on error type
-    if (
-      error instanceof Error &&
-      error.message.includes("verification email")
-    ) {
-      return NextResponse.json(
-        { error: "Unable to send verification email. Please try again later." },
-        { status: 500 }
-      );
-    }
 
     return NextResponse.json(
       {

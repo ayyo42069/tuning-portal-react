@@ -3,7 +3,7 @@ import { authenticateUser } from "@/lib/authMiddleware";
 
 export async function GET(request: NextRequest) {
   try {
-    // Use the authentication middleware to verify both JWT and session
+    // Use the authentication middleware to verify JWT token
     const authResult = await authenticateUser(request);
 
     if (!authResult.success) {

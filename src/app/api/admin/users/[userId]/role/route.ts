@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { executeQuery } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
-import { logAdminAction, logSessionEvent } from "@/lib/securityMiddleware";
+import { logAdminAction } from "@/lib/securityMiddleware";
 import { SecurityEventType } from "@/lib/securityLogging";
 
 export async function PUT(

@@ -61,12 +61,10 @@ export async function POST(request: NextRequest) {
       // Use executeTransaction to handle all database operations
       await executeTransaction([
         "UPDATE users SET password = ? WHERE id = ?",
-        "UPDATE password_reset_tokens SET used = 1 WHERE id = ?",
-        "DELETE FROM sessions WHERE user_id = ?"
+        "UPDATE password_reset_tokens SET used = 1 WHERE id = ?"
       ], [
         [hashedPassword, userId],
-        [tokenId],
-        [userId]
+        [tokenId]
       ]);
 
       console.log(`Password update successful for user ID: ${userId}`);
@@ -87,7 +85,7 @@ export async function POST(request: NextRequest) {
           <div style="padding: 20px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
             <p>Hello ${username},</p>
             <p>Your password has been successfully reset.</p>
-            <p>For security reasons, all your active sessions have been terminated. You will need to log in again with your new password.</p>
+            <p>For security reasons, you will need to log in again with your new password.</p>
             <p>If you did not request this change, please contact our support team immediately as your account may have been compromised.</p>
             <div style="text-align: center; margin: 30px 0;">
               <a href="${process.env.NEXT_PUBLIC_APP_URL}/auth/login" style="background: linear-gradient(to right, #1e40af, #3b82f6); color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">Login to Your Account</a>

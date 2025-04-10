@@ -92,9 +92,9 @@ export async function authenticateUser(request: NextRequest): Promise<AuthResult
         email: user.email,
         role: user.role as "user" | "admin",
         credits: user.credits,
-        isBanned: user.is_banned,
-        banReason: user.ban_reason,
-        banExpiresAt: user.ban_expires_at
+        is_banned: user.is_banned,
+        ban_reason: user.ban_reason,
+        ban_expires_at: user.ban_expires_at
       }
     };
   } catch (error) {
