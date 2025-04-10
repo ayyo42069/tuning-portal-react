@@ -50,13 +50,14 @@ export enum SecurityEventSeverity {
 
 // Define security event interface
 export interface SecurityEvent {
-  user_id?: number;
-  event_type: SecurityEventType;
+  id?: number;
+  userId?: number;
+  eventType: SecurityEventType;
   severity: SecurityEventSeverity;
-  ip_address: string;
-  user_agent: string;
-  details?: any;
-  created_at?: Date;
+  ipAddress: string;
+  userAgent: string;
+  details?: Record<string, any>;
+  createdAt?: Date;
 }
 
 // Define security log interface for retrieving logs
@@ -86,6 +87,49 @@ export interface SecurityLogStats {
   recentFailedLogins: number;
   recentSuspiciousActivities: number;
   recentApiAccess: number;
+}
+
+// Define security alert interface
+export interface SecurityAlert {
+  id?: number;
+  eventId: number;
+  userId?: number;
+  alertType: string;
+  severity: SecurityEventSeverity;
+  message: string;
+  isResolved: boolean;
+  resolvedBy?: number;
+  resolutionNotes?: string;
+  createdAt?: Date;
+  resolvedAt?: Date;
+}
+
+// Define security stats interface
+export interface SecurityStats {
+  totalEvents: number;
+  eventsByType: Record<SecurityEventType, number>;
+  eventsBySeverity: Record<SecurityEventSeverity, number>;
+  recentAlerts: number;
+  unresolvedAlerts: number;
+}
+
+interface QueryResult {
+  insertId: number;
+  [key: string]: any;
+}
+
+interface CountResult {
+  total: number;
+}
+
+interface EventTypeCount {
+  event_type: SecurityEventType;
+  count: number;
+}
+
+interface SeverityCount {
+  severity: SecurityEventSeverity;
+  count: number;
 }
 
 /**
@@ -182,92 +226,50 @@ export async function initSecurityLoggingTables() {
  */
 export async function logSecurityEvent(event: SecurityEvent): Promise<number> {
   try {
-    // Sanitize event details to prevent log injection
-    const sanitizedDetails = event.details
-      ? sanitizeLogData(event.details)
-      : null;
-
-    // Insert the security event
-    const result = await executeQuery<any>(
-      `INSERT INTO security_events 
-       (user_id, event_type, severity, ip_address, user_agent, details) 
+    const result = await executeQuery<QueryResult>(
+      `INSERT INTO security_events (user_id, event_type, severity, ip_address, user_agent, details)
        VALUES (?, ?, ?, ?, ?, ?)`,
       [
-        event.user_id || null,
-        event.event_type,
+        event.userId,
+        event.eventType,
         event.severity,
-        event.ip_address,
-        event.user_agent,
-        sanitizedDetails ? JSON.stringify(sanitizedDetails) : null,
+        event.ipAddress,
+        event.userAgent,
+        event.details ? JSON.stringify(event.details) : null,
       ]
     );
 
-    // Return the inserted event ID
     return result.insertId;
   } catch (error) {
     console.error("Failed to log security event:", error);
-    return 0;
+    throw error;
   }
 }
 
 /**
- * Create a security alert from an event
- * @param eventId The ID of the security event
- * @param alertType The type of alert
- * @param severity The severity of the alert
- * @param message The alert message
- * @param userId The user ID associated with the alert
+ * Create a security alert
+ * @param alert The security alert to create
  * @returns The ID of the created alert
  */
-export async function createSecurityAlert(
-  eventId: number,
-  alertType: string,
-  severity: SecurityEventSeverity,
-  message: string,
-  userId?: number
-): Promise<number> {
+export async function createSecurityAlert(alert: SecurityAlert): Promise<number> {
   try {
-    const result = await executeQuery<any>(
-      `INSERT INTO security_alerts 
-       (event_id, user_id, alert_type, severity, message) 
-       VALUES (?, ?, ?, ?, ?)`,
-      [eventId, userId || null, alertType, severity, message]
+    const result = await executeQuery<QueryResult>(
+      `INSERT INTO security_alerts (event_id, user_id, alert_type, severity, message, is_resolved)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        alert.eventId,
+        alert.userId,
+        alert.alertType,
+        alert.severity,
+        alert.message,
+        alert.isResolved,
+      ]
     );
 
     return result.insertId;
   } catch (error) {
     console.error("Failed to create security alert:", error);
-    return 0;
-  }
-}
-
-/**
- * Resolve a security alert
- * @param alertId The ID of the alert to resolve
- * @param resolvedBy The ID of the user who resolved the alert
- * @param notes Resolution notes
- * @returns Whether the operation was successful
- */
-export async function resolveSecurityAlert(
-  alertId: number,
-  resolvedBy: number,
-  notes: string
-): Promise<boolean> {
-  try {
-    await executeQuery(
-      `UPDATE security_alerts 
-       SET is_resolved = TRUE, 
-           resolved_by = ?, 
-           resolution_notes = ?, 
-           resolved_at = NOW() 
-       WHERE id = ?`,
-      [resolvedBy, notes, alertId]
-    );
-
-    return true;
-  } catch (error) {
-    console.error("Failed to resolve security alert:", error);
-    return false;
+    throw error;
   }
 }
 
@@ -414,6 +416,104 @@ export async function getSecurityLogs(
 }
 
 /**
+ * Get security statistics
+ * @returns Security statistics
+ */
+export async function getSecurityStats(): Promise<SecurityStats> {
+  try {
+    // Get total events
+    const totalEventsResult = await executeQuery<CountResult[]>(
+      "SELECT COUNT(*) as total FROM security_events"
+    );
+    const totalEvents = totalEventsResult[0].total;
+
+    // Get events by type
+    const eventsByTypeResult = await executeQuery<EventTypeCount[]>(`
+      SELECT event_type, COUNT(*) as count
+      FROM security_events
+      GROUP BY event_type
+    `);
+    const eventsByType: Record<SecurityEventType, number> = {} as Record<
+      SecurityEventType,
+      number
+    >;
+    eventsByTypeResult.forEach((row) => {
+      eventsByType[row.event_type] = row.count;
+    });
+
+    // Get events by severity
+    const eventsBySeverityResult = await executeQuery<SeverityCount[]>(`
+      SELECT severity, COUNT(*) as count
+      FROM security_events
+      GROUP BY severity
+    `);
+    const eventsBySeverity: Record<SecurityEventSeverity, number> = {} as Record<
+      SecurityEventSeverity,
+      number
+    >;
+    eventsBySeverityResult.forEach((row) => {
+      eventsBySeverity[row.severity] = row.count;
+    });
+
+    // Get recent and unresolved alerts
+    const recentAlertsResult = await executeQuery<CountResult[]>(`
+      SELECT COUNT(*) as total
+      FROM security_alerts
+      WHERE created_at >= NOW() - INTERVAL 24 HOUR
+    `);
+    const recentAlerts = recentAlertsResult[0].total;
+
+    const unresolvedAlertsResult = await executeQuery<CountResult[]>(`
+      SELECT COUNT(*) as total
+      FROM security_alerts
+      WHERE is_resolved = FALSE
+    `);
+    const unresolvedAlerts = unresolvedAlertsResult[0].total;
+
+    return {
+      totalEvents,
+      eventsByType,
+      eventsBySeverity,
+      recentAlerts,
+      unresolvedAlerts,
+    };
+  } catch (error) {
+    console.error("Failed to get security statistics:", error);
+    throw error;
+  }
+}
+
+/**
+ * Resolve a security alert
+ * @param alertId The ID of the alert to resolve
+ * @param resolvedBy The ID of the user who resolved the alert
+ * @param notes Resolution notes
+ * @returns Whether the operation was successful
+ */
+export async function resolveSecurityAlert(
+  alertId: number,
+  resolvedBy: number,
+  notes: string
+): Promise<boolean> {
+  try {
+    await executeQuery(
+      `UPDATE security_alerts 
+       SET is_resolved = TRUE, 
+           resolved_by = ?, 
+           resolution_notes = ?, 
+           resolved_at = NOW() 
+       WHERE id = ?`,
+      [resolvedBy, notes, alertId]
+    );
+
+    return true;
+  } catch (error) {
+    console.error("Failed to resolve security alert:", error);
+    return false;
+  }
+}
+
+/**
  * Get unresolved security alerts
  * @param limit Maximum number of alerts to return
  * @returns Array of unresolved security alerts
@@ -458,11 +558,6 @@ export async function getUnresolvedAlerts(limit: number = 100): Promise<any[]> {
   }
 }
 
-/**
- * Get security log statistics
- * @param days Number of days to include in statistics
- * @returns Security log statistics
- */
 /**
  * Sanitize log data to prevent log injection
  * @param data The data to sanitize
