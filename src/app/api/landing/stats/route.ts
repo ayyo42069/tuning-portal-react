@@ -1,72 +1,127 @@
 import { NextRequest, NextResponse } from "next/server";
 import { executeQuery } from "@/lib/db";
 
-export async function GET(request: NextRequest) {
+// SQL script to create the ecu_file_feedback table
+const createEcuFileFeedbackTableSQL = `
+CREATE TABLE IF NOT EXISTS ecu_file_feedback (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  ecu_file_id INT NOT NULL,
+  user_id INT NOT NULL,
+  rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  comment TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (ecu_file_id) REFERENCES ecu_files(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_user_file_feedback (user_id, ecu_file_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+`;
+
+export async function GET(req: NextRequest) {
   try {
-    // Get total users count
-    const totalUsersResult = await executeQuery<any[]>(
-      `SELECT COUNT(*) as count FROM users WHERE role = 'user'`,
-      [],
-      { cache: true, cacheTTL: 300000 } // Cache for 5 minutes
-    );
-    const users = totalUsersResult[0]?.count || 0;
+    // Try to create the ecu_file_feedback table if it doesn't exist
+    try {
+      await executeQuery<any[]>(createEcuFileFeedbackTableSQL, [], { cache: false });
+      console.log("Successfully created or verified ecu_file_feedback table");
+    } catch (error) {
+      console.error("Error creating ecu_file_feedback table:", error);
+      // Continue execution even if table creation fails
+    }
 
-    // Get total files count
-    const totalFilesResult = await executeQuery<any[]>(
-      `SELECT COUNT(*) as count FROM ecu_files`,
+    // Get total users
+    const usersResult = await executeQuery<any[]>(
+      "SELECT COUNT(*) as total FROM users WHERE role = 'user'",
       [],
-      { cache: true, cacheTTL: 300000 } // Cache for 5 minutes
+      { cache: true, cacheTTL: 300000 } // 5 minutes
     );
-    const files = totalFilesResult[0]?.count || 0;
+    const totalUsers = usersResult[0]?.total || 0;
 
-    // Get satisfaction rate from ratings
-    const satisfactionResult = await executeQuery<any[]>(
-      `SELECT 
-        ROUND(AVG(rating) * 20) as satisfaction_percent 
-       FROM (
-         SELECT rating FROM ticket_responses WHERE rating IS NOT NULL
-         UNION ALL
-         SELECT rating FROM ecu_file_feedback WHERE rating IS NOT NULL
-       ) as ratings`,
+    // Get total files
+    const filesResult = await executeQuery<any[]>(
+      "SELECT COUNT(*) as total FROM ecu_files",
       [],
-      { cache: true, cacheTTL: 300000 } // Cache for 5 minutes
+      { cache: true, cacheTTL: 300000 } // 5 minutes
     );
-    const satisfaction = satisfactionResult[0]?.satisfaction_percent || 98;
+    const totalFiles = filesResult[0]?.total || 0;
+
+    // Get satisfaction rate - handle case when ecu_file_feedback table doesn't exist
+    let satisfactionPercent = 0;
+    try {
+      // First check if the ecu_file_feedback table exists
+      const tableExistsResult = await executeQuery<any[]>(
+        "SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = 'tuning_portal' AND table_name = 'ecu_file_feedback'",
+        [],
+        { cache: true, cacheTTL: 300000 } // 5 minutes
+      );
+      
+      const tableExists = tableExistsResult[0]?.count > 0;
+      
+      if (tableExists) {
+        // If table exists, use the original query
+        const satisfactionResult = await executeQuery<any[]>(
+          `SELECT 
+            ROUND(AVG(rating) * 20) as satisfaction_percent 
+           FROM (
+             SELECT rating FROM ticket_responses WHERE rating IS NOT NULL
+             UNION ALL
+             SELECT rating FROM ecu_file_feedback WHERE rating IS NOT NULL
+           ) as ratings`,
+          [],
+          { cache: true, cacheTTL: 300000 } // 5 minutes
+        );
+        satisfactionPercent = satisfactionResult[0]?.satisfaction_percent || 0;
+      } else {
+        // If table doesn't exist, only use ticket_responses
+        const satisfactionResult = await executeQuery<any[]>(
+          `SELECT 
+            ROUND(AVG(rating) * 20) as satisfaction_percent 
+           FROM ticket_responses 
+           WHERE rating IS NOT NULL`,
+          [],
+          { cache: true, cacheTTL: 300000 } // 5 minutes
+        );
+        satisfactionPercent = satisfactionResult[0]?.satisfaction_percent || 0;
+      }
+    } catch (error) {
+      console.error("Error fetching satisfaction rate:", error);
+      // Fallback to 0 if there's an error
+      satisfactionPercent = 0;
+    }
 
     // Get vehicle manufacturers count
     const manufacturersResult = await executeQuery<any[]>(
-      `SELECT COUNT(*) as count FROM manufacturers`,
+      "SELECT COUNT(*) as total FROM manufacturers",
       [],
-      { cache: true, cacheTTL: 300000 }
+      { cache: true, cacheTTL: 300000 } // 5 minutes
     );
-    const manufacturers = manufacturersResult[0]?.count || 0;
+    const totalManufacturers = manufacturersResult[0]?.total || 0;
 
     // Get vehicle models count
     const modelsResult = await executeQuery<any[]>(
-      `SELECT COUNT(*) as count FROM vehicle_models`,
+      "SELECT COUNT(*) as total FROM models",
       [],
-      { cache: true, cacheTTL: 300000 }
+      { cache: true, cacheTTL: 300000 } // 5 minutes
     );
-    const models = modelsResult[0]?.count || 0;
+    const totalModels = modelsResult[0]?.total || 0;
 
     // Get completed tuning files count
     const completedFilesResult = await executeQuery<any[]>(
-      `SELECT COUNT(*) as count FROM ecu_files WHERE status = 'completed'`,
+      "SELECT COUNT(*) as total FROM ecu_files WHERE status = 'completed'",
       [],
-      { cache: true, cacheTTL: 300000 }
+      { cache: true, cacheTTL: 300000 } // 5 minutes
     );
-    const completedFiles = completedFilesResult[0]?.count || 0;
+    const completedFiles = completedFilesResult[0]?.total || 0;
 
-    // Get average processing time (in hours)
+    // Get average processing time for completed files
     const processingTimeResult = await executeQuery<any[]>(
       `SELECT 
-        ROUND(AVG(TIMESTAMPDIFF(HOUR, created_at, updated_at)), 1) as avg_hours 
+        ROUND(AVG(TIMESTAMPDIFF(HOUR, created_at, updated_at))) as avg_hours 
        FROM ecu_files 
-       WHERE status = 'completed' AND updated_at > created_at`,
+       WHERE status = 'completed' AND updated_at IS NOT NULL`,
       [],
-      { cache: true, cacheTTL: 300000 }
+      { cache: true, cacheTTL: 300000 } // 5 minutes
     );
-    const avgProcessingTime = processingTimeResult[0]?.avg_hours || 24;
+    const avgProcessingTime = processingTimeResult[0]?.avg_hours || 0;
 
     // Get top 3 manufacturers by file count
     const topManufacturersResult = await executeQuery<any[]>(
@@ -74,44 +129,40 @@ export async function GET(request: NextRequest) {
         m.name, 
         COUNT(ef.id) as file_count 
        FROM manufacturers m
-       JOIN ecu_files ef ON m.id = ef.manufacturer_id
+       JOIN models md ON m.id = md.manufacturer_id
+       JOIN ecu_files ef ON md.id = ef.model_id
        GROUP BY m.id, m.name
        ORDER BY file_count DESC
        LIMIT 3`,
       [],
-      { cache: true, cacheTTL: 300000 }
+      { cache: true, cacheTTL: 300000 } // 5 minutes
     );
     const topManufacturers = topManufacturersResult || [];
 
     return NextResponse.json({
-      users,
-      files,
-      satisfaction,
-      manufacturers,
-      models,
-      completedFiles,
-      avgProcessingTime,
-      topManufacturers,
+      users: totalUsers,
+      files: totalFiles,
+      satisfaction: satisfactionPercent,
+      manufacturers: totalManufacturers,
+      models: totalModels,
+      completedFiles: completedFiles,
+      avgProcessingTime: avgProcessingTime,
+      topManufacturers: topManufacturers,
       lastUpdated: new Date().toISOString()
     });
   } catch (error) {
     console.error("Error fetching landing stats:", error);
-    // Return fallback data instead of error
+    // Return fallback data in case of error
     return NextResponse.json({
-      users: 5000,
-      files: 25000,
-      satisfaction: 98,
-      manufacturers: 15,
-      models: 120,
-      completedFiles: 20000,
-      avgProcessingTime: 24,
-      topManufacturers: [
-        { name: "VW", file_count: 8500 },
-        { name: "BMW", file_count: 7200 },
-        { name: "Audi", file_count: 6800 }
-      ],
-      lastUpdated: new Date().toISOString(),
-      fallback: true
+      users: 0,
+      files: 0,
+      satisfaction: 0,
+      manufacturers: 0,
+      models: 0,
+      completedFiles: 0,
+      avgProcessingTime: 0,
+      topManufacturers: [],
+      lastUpdated: new Date().toISOString()
     });
   }
 } 
