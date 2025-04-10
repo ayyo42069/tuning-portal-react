@@ -55,6 +55,8 @@ export async function POST(request: NextRequest) {
     // Hash the new password
     const hashedPassword = await hash(password, 10);
 
+    console.log(`Attempting to update password for user ID: ${userId}`);
+
     // Use executeTransaction to handle all database operations
     await executeTransaction([
       "UPDATE users SET password = ? WHERE id = ?",
@@ -65,6 +67,8 @@ export async function POST(request: NextRequest) {
       [tokenId],
       [userId]
     ]);
+
+    console.log(`Password update successful for user ID: ${userId}`);
 
     // Send confirmation email
     await sendEmail({
