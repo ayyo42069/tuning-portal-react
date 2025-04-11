@@ -15,109 +15,66 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
   const [error, setError] = useState<string | null>(null);
   const [showNewTicketForm, setShowNewTicketForm] = useState(false);
   const [view, setView] = useState<"all" | "my" | "assigned">("all");
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [lastUpdate, setLastUpdate] = useState<number>(Date.now());
 
-  // Fetch tickets on component mount and view change
+  // Fetch tickets on component mount
   useEffect(() => {
-    setPage(1);
-    fetchTickets(true);
+    fetchTickets();
+
+    // Set up polling for new tickets/updates
+    const interval = setInterval(() => {
+      fetchTickets(false);
+    }, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
   }, [view]);
 
-  // Set up polling for new tickets/updates with exponential backoff
-  useEffect(() => {
-    let pollInterval = 30000; // Start with 30 seconds
-    let timeoutId: NodeJS.Timeout;
-
-    const poll = () => {
-      const now = Date.now();
-      // Only poll if it's been at least 30 seconds since the last update
-      if (now - lastUpdate >= 30000) {
-        fetchTickets(false);
-      }
-      // Increase interval up to 5 minutes
-      pollInterval = Math.min(pollInterval * 1.5, 300000);
-      timeoutId = setTimeout(poll, pollInterval);
-    };
-
-    timeoutId = setTimeout(poll, pollInterval);
-
-    return () => clearTimeout(timeoutId);
-  }, [lastUpdate]);
-
-  // Fetch tickets based on current view with pagination
-  const fetchTickets = async (showLoading = true, resetPage = false) => {
+  // Fetch tickets based on current view
+  const fetchTickets = async (showLoading = true) => {
     try {
       if (showLoading) setLoading(true);
       setError(null);
 
-      let url = `/api/tickets?page=${resetPage ? 1 : page}&limit=10`;
+      let url = "/api/tickets";
       if (view === "my") {
-        url += "&filter=my";
+        url += "?filter=my";
       } else if (view === "assigned") {
-        url += "&filter=assigned";
+        url += "?filter=assigned";
       }
 
-      console.log(`Fetching tickets from: ${url}`);
       const response = await fetch(url);
 
+      // Check if response is ok before trying to parse JSON
       if (!response.ok) {
         const errorText = await response.text();
         let errorMessage = "Failed to fetch tickets";
-        let errorDetails = "";
 
         try {
+          // Try to parse error as JSON
           const errorData = JSON.parse(errorText);
           errorMessage = errorData.error || errorMessage;
-          errorDetails = errorData.details || "";
         } catch (parseErr) {
+          // If parsing fails, use status text
           errorMessage = response.statusText || errorMessage;
         }
 
-        // Log detailed error information
-        console.error(`Ticket fetch error: ${errorMessage}`, {
-          status: response.status,
-          statusText: response.statusText,
-          details: errorDetails,
-          url
-        });
-
-        // Set a more detailed error message
-        setError(`${errorMessage}${errorDetails ? `: ${errorDetails}` : ''}`);
+        setError(errorMessage);
         return;
       }
 
-      const data = await response.json();
-      
-      if (resetPage) {
+      // Parse JSON response
+      let data;
+      try {
+        data = await response.json();
         setTickets(data.tickets || []);
-      } else {
-        setTickets(prev => [...prev, ...(data.tickets || [])]);
+      } catch (jsonErr) {
+        console.error("Error parsing JSON response:", jsonErr);
+        setError("Error parsing server response");
       }
-      
-      setHasMore(data.tickets?.length === 10);
-      setLastUpdate(Date.now());
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      setError("Error connecting to server");
       console.error("Error fetching tickets:", err);
-      setError(`Error connecting to server: ${errorMessage}`);
     } finally {
       if (showLoading) setLoading(false);
-    }
-  };
-
-  // Retry fetching tickets
-  const retryFetchTickets = () => {
-    setError(null);
-    fetchTickets(true, true);
-  };
-
-  // Load more tickets
-  const loadMore = () => {
-    if (!loading && hasMore) {
-      setPage(prev => prev + 1);
-      fetchTickets(false);
     }
   };
 
@@ -545,15 +502,7 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
       <div className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
         {error && (
           <div className="bg-red-50/90 dark:bg-red-900/30 backdrop-blur-sm p-3 rounded-lg border border-red-200 dark:border-red-800/50 text-red-800 dark:text-red-200 text-xs mb-4 shadow-sm">
-            <div className="flex justify-between items-center">
-              <span>{error}</span>
-              <button 
-                onClick={retryFetchTickets}
-                className="ml-2 bg-red-100 hover:bg-red-200 dark:bg-red-800/50 dark:hover:bg-red-700/50 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs"
-              >
-                Retry
-              </button>
-            </div>
+            {error}
           </div>
         )}
 
@@ -598,14 +547,12 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
             tickets={tickets}
             onSelectTicket={handleSelectTicket}
             currentUser={currentUser}
-            onLoadMore={loadMore}
           />
         ) : (
           <TicketList
             tickets={tickets}
             onSelectTicket={handleSelectTicket}
             currentUser={currentUser}
-            onLoadMore={loadMore}
           />
         )}
       </div>

@@ -16,15 +16,7 @@ CREATE TABLE IF NOT EXISTS tickets (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   resolved_at TIMESTAMP NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
-  INDEX idx_user_id (user_id),
-  INDEX idx_assigned_to (assigned_to),
-  INDEX idx_status (status),
-  INDEX idx_priority (priority),
-  INDEX idx_updated_at (updated_at),
-  INDEX idx_created_at (created_at),
-  INDEX idx_user_status (user_id, status),
-  INDEX idx_assigned_status (assigned_to, status)
+  FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- Ticket responses table
@@ -36,10 +28,7 @@ CREATE TABLE IF NOT EXISTS ticket_responses (
   is_internal BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  INDEX idx_ticket_id (ticket_id),
-  INDEX idx_user_id (user_id),
-  INDEX idx_created_at (created_at)
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Ticket attachments table
@@ -55,26 +44,26 @@ CREATE TABLE IF NOT EXISTS ticket_attachments (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON DELETE CASCADE,
   FOREIGN KEY (response_id) REFERENCES ticket_responses(id) ON DELETE CASCADE,
-  FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE CASCADE,
-  INDEX idx_ticket_id (ticket_id),
-  INDEX idx_response_id (response_id),
-  INDEX idx_uploaded_by (uploaded_by)
+  FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Ticket history table for tracking status changes
 CREATE TABLE IF NOT EXISTS ticket_history (
   id INT AUTO_INCREMENT PRIMARY KEY,
   ticket_id INT NOT NULL,
-  user_id INT NOT NULL,
-  field_name VARCHAR(50) NOT NULL,
-  old_value TEXT,
-  new_value TEXT,
+  changed_by INT NOT NULL,
+  old_status ENUM('open', 'in_progress', 'resolved', 'closed'),
+  new_status ENUM('open', 'in_progress', 'resolved', 'closed'),
+  old_priority ENUM('low', 'medium', 'high', 'urgent'),
+  new_priority ENUM('low', 'medium', 'high', 'urgent'),
+  old_assigned_to INT,
+  new_assigned_to INT,
+  comment TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  INDEX idx_ticket_id (ticket_id),
-  INDEX idx_user_id (user_id),
-  INDEX idx_created_at (created_at)
+  FOREIGN KEY (changed_by) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (old_assigned_to) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (new_assigned_to) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- Indexes for better query performance

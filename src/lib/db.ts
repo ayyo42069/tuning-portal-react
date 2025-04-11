@@ -69,10 +69,17 @@ export async function executeQuery<T>(
       console.log(`Query params:`, params);
     }
 
-    // Use the validated params we created at the beginning of the function
-    // For MySQL prepared statements, we need to handle empty arrays properly
-    const safeParams = validParams.length > 0 ? validParams : [];
-    const [results] = await connection.execute(query, safeParams);
+    // Process parameters to ensure proper types for MySQL
+    const processedParams = validParams.map(param => {
+      // Convert string numbers to actual numbers for numeric parameters
+      if (typeof param === 'string' && !isNaN(Number(param)) && param.trim() !== '') {
+        return Number(param);
+      }
+      return param;
+    });
+
+    // Use the processed params for the query
+    const [results] = await connection.execute(query, processedParams);
 
     // Enhanced logging for security queries
     if (query.includes("security_events")) {
