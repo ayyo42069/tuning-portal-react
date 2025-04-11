@@ -176,7 +176,7 @@ export const Hero = ({ inView }: HeroProps) => {
               <div className="absolute inset-0 bg-white/5 backdrop-blur-sm rounded-2xl flex items-center justify-center overflow-hidden">
                 <div className="relative w-full h-full">
                   <Image
-                    src="/images/car-tuning.jpg"
+                    src="/images/ecu-tuning.png"
                     alt="Car ECU Tuning"
                     fill
                     className="object-cover rounded-2xl"

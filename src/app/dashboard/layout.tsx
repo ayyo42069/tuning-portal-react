@@ -105,8 +105,11 @@ export default function DashboardLayout({
         {/* Header */}
         <header className="relative z-10 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border-b border-white/20 dark:border-gray-700/30">
           <div className="flex justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            {/* Left side - Tuning Portal text */}
-            <h1 className="text-2xl font-bold text-white flex-shrink-0">Tuning Portal</h1>
+            {/* Left side - Logo and Tuning Portal text */}
+            <div className="flex items-center space-x-2">
+              <img src="/images/logo.png" alt="Logo" className="h-8 w-8" />
+              <h1 className="text-2xl font-bold text-white flex-shrink-0">Tuning Portal</h1>
+            </div>
 
             {/* Center - Welcome message */}
             <div className="flex items-center space-x-4 mx-auto">
