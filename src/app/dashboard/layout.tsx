@@ -104,14 +104,14 @@ export default function DashboardLayout({
 
         {/* Header */}
         <header className="relative z-10 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border-b border-white/20 dark:border-gray-700/30">
-          <div className="flex justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-wrap justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             {/* Left side - Logo and Tuning Portal text */}
             <div className="flex items-center space-x-2">
               <img src="/images/logo.png" alt="Logo" className="h-12 w-12" />
             </div>
 
             {/* Center - Welcome message */}
-            <div className="flex items-center space-x-4 mx-auto justify-center">
+            <div className="flex flex-col items-center space-y-1 mx-auto text-center">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold">
                 {user?.username?.charAt(0).toUpperCase() || "U"}
               </div>
@@ -131,14 +131,18 @@ export default function DashboardLayout({
                   {user?.credits || 0} Credits
                 </span>
               </div>
-              <NotificationBell />
-              <ThemeToggle />
+              <div className="p-2 rounded-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                <NotificationBell />
+              </div>
+              <div className="p-2 rounded-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                <ThemeToggle />
+              </div>
               <button
                 onClick={handleLogout}
-                className="p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-700/30 transition-colors"
+                className="p-2 rounded-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                 aria-label="Logout"
               >
-                <LogOut className="w-5 h-5 text-white" />
+                <LogOut className="w-5 h-5 text-gray-800 dark:text-gray-200" />
               </button>
             </div>
           </div>
@@ -203,6 +207,9 @@ export default function DashboardLayout({
                 </div>
               </div>
 
+              {/* Opening Hours */}
+              <OpeningHours />
+
               {/* Navigation */}
               <nav className="space-y-2 p-4 flex-grow">
                 <Link
@@ -247,6 +254,20 @@ export default function DashboardLayout({
 
           {/* Main content */}
           <div className="flex-1 p-4 md:p-8 overflow-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Completed Tunes</h3>
+                <p className="text-2xl font-bold text-blue-500">1</p>
+              </div>
+              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Processing</h3>
+                <p className="text-2xl font-bold text-blue-500">1</p>
+              </div>
+              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Available Credits</h3>
+                <p className="text-2xl font-bold text-blue-500">1837</p>
+              </div>
+            </div>
             {children}
           </div>
         </div>

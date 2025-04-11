@@ -156,31 +156,15 @@ export default function OpeningHours() {
   }) as DayOfWeek;
 
   return (
-    <div className="mt-4 sm:mt-6 px-3 sm:px-4 py-2 sm:py-3 border-t border-gray-200 dark:border-gray-700">
-      <div className="flex items-center mb-2 sm:mb-3">
-        <Clock className="h-4 w-4 mr-2 text-yellow-500" />
-        <h4 className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
-          Opening Hours
-        </h4>
-      </div>
-
-      <div className="space-y-1 text-xs">
+    <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Opening Hours</h3>
+      <ul className="mt-2 text-gray-700 dark:text-gray-300">
         {Object.entries(openingHours).map(([day, hours]) => (
-          <div
-            key={day}
-            className={`flex justify-between items-center py-0.5 ${
-              day === today
-                ? "font-medium text-gray-800 dark:text-gray-200"
-                : "text-gray-500 dark:text-gray-400"
-            }`}
-          >
-            <span>{day.substring(0, 3)}</span>
-            <span>
-              {hours.open ? `${hours.open} - ${hours.close}` : "Closed"}
-            </span>
-          </div>
+          <li key={day}>
+            {day.substring(0, 3)}: {hours.open ? `${hours.open} - ${hours.close}` : "Closed"}
+          </li>
         ))}
-      </div>
+      </ul>
 
       <div className="mt-2 sm:mt-3 flex items-center justify-between text-xs">
         <span className="text-gray-600 dark:text-gray-400">Status:</span>
