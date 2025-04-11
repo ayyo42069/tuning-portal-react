@@ -207,11 +207,8 @@ export default function DashboardLayout({
                 </div>
               </div>
 
-              {/* Opening Hours */}
-              <OpeningHours />
-
               {/* Navigation */}
-              <nav className="space-y-2 p-4 flex-grow">
+              <nav className="flex-1 space-y-1 p-4">
                 <Link
                   href="/dashboard"
                   className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
@@ -237,14 +234,20 @@ export default function DashboardLayout({
                   Credits
                 </Link>
                 {user?.role === "admin" && (
-                  <Link
-                    href="/admin"
-                    className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-                    onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-                  >
-                    <Settings className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-                    Admin Panel
-                  </Link>
+                  <>
+                    <Link
+                      href="/admin"
+                      className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
+                      onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+                    >
+                      <Settings className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
+                      Admin Panel
+                    </Link>
+                    {/* Opening Hours moved under admin panel */}
+                    <div className="px-4 py-3">
+                      <OpeningHours />
+                    </div>
+                  </>
                 )}
               </nav>
 

@@ -156,23 +156,31 @@ export default function OpeningHours() {
   }) as DayOfWeek;
 
   return (
-    <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Opening Hours</h3>
-      <ul className="mt-2 text-gray-700 dark:text-gray-300">
+    <div className="p-4 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/20 dark:border-gray-700/30 group hover:shadow-xl transition-all duration-300">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-lg shadow-lg shadow-blue-500/20">
+          <Clock className="w-5 h-5 text-white" />
+        </div>
+        <h3 className="text-lg font-semibold text-white">Opening Hours</h3>
+      </div>
+      <ul className="mt-2 space-y-1 text-blue-100/90">
         {Object.entries(openingHours).map(([day, hours]) => (
-          <li key={day}>
-            {day.substring(0, 3)}: {hours.open ? `${hours.open} - ${hours.close}` : "Closed"}
+          <li key={day} className="flex justify-between items-center">
+            <span className="text-sm">{day.substring(0, 3)}</span>
+            <span className="text-sm">
+              {hours.open ? `${hours.open} - ${hours.close}` : "Closed"}
+            </span>
           </li>
         ))}
       </ul>
 
-      <div className="mt-2 sm:mt-3 flex items-center justify-between text-xs">
-        <span className="text-gray-600 dark:text-gray-400">Status:</span>
+      <div className="mt-3 pt-3 border-t border-white/10 dark:border-gray-700/30 flex items-center justify-between">
+        <span className="text-sm text-blue-100/70">Status:</span>
         <span
-          className={`px-2 py-0.5 rounded-full ${
+          className={`px-2 py-0.5 rounded-full text-sm ${
             isCurrentlyOpen()
-              ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
-              : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
+              ? "bg-green-500/20 text-green-300"
+              : "bg-red-500/20 text-red-300"
           }`}
         >
           {isCurrentlyOpen() ? "Open" : "Closed"}
@@ -180,7 +188,7 @@ export default function OpeningHours() {
       </div>
 
       {!isCurrentlyOpen() && (
-        <div className="mt-2 text-xs text-center text-blue-600 dark:text-blue-400">
+        <div className="mt-2 text-sm text-center text-blue-300">
           Opens in: {timeUntilOpen}
         </div>
       )}
