@@ -69,42 +69,33 @@ export async function executeQuery<T>(
       console.log(`Query params:`, params);
     }
 
-    // Process parameters to ensure proper types for MySQL
-    const processedParams = validParams.map((param, index) => {
-      // Special handling for LIMIT and OFFSET parameters
-      if (query.includes("LIMIT ?") || query.includes("OFFSET ?")) {
-        // Check if this parameter is for LIMIT or OFFSET
-        const isLimitOrOffset = query.includes("LIMIT ?") && index === validParams.length - 2 || 
-                               query.includes("OFFSET ?") && index === validParams.length - 1;
-        
-        if (isLimitOrOffset) {
-          // Ensure it's a number and not a string
-          if (typeof param === 'string') {
-            const numValue = parseInt(param, 10);
-            if (!isNaN(numValue)) {
-              console.log(`Converting string parameter to number for LIMIT/OFFSET: ${param} -> ${numValue}`);
-              return numValue;
-            }
-          } else if (typeof param === 'number') {
-            return param;
-          }
+    // Check if the query contains embedded values (not using parameterized queries)
+    const hasEmbeddedValues = query.includes("${") || 
+                             (query.includes("LIMIT") && !query.includes("LIMIT ?")) ||
+                             (query.includes("OFFSET") && !query.includes("OFFSET ?"));
+    
+    let results;
+    
+    if (hasEmbeddedValues) {
+      // For queries with embedded values, use query instead of execute
+      console.log("Using query() instead of execute() due to embedded values");
+      [results] = await connection.query(query);
+    } else {
+      // Process parameters to ensure proper types for MySQL
+      const processedParams = validParams.map(param => {
+        // Convert string numbers to actual numbers for numeric parameters
+        if (typeof param === 'string' && !isNaN(Number(param)) && param.trim() !== '') {
+          return Number(param);
         }
-      }
-      
-      // Convert string numbers to actual numbers for numeric parameters
-      if (typeof param === 'string' && !isNaN(Number(param)) && param.trim() !== '') {
-        return Number(param);
-      }
-      
-      return param;
-    });
+        return param;
+      });
 
-    // Log the processed parameters for debugging
-    console.log(`Processed parameters:`, processedParams);
-    console.log(`Query:`, query);
-
-    // Use the processed params for the query
-    const [results] = await connection.execute(query, processedParams);
+      // Log the processed parameters for debugging
+      console.log(`Processed parameters:`, processedParams);
+      
+      // Use the processed params for the query
+      [results] = await connection.execute(query, processedParams);
+    }
 
     // Enhanced logging for security queries
     if (query.includes("security_events")) {

@@ -157,23 +157,19 @@ export async function GET(request: NextRequest) {
     );
     const total = countResult?.total || 0;
 
-    // Add ordering and pagination
-    query += " ORDER BY t.updated_at DESC LIMIT ? OFFSET ?";
+    // Add ordering and pagination - using a different approach to avoid parameter binding issues
+    // Instead of using LIMIT ? OFFSET ?, we'll use LIMIT with a calculated value
+    const offset = (page - 1) * limit;
+    query += ` ORDER BY t.updated_at DESC LIMIT ${limit} OFFSET ${offset}`;
     
-    // Ensure parameters are properly typed as numbers
-    const limitParam = Number(limit);
-    const offsetParam = Number((page - 1) * limit);
-    
-    // Add parameters to the query params array
-    queryParams.push(limitParam, offsetParam);
+    // We don't need to add these parameters anymore since they're directly in the query
+    // queryParams.push(limitParam, offsetParam);
 
     // Execute the main query with better error handling
     let tickets: TicketDB[] = [];
     try {
       console.log("Executing query with params:", queryParams);
       console.log("Query:", query);
-      console.log("Limit param:", limitParam, "Type:", typeof limitParam);
-      console.log("Offset param:", offsetParam, "Type:", typeof offsetParam);
       
       tickets = await executeQuery<TicketDB[]>(query, queryParams);
     } catch (dbError) {
