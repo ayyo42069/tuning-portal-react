@@ -171,6 +171,10 @@ export async function GET(request: NextRequest) {
     let tickets: TicketDB[] = [];
     try {
       console.log("Executing query with params:", queryParams);
+      console.log("Query:", query);
+      console.log("Limit param:", limitParam, "Type:", typeof limitParam);
+      console.log("Offset param:", offsetParam, "Type:", typeof offsetParam);
+      
       tickets = await executeQuery<TicketDB[]>(query, queryParams);
     } catch (dbError) {
       console.error("Database query error:", dbError);

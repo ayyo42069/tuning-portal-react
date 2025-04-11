@@ -70,13 +70,38 @@ export async function executeQuery<T>(
     }
 
     // Process parameters to ensure proper types for MySQL
-    const processedParams = validParams.map(param => {
+    const processedParams = validParams.map((param, index) => {
+      // Special handling for LIMIT and OFFSET parameters
+      if (query.includes("LIMIT ?") || query.includes("OFFSET ?")) {
+        // Check if this parameter is for LIMIT or OFFSET
+        const isLimitOrOffset = query.includes("LIMIT ?") && index === validParams.length - 2 || 
+                               query.includes("OFFSET ?") && index === validParams.length - 1;
+        
+        if (isLimitOrOffset) {
+          // Ensure it's a number and not a string
+          if (typeof param === 'string') {
+            const numValue = parseInt(param, 10);
+            if (!isNaN(numValue)) {
+              console.log(`Converting string parameter to number for LIMIT/OFFSET: ${param} -> ${numValue}`);
+              return numValue;
+            }
+          } else if (typeof param === 'number') {
+            return param;
+          }
+        }
+      }
+      
       // Convert string numbers to actual numbers for numeric parameters
       if (typeof param === 'string' && !isNaN(Number(param)) && param.trim() !== '') {
         return Number(param);
       }
+      
       return param;
     });
+
+    // Log the processed parameters for debugging
+    console.log(`Processed parameters:`, processedParams);
+    console.log(`Query:`, query);
 
     // Use the processed params for the query
     const [results] = await connection.execute(query, processedParams);
