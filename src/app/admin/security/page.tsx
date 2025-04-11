@@ -84,6 +84,15 @@ export default function SecurityDashboard() {
   // State for active tab
   const [activeTab, setActiveTab] = useState<"overview" | "logs" | "alerts">("overview");
 
+  // Fetch security stats and logs when component mounts or filters change
+  useEffect(() => {
+    fetchSecurityStats();
+  }, [timeRange]);
+
+  useEffect(() => {
+    fetchSecurityLogs();
+  }, [page, limit, filters, activeTab]);
+
   // Fetch security stats
   const fetchSecurityStats = async () => {
     try {
@@ -105,12 +114,14 @@ export default function SecurityDashboard() {
   const fetchSecurityLogs = async () => {
     try {
       setLoading(true);
+      setError(null); // Clear any previous errors
 
       // Build query string from filters
       const queryParams = new URLSearchParams();
       queryParams.append("limit", limit.toString());
       queryParams.append("offset", ((page - 1) * limit).toString());
 
+      // Only add filters if they have values
       if (filters.eventType) queryParams.append("eventType", filters.eventType);
       if (filters.severity) queryParams.append("severity", filters.severity);
       if (filters.userId) queryParams.append("userId", filters.userId);
@@ -120,9 +131,12 @@ export default function SecurityDashboard() {
       const response = await fetch(
         `/api/admin/security/logs?${queryParams.toString()}`
       );
+      
       if (!response.ok) {
-        throw new Error("Failed to fetch security logs");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch security logs");
       }
+      
       const data = await response.json();
 
       console.log("Security logs API response:", data);
@@ -131,7 +145,7 @@ export default function SecurityDashboard() {
       if (data.logs && Array.isArray(data.logs)) {
         console.log(`Received ${data.logs.length} security logs from API`);
         setLogs(data.logs);
-        setTotalLogs(data.total || data.logs.length); // Use total if provided, otherwise use length
+        setTotalLogs(data.total || data.logs.length);
       } else {
         console.error(
           "No logs data returned from API or invalid format:",
@@ -198,8 +212,7 @@ export default function SecurityDashboard() {
       startDate: "",
       endDate: "",
     });
-    setPage(1);
-    fetchSecurityLogs();
+    setPage(1); // Reset to first page when filters change
   };
 
   // Handle time range change
@@ -226,17 +239,6 @@ export default function SecurityDashboard() {
         return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
     }
   };
-
-  // Load data on component mount
-  useEffect(() => {
-    fetchSecurityStats();
-    fetchSecurityLogs();
-  }, []);
-
-  // Reload stats when time range changes
-  useEffect(() => {
-    fetchSecurityStats();
-  }, [timeRange]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -562,117 +564,60 @@ export default function SecurityDashboard() {
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Security Event Logs
             </h2>
+            
+            {/* Error Message */}
             {error && (
-              <div className="p-4 mb-6 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-red-900/30 dark:text-red-400 flex flex-col">
-                <div className="flex items-center mb-2">
+              <div className="p-4 mb-6 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-red-900/30 dark:text-red-400">
+                <div className="flex items-center">
                   <AlertTriangle className="w-5 h-5 mr-2" />
                   <span className="font-medium">Error: {error}</span>
-                </div>
-                <div className="ml-7 mb-3">
-                  <p>
-                    There was an error fetching security logs. This may be due
-                    to a database query issue.
-                  </p>
                 </div>
               </div>
             )}
 
             {/* Filters */}
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 mb-6">
-              <div className="flex flex-col md:flex-row md:items-end gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Event Type
-                  </label>
-                  <select
-                    name="eventType"
-                    value={filters.eventType}
-                    onChange={handleFilterChange}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  >
-                    <option value="">All Types</option>
-                    {Object.values(SecurityEventType).map((type) => (
-                      <option key={type} value={type}>
-                        {type.replace(/_/g, " ")}
-                      </option>
-                    ))}
-                    <option value="api_access">API Access</option>
-                  </select>
-                </div>
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Severity
-                  </label>
-                  <select
-                    name="severity"
-                    value={filters.severity}
-                    onChange={handleFilterChange}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  >
-                    <option value="">All Severities</option>
-                    {Object.values(SecurityEventSeverity).map((severity) => (
-                      <option key={severity} value={severity}>
-                        {severity}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    User ID
-                  </label>
-                  <input
-                    type="text"
-                    name="userId"
-                    value={filters.userId}
-                    onChange={handleFilterChange}
-                    placeholder="Enter user ID"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Start Date
-                  </label>
-                  <input
-                    type="date"
-                    name="startDate"
-                    value={filters.startDate}
-                    onChange={handleFilterChange}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    name="endDate"
-                    value={filters.endDate}
-                    onChange={handleFilterChange}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={applyFilters}
-                    className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-                  >
-                    <Filter className="w-4 h-4 inline mr-1" />
-                    Filter
-                  </button>
-                  <button
-                    onClick={resetFilters}
-                    className="text-gray-500 bg-gray-100 hover:bg-gray-200 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300 focus:outline-none dark:focus:ring-gray-600"
-                  >
-                    Reset
-                  </button>
-                </div>
-              </div>
+            <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <select
+                value={filters.eventType}
+                onChange={(e) => {
+                  setFilters({ ...filters, eventType: e.target.value });
+                  setPage(1);
+                }}
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              >
+                <option value="">All Event Types</option>
+                {Object.values(SecurityEventType).map((type) => (
+                  <option key={type} value={type}>
+                    {type.replace(/_/g, " ")}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={filters.severity}
+                onChange={(e) => {
+                  setFilters({ ...filters, severity: e.target.value });
+                  setPage(1);
+                }}
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              >
+                <option value="">All Severities</option>
+                {Object.values(SecurityEventSeverity).map((severity) => (
+                  <option key={severity} value={severity}>
+                    {severity.charAt(0).toUpperCase() + severity.slice(1)}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                onClick={resetFilters}
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+              >
+                Reset Filters
+              </button>
             </div>
 
-            {/* Logs Table */}
+            {/* Loading State */}
             {loading ? (
               <div className="text-center py-10">
                 <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent align-[-0.125em]"></div>
@@ -683,7 +628,9 @@ export default function SecurityDashboard() {
             ) : logs.length === 0 ? (
               <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700">
                 <p className="text-gray-600 dark:text-gray-400">
-                  No security logs found matching your criteria.
+                  {error 
+                    ? "Error loading security logs. Please try again."
+                    : "No security logs found matching your criteria. Try adjusting your filters."}
                 </p>
               </div>
             ) : (
@@ -692,31 +639,19 @@ export default function SecurityDashboard() {
                   <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                       <tr>
-                        <th scope="col" className="px-6 py-3">
-                          Event Type
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Severity
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          User
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          IP Address
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Time
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Details
-                        </th>
+                        <th className="px-6 py-3">Event Type</th>
+                        <th className="px-6 py-3">Severity</th>
+                        <th className="px-6 py-3">User</th>
+                        <th className="px-6 py-3">IP Address</th>
+                        <th className="px-6 py-3">Date</th>
+                        <th className="px-6 py-3">Details</th>
                       </tr>
                     </thead>
                     <tbody>
                       {logs.map((log) => (
                         <tr
                           key={log.id}
-                          className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                          className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                         >
                           <td className="px-6 py-4">
                             {log.event_type.replace(/_/g, " ")}
@@ -733,7 +668,7 @@ export default function SecurityDashboard() {
                           <td className="px-6 py-4">{log.username || "N/A"}</td>
                           <td className="px-6 py-4">{log.ip_address}</td>
                           <td className="px-6 py-4">
-                            {formatDate(log.created_at)}
+                            {new Date(log.created_at).toLocaleString()}
                           </td>
                           <td className="px-6 py-4">
                             <button
@@ -752,14 +687,13 @@ export default function SecurityDashboard() {
                 </div>
 
                 {/* Pagination */}
-                <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-4 py-3">
+                <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex items-center">
                     <select
                       value={limit}
                       onChange={(e) => {
                         setLimit(Number(e.target.value));
                         setPage(1);
-                        fetchSecurityLogs();
                       }}
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     >
@@ -771,22 +705,21 @@ export default function SecurityDashboard() {
                     <span className="text-sm text-gray-700 dark:text-gray-400 ml-4">
                       Showing{" "}
                       <span className="font-medium">
-                        {(page - 1) * limit + 1}
+                        {totalLogs === 0 ? 0 : (page - 1) * limit + 1}
                       </span>{" "}
                       to{" "}
                       <span className="font-medium">
                         {Math.min(page * limit, totalLogs)}
                       </span>{" "}
-                      of <span className="font-medium">{totalLogs}</span>{" "}
-                      results
+                      of <span className="font-medium">{totalLogs}</span> results
                     </span>
                   </div>
+
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => {
                         if (page > 1) {
                           setPage(page - 1);
-                          fetchSecurityLogs();
                         }
                       }}
                       disabled={page === 1}
@@ -805,7 +738,6 @@ export default function SecurityDashboard() {
                       onClick={() => {
                         if (page * limit < totalLogs) {
                           setPage(page + 1);
-                          fetchSecurityLogs();
                         }
                       }}
                       disabled={page * limit >= totalLogs}
