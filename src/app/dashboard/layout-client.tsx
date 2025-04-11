@@ -103,21 +103,11 @@ export default function DashboardLayout({
         </div>
 
         {/* Header */}
-        <header className="relative z-10 bg-transparent flex justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <header className="relative z-10 bg-transparent flex justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 border border-white/20 dark:border-gray-700/30 backdrop-blur-md">
           {/* Left side - Logo and Tuning Portal text */}
           <div className="flex items-center space-x-2">
             <img src="/images/logo.png" alt="Logo" className="h-12 w-12" />
             <span className="text-xl font-semibold text-purple-400">Tuning Portal</span>
-          </div>
-
-          {/* Center - Welcome message */}
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold">
-              {user?.username?.charAt(0).toUpperCase() || "U"}
-            </div>
-            <h2 className="text-xl font-semibold text-white">
-              Welcome, <span className="text-purple-400">{user?.username || "User"}</span>
-            </h2>
           </div>
 
           {/* Right side - Controls */}
@@ -197,8 +187,8 @@ export default function DashboardLayout({
                     {user?.username?.charAt(0).toUpperCase() || "U"}
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-white font-medium">{user?.username || "User"}</h3>
-                    <p className="text-blue-200/70 text-sm">{user?.email || ""}</p>
+                    <h3 className="text-white font-medium">Hello, {user?.username || "User"}</h3>
+                    <p className={`text-sm ${user?.role === "admin" ? "text-red-500" : "text-green-500"} bg-white/10 dark:bg-gray-800/20 backdrop-blur-md px-2 py-1 rounded-lg`}>{user?.role}</p>
                   </div>
                 </div>
               </div>
