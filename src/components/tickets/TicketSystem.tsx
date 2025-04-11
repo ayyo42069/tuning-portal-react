@@ -59,20 +59,32 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
         url += "&filter=assigned";
       }
 
+      console.log(`Fetching tickets from: ${url}`);
       const response = await fetch(url);
 
       if (!response.ok) {
         const errorText = await response.text();
         let errorMessage = "Failed to fetch tickets";
+        let errorDetails = "";
 
         try {
           const errorData = JSON.parse(errorText);
           errorMessage = errorData.error || errorMessage;
+          errorDetails = errorData.details || "";
         } catch (parseErr) {
           errorMessage = response.statusText || errorMessage;
         }
 
-        setError(errorMessage);
+        // Log detailed error information
+        console.error(`Ticket fetch error: ${errorMessage}`, {
+          status: response.status,
+          statusText: response.statusText,
+          details: errorDetails,
+          url
+        });
+
+        // Set a more detailed error message
+        setError(`${errorMessage}${errorDetails ? `: ${errorDetails}` : ''}`);
         return;
       }
 
@@ -87,11 +99,18 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
       setHasMore(data.tickets?.length === 10);
       setLastUpdate(Date.now());
     } catch (err) {
-      setError("Error connecting to server");
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
       console.error("Error fetching tickets:", err);
+      setError(`Error connecting to server: ${errorMessage}`);
     } finally {
       if (showLoading) setLoading(false);
     }
+  };
+
+  // Retry fetching tickets
+  const retryFetchTickets = () => {
+    setError(null);
+    fetchTickets(true, true);
   };
 
   // Load more tickets
@@ -526,7 +545,15 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
       <div className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
         {error && (
           <div className="bg-red-50/90 dark:bg-red-900/30 backdrop-blur-sm p-3 rounded-lg border border-red-200 dark:border-red-800/50 text-red-800 dark:text-red-200 text-xs mb-4 shadow-sm">
-            {error}
+            <div className="flex justify-between items-center">
+              <span>{error}</span>
+              <button 
+                onClick={retryFetchTickets}
+                className="ml-2 bg-red-100 hover:bg-red-200 dark:bg-red-800/50 dark:hover:bg-red-700/50 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs"
+              >
+                Retry
+              </button>
+            </div>
           </div>
         )}
 

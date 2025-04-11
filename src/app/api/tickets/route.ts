@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       SELECT SQL_CALC_FOUND_ROWS t.*, 
         u1.username, 
         u2.username as assignedUsername
-      FROM tickets t FORCE INDEX (idx_user_id, idx_assigned_to)
+      FROM tickets t
       JOIN users u1 ON t.user_id = u1.id
       LEFT JOIN users u2 ON t.assigned_to = u2.id
     `;
@@ -67,11 +67,27 @@ export async function GET(request: NextRequest) {
     query += " ORDER BY t.updated_at DESC LIMIT ? OFFSET ?";
     queryParams.push(limit, offset);
 
-    // Execute the main query
-    const tickets = await executeQuery<TicketDB[]>(query, queryParams);
+    // Execute the main query with better error handling
+    let tickets: TicketDB[] = [];
+    try {
+      tickets = await executeQuery<TicketDB[]>(query, queryParams);
+    } catch (dbError) {
+      console.error("Database query error:", dbError);
+      return NextResponse.json(
+        { error: "Database error occurred while fetching tickets" },
+        { status: 500 }
+      );
+    }
 
-    // Get total count for pagination
-    const [{ total }] = await executeQuery<[{ total: number }]>("SELECT FOUND_ROWS() as total");
+    // Get total count for pagination with error handling
+    let total = 0;
+    try {
+      const countResult = await executeQuery<[{ total: number }]>("SELECT FOUND_ROWS() as total");
+      total = countResult[0]?.total || 0;
+    } catch (countError) {
+      console.error("Error getting total count:", countError);
+      // Continue with tickets we have, but total will be 0
+    }
 
     // Format tickets for response
     const formattedTickets: Ticket[] = tickets.map((ticket) => ({
