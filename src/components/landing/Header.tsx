@@ -74,8 +74,7 @@ export const Header = () => {
       <div className="container mx-auto py-6 px-4 relative z-10">
         <div className="flex justify-between items-center">
           <Link href="/" className="flex items-center space-x-2 group">
-            <img src="/images/logo.png" alt="Logo" className="h-8 w-8" />
-            <h1 className="text-3xl font-bold text-white">Tuning Portal</h1>
+            <img src="/images/logo.png" alt="Logo" className="h-12 w-12" />
           </Link>
 
           <div className="flex items-center space-x-4">
