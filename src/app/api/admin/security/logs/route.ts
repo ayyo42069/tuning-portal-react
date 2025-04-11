@@ -54,24 +54,14 @@ export async function GET(request: NextRequest) {
 
     if (searchParams.has("eventType")) {
       const eventType = searchParams.get("eventType");
-      if (
-        eventType &&
-        Object.values(SecurityEventType).includes(
-          eventType as SecurityEventType
-        )
-      ) {
+      if (eventType) {
         queryOptions.eventType = eventType as SecurityEventType;
       }
     }
 
     if (searchParams.has("severity")) {
       const severity = searchParams.get("severity");
-      if (
-        severity &&
-        Object.values(SecurityEventSeverity).includes(
-          severity as SecurityEventSeverity
-        )
-      ) {
+      if (severity) {
         queryOptions.severity = severity as SecurityEventSeverity;
       }
     }
@@ -133,9 +123,9 @@ export async function GET(request: NextRequest) {
     // Return the logs and total count
     return NextResponse.json({ logs, total });
   } catch (error) {
-    console.error("Error fetching security logs:", error);
+    console.error("Error in security logs API:", error);
     return NextResponse.json(
-      { error: "Failed to fetch security logs" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

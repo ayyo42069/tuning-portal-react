@@ -290,18 +290,9 @@ export async function getSecurityLogs(
     }
 
     if (options.eventType) {
-      // Special handling for api_access which can come from user_activity_logs
-      if (options.eventType === "api_access") {
-        whereClause += " AND (se.event_type = ? OR se.event_type = ?)";
-        params.push("api_access");
-        params.push("sensitive_data_access");
-        countParams.push("api_access");
-        countParams.push("sensitive_data_access");
-      } else {
-        whereClause += " AND se.event_type = ?";
-        params.push(options.eventType);
-        countParams.push(options.eventType);
-      }
+      whereClause += " AND se.event_type = ?";
+      params.push(options.eventType);
+      countParams.push(options.eventType);
     }
 
     if (options.severity) {
@@ -330,6 +321,9 @@ export async function getSecurityLogs(
       ${whereClause}
     `;
 
+    console.log("Count query:", countQuery);
+    console.log("Count params:", countParams);
+
     const countResults = await executeQuery<any[]>(countQuery, countParams);
     // Ensure we have a valid count result
     const countResult =
@@ -340,11 +334,6 @@ export async function getSecurityLogs(
 
     // Log the count for debugging
     console.log(`Security logs count: ${total}`);
-    console.log(`Count query: ${countQuery}`);
-    console.log(`Count params:`, countParams);
-
-    // Don't return early even if total is 0, still attempt to query
-    // This helps diagnose if there's a counting issue vs. a data retrieval issue
 
     // Get the actual data
     let dataQuery = `

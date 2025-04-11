@@ -254,20 +254,6 @@ export default function DashboardLayout({
 
           {/* Main content */}
           <div className="flex-1 p-4 md:p-8 overflow-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Completed Tunes</h3>
-                <p className="text-2xl font-bold text-blue-500">1</p>
-              </div>
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Processing</h3>
-                <p className="text-2xl font-bold text-blue-500">1</p>
-              </div>
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Available Credits</h3>
-                <p className="text-2xl font-bold text-blue-500">1837</p>
-              </div>
-            </div>
             {children}
           </div>
         </div>
