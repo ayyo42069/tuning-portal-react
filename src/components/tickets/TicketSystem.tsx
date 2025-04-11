@@ -15,45 +15,60 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
   const [error, setError] = useState<string | null>(null);
   const [showNewTicketForm, setShowNewTicketForm] = useState(false);
   const [view, setView] = useState<"all" | "my" | "assigned">("all");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<number>(Date.now());
 
-  // Fetch tickets on component mount
+  // Fetch tickets on component mount and view change
   useEffect(() => {
-    fetchTickets();
-
-    // Set up polling for new tickets/updates
-    const interval = setInterval(() => {
-      fetchTickets(false);
-    }, 30000); // Poll every 30 seconds
-
-    return () => clearInterval(interval);
+    setPage(1);
+    fetchTickets(true);
   }, [view]);
 
-  // Fetch tickets based on current view
-  const fetchTickets = async (showLoading = true) => {
+  // Set up polling for new tickets/updates with exponential backoff
+  useEffect(() => {
+    let pollInterval = 30000; // Start with 30 seconds
+    let timeoutId: NodeJS.Timeout;
+
+    const poll = () => {
+      const now = Date.now();
+      // Only poll if it's been at least 30 seconds since the last update
+      if (now - lastUpdate >= 30000) {
+        fetchTickets(false);
+      }
+      // Increase interval up to 5 minutes
+      pollInterval = Math.min(pollInterval * 1.5, 300000);
+      timeoutId = setTimeout(poll, pollInterval);
+    };
+
+    timeoutId = setTimeout(poll, pollInterval);
+
+    return () => clearTimeout(timeoutId);
+  }, [lastUpdate]);
+
+  // Fetch tickets based on current view with pagination
+  const fetchTickets = async (showLoading = true, resetPage = false) => {
     try {
       if (showLoading) setLoading(true);
       setError(null);
 
-      let url = "/api/tickets";
+      let url = `/api/tickets?page=${resetPage ? 1 : page}&limit=10`;
       if (view === "my") {
-        url += "?filter=my";
+        url += "&filter=my";
       } else if (view === "assigned") {
-        url += "?filter=assigned";
+        url += "&filter=assigned";
       }
 
       const response = await fetch(url);
 
-      // Check if response is ok before trying to parse JSON
       if (!response.ok) {
         const errorText = await response.text();
         let errorMessage = "Failed to fetch tickets";
 
         try {
-          // Try to parse error as JSON
           const errorData = JSON.parse(errorText);
           errorMessage = errorData.error || errorMessage;
         } catch (parseErr) {
-          // If parsing fails, use status text
           errorMessage = response.statusText || errorMessage;
         }
 
@@ -61,20 +76,29 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
         return;
       }
 
-      // Parse JSON response
-      let data;
-      try {
-        data = await response.json();
+      const data = await response.json();
+      
+      if (resetPage) {
         setTickets(data.tickets || []);
-      } catch (jsonErr) {
-        console.error("Error parsing JSON response:", jsonErr);
-        setError("Error parsing server response");
+      } else {
+        setTickets(prev => [...prev, ...(data.tickets || [])]);
       }
+      
+      setHasMore(data.tickets?.length === 10);
+      setLastUpdate(Date.now());
     } catch (err) {
       setError("Error connecting to server");
       console.error("Error fetching tickets:", err);
     } finally {
       if (showLoading) setLoading(false);
+    }
+  };
+
+  // Load more tickets
+  const loadMore = () => {
+    if (!loading && hasMore) {
+      setPage(prev => prev + 1);
+      fetchTickets(false);
     }
   };
 
@@ -547,12 +571,14 @@ const TicketSystem = ({ currentUser }: TicketSystemProps) => {
             tickets={tickets}
             onSelectTicket={handleSelectTicket}
             currentUser={currentUser}
+            onLoadMore={loadMore}
           />
         ) : (
           <TicketList
             tickets={tickets}
             onSelectTicket={handleSelectTicket}
             currentUser={currentUser}
+            onLoadMore={loadMore}
           />
         )}
       </div>

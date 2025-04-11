@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
     const filter = searchParams.get("filter");
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
+    const offset = (page - 1) * limit;
 
     // Validate pagination parameters
     if (isNaN(page) || page < 1 || isNaN(limit) || limit < 1 || limit > 50) {
@@ -41,86 +42,39 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Build the base query with proper indexing hints
     let query = `
-      SELECT t.*, 
+      SELECT SQL_CALC_FOUND_ROWS t.*, 
         u1.username, 
         u2.username as assignedUsername
-      FROM tickets t
+      FROM tickets t FORCE INDEX (idx_user_id, idx_assigned_to)
       JOIN users u1 ON t.user_id = u1.id
       LEFT JOIN users u2 ON t.assigned_to = u2.id
     `;
 
     const queryParams = [];
 
-    // Apply filters based on user role and filter parameter
-    if (userRole !== "admin") {
-      // Regular users can only see their own tickets
+    // Add filter conditions
+    if (filter === "my") {
       query += " WHERE t.user_id = ?";
       queryParams.push(userId);
-    } else {
-      // Admin filters
-      if (filter === "my") {
-        query += " WHERE t.user_id = ?";
-        queryParams.push(userId);
-      } else if (filter === "assigned") {
-        query += " WHERE t.assigned_to = ?";
-        queryParams.push(userId);
-      }
-      // For 'all', no WHERE clause needed for admins
+    } else if (filter === "assigned" && userRole === "admin") {
+      query += " WHERE t.assigned_to = ?";
+      queryParams.push(userId);
     }
 
-    // Add status filter if provided
-    const status = searchParams.get("status");
-    if (status) {
-      const validStatuses = ["open", "in_progress", "resolved", "closed"];
-      if (validStatuses.includes(status)) {
-        if (query.includes("WHERE")) {
-          query += " AND t.status = ?";
-        } else {
-          query += " WHERE t.status = ?";
-        }
-        queryParams.push(status);
-      }
-    }
+    // Add ordering and pagination
+    query += " ORDER BY t.updated_at DESC LIMIT ? OFFSET ?";
+    queryParams.push(limit, offset);
 
-    // Add priority filter if provided
-    const priority = searchParams.get("priority");
-    if (priority) {
-      const validPriorities = ["low", "medium", "high", "urgent"];
-      if (validPriorities.includes(priority)) {
-        if (query.includes("WHERE")) {
-          query += " AND t.priority = ?";
-        } else {
-          query += " WHERE t.priority = ?";
-        }
-        queryParams.push(priority);
-      }
-    }
-
-    // Count total tickets for pagination
-    const countQuery = `SELECT COUNT(*) as total FROM (${query}) as filtered_tickets`;
-
-    const countResult = await getRow<TicketCountResult>(
-      countQuery,
-      queryParams
-    );
-    const total = countResult?.total || 0;
-
-    // Add sorting and pagination
-    query += " ORDER BY t.created_at DESC LIMIT ? OFFSET ?";
-
-    // Calculate pagination values
-    const offset = (page - 1) * limit;
-
-    // Add pagination parameters to the query params array
-    // Convert to strings to avoid type mismatch with prepared statement
-    queryParams.push(String(limit));
-    queryParams.push(String(offset));
-
+    // Execute the main query
     const tickets = await executeQuery<TicketDB[]>(query, queryParams);
 
-    // Transform database column names to camelCase for frontend
-    const formattedTickets = tickets.map((ticket: TicketDB) => ({
+    // Get total count for pagination
+    const [{ total }] = await executeQuery<[{ total: number }]>("SELECT FOUND_ROWS() as total");
+
+    // Format tickets for response
+    const formattedTickets: Ticket[] = tickets.map((ticket) => ({
       id: ticket.id,
       userId: ticket.user_id,
       username: ticket.username,
@@ -135,15 +89,12 @@ export async function GET(request: NextRequest) {
       resolvedAt: ticket.resolved_at,
     }));
 
-    // Return with pagination metadata
     return NextResponse.json({
       tickets: formattedTickets,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
+      total,
+      page,
+      limit,
+      hasMore: offset + tickets.length < total,
     });
   } catch (error) {
     console.error("Error fetching tickets:", error);
