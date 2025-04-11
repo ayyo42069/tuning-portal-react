@@ -132,24 +132,24 @@ export default function DashboardLayout({
 
             {/* Right side - Controls */}
             <div className="flex items-center space-x-4">
-              <div className="bg-blue-500/20 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg flex items-center">
+              <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 px-3 py-1.5 rounded-lg flex items-center hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300">
                 <CreditCard className="h-4 w-4 text-blue-200 mr-1.5" />
                 <span className="text-sm font-medium text-blue-200">
                   {user?.credits || 0} Credits
                 </span>
               </div>
-              <div className="p-2 rounded-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+              <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 p-2 rounded-lg hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300">
                 <NotificationBell />
               </div>
-              <div className="p-2 rounded-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+              <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 p-2 rounded-lg hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300">
                 <ThemeToggle />
               </div>
               <button
                 onClick={handleLogout}
-                className="p-2 rounded-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 p-2 rounded-lg hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300"
                 aria-label="Logout"
               >
-                <LogOut className="w-5 h-5 text-gray-800 dark:text-gray-200" />
+                <LogOut className="w-5 h-5 text-blue-200" />
               </button>
             </div>
           </div>
