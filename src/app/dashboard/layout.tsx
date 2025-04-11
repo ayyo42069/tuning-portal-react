@@ -107,12 +107,12 @@ export default function DashboardLayout({
           <div className="flex justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             {/* Left side - Logo and Tuning Portal text */}
             <div className="flex items-center space-x-2">
-              <img src="/images/logo.png" alt="Logo" className="h-8 w-8" />
+              <img src="/images/logo.png" alt="Logo" className="h-10 w-10" />
               <h1 className="text-2xl font-bold text-white flex-shrink-0">Tuning Portal</h1>
             </div>
 
             {/* Center - Welcome message */}
-            <div className="flex items-center space-x-4 mx-auto">
+            <div className="flex items-center space-x-4 mx-auto justify-center">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold">
                 {user?.username?.charAt(0).toUpperCase() || "U"}
               </div>
