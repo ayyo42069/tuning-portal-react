@@ -106,10 +106,10 @@ export default function DashboardLayout({
         <header className="relative z-10 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border-b border-white/20 dark:border-gray-700/30">
           <div className="flex justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             {/* Left side - Tuning Portal text */}
-            <h1 className="text-2xl font-bold text-white">Tuning Portal</h1>
+            <h1 className="text-2xl font-bold text-white flex-shrink-0">Tuning Portal</h1>
 
             {/* Center - Welcome message */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 mx-auto">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold">
                 {user?.username?.charAt(0).toUpperCase() || "U"}
               </div>
@@ -122,7 +122,7 @@ export default function DashboardLayout({
             </div>
 
             {/* Right side - Controls */}
-            <div className="flex items-center space-x-4 ml-auto">
+            <div className="flex items-center space-x-4">
               <div className="bg-blue-500/20 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg flex items-center">
                 <CreditCard className="h-4 w-4 text-blue-200 mr-1.5" />
                 <span className="text-sm font-medium text-blue-200">
@@ -227,14 +227,6 @@ export default function DashboardLayout({
                   <CreditCard className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
                   Credits
                 </Link>
-                <Link
-                  href="/dashboard/upload"
-                  className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-                  onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-                >
-                  <Upload className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-                  Upload ECU
-                </Link>
                 {user?.role === "admin" && (
                   <Link
                     href="/admin"
@@ -247,20 +239,7 @@ export default function DashboardLayout({
                 )}
               </nav>
 
-              {/* Bottom section */}
-              <div className="p-4 border-t border-white/10 dark:border-gray-700/30">
-                <div className="flex items-center justify-between mb-4">
-                  <ThemeToggle />
-                  <NotificationBell />
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center px-4 py-3 rounded-lg text-white hover:bg-red-500/20 hover:text-red-300 transition-all duration-200 group backdrop-blur-sm"
-                >
-                  <LogOut className="h-5 w-5 mr-3 text-red-300 group-hover:text-red-400 transition-colors" />
-                  Logout
-                </button>
-              </div>
+              
             </div>
           </div>
 
