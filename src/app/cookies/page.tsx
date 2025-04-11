@@ -28,7 +28,8 @@ export default function CookiePolicy() {
           }}
         ></div>
       </div>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
         <div className="mb-8 flex items-center">
           <Link
             href="/"
