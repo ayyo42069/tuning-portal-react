@@ -103,48 +103,44 @@ export default function DashboardLayout({
         </div>
 
         {/* Header */}
-        <header className="relative z-10 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border-b border-white/20 dark:border-gray-700/30">
-          <div className="flex flex-wrap justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            {/* Left side - Logo and Tuning Portal text */}
-            <div className="flex items-center space-x-2">
-              <img src="/images/logo.png" alt="Logo" className="h-12 w-12" />
-            </div>
+        <header className="relative z-10 bg-transparent flex justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          {/* Left side - Logo and Tuning Portal text */}
+          <div className="flex items-center space-x-2">
+            <img src="/images/logo.png" alt="Logo" className="h-12 w-12" />
+            <span className="text-xl font-semibold text-purple-400">Tuning Portal</span>
+          </div>
 
-            {/* Center - Welcome message */}
-            <div className="flex flex-col items-center space-y-1 mx-auto text-center">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold">
-                {user?.username?.charAt(0).toUpperCase() || "U"}
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-white">
-                  Welcome, {user?.username || "User"}
-                </h2>
-                <p className="text-blue-200/70 text-sm">{user?.email || ""}</p>
-              </div>
+          {/* Center - Welcome message */}
+          <div className="flex items-center space-x-2">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold">
+              {user?.username?.charAt(0).toUpperCase() || "U"}
             </div>
+            <h2 className="text-xl font-semibold text-white">
+              Welcome, <span className="text-purple-400">{user?.username || "User"}</span>
+            </h2>
+          </div>
 
-            {/* Right side - Controls */}
-            <div className="flex items-center space-x-4">
-              <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 px-3 py-1.5 rounded-lg flex items-center hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300">
-                <CreditCard className="h-4 w-4 text-blue-200 mr-1.5" />
-                <span className="text-sm font-medium text-blue-200">
-                  {user?.credits || 0} Credits
-                </span>
-              </div>
-              <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 p-2 rounded-lg hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300">
-                <NotificationBell />
-              </div>
-              <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 p-2 rounded-lg hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300">
-                <ThemeToggle />
-              </div>
-              <button
-                onClick={handleLogout}
-                className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 p-2 rounded-lg hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300"
-                aria-label="Logout"
-              >
-                <LogOut className="w-5 h-5 text-blue-200" />
-              </button>
+          {/* Right side - Controls */}
+          <div className="flex items-center space-x-4">
+            <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 px-3 py-1.5 rounded-lg flex items-center hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300">
+              <CreditCard className="h-4 w-4 text-blue-200 mr-1.5" />
+              <span className="text-sm font-medium text-blue-200">
+                {user?.credits || 0} Credits
+              </span>
             </div>
+            <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 p-2 rounded-lg hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300">
+              <NotificationBell />
+            </div>
+            <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 p-2 rounded-lg hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300">
+              <ThemeToggle />
+            </div>
+            <button
+              onClick={handleLogout}
+              className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 p-2 rounded-lg hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300"
+              aria-label="Logout"
+            >
+              <LogOut className="w-5 h-5 text-blue-200" />
+            </button>
           </div>
         </header>
 
