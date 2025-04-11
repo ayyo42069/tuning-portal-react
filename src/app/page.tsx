@@ -1,33 +1,18 @@
 "use client";
 
-import { useInView } from "react-intersection-observer";
 import { Header } from "@/components/landing/Header";
 import { Hero } from "@/components/landing/Hero";
 import { Stats } from "@/components/landing/Stats";
 import { Features } from "@/components/landing/Features";
 import { Footer } from "@/components/landing/Footer";
 import { CookieConsent } from "@/components/CookieConsent";
+import { useInViewAnimation } from "@/hooks/useInViewAnimation";
 
 export default function Home() {
-  const [heroRef, heroInView] = useInView({
-    threshold: 0.1,
-    triggerOnce: true,
-  });
-
-  const [statsRef, statsInView] = useInView({
-    threshold: 0.3,
-    triggerOnce: true,
-  });
-
-  const [featuresRef, featuresInView] = useInView({
-    threshold: 0.2,
-    triggerOnce: true,
-  });
-
-  const [footerRef, footerInView] = useInView({
-    threshold: 0.1,
-    triggerOnce: true,
-  });
+  const { ref: heroRef, inView: heroInView } = useInViewAnimation({ threshold: 0.1 });
+  const { ref: statsRef, inView: statsInView } = useInViewAnimation({ threshold: 0.3 });
+  const { ref: featuresRef, inView: featuresInView } = useInViewAnimation({ threshold: 0.2 });
+  const { ref: footerRef, inView: footerInView } = useInViewAnimation({ threshold: 0.1 });
 
   return (
     <div className="min-h-screen flex flex-col overflow-hidden">

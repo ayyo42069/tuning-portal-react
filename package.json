@@ -27,6 +27,7 @@
     "@types/uuid": "^9.0.8",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
+    "clsx": "^2.1.1",
     "cookie": "^1.0.2",
     "cross-env": "^7.0.3",
     "framer-motion": "^12.4.7",
@@ -45,6 +46,7 @@
     "rimraf": "^5.0.5",
     "slick-carousel": "^1.8.1",
     "stripe": "^17.7.0",
+    "tailwind-merge": "^3.2.0",
     "tls": "^0.0.1",
     "uuid": "^9.0.1"
   },

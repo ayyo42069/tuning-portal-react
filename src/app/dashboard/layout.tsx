@@ -21,6 +21,7 @@ import OpeningHours from "@/components/OpeningHours";
 import { useAuth } from "@/lib/AuthProvider";
 import FloatingTicketButton from "@/components/FloatingTicketButton";
 import DashboardDebug from "./components/DashboardDebug";
+import { Metadata } from 'next';
 
 interface User {
   id: number;
@@ -29,6 +30,12 @@ interface User {
   role: "user" | "admin";
   credits: number;
 }
+
+export const metadata: Metadata = {
+  title: 'Dashboard | Tuning Portal',
+  description: 'Access your tuning files, manage your account, and track your tuning history.',
+  keywords: ['tuning', 'dashboard', 'ecu', 'files', 'management'],
+};
 
 export default function DashboardLayout({
   children,
