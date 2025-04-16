@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { use } from "react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ECUFileDetailedProgress from "@/components/ECUFileDetailedProgress";
 import ECUFileComments from "@/components/ECUFileComments";
@@ -51,12 +52,13 @@ async function fetchTuningFileDetails(fileId: string) {
   return data.tuningFile;
 }
 
-// Change to Next.js recommended pattern for dynamic routes
-export default async function TuningFileDetailsPage({
-  params,
-}: {
-  params: { id: string };
+// Fix params type by using the use() hook to unwrap Promise-based params
+export default function TuningFileDetailsPage(props: {
+  params: Promise<{ id: string }>;
 }) {
+  // Use the use() hook to unwrap the Promise
+  const params = use(props.params);
+  
   // Validate the ID parameter
   if (!params.id || !/^\d+$/.test(params.id)) {
     notFound();
@@ -64,7 +66,7 @@ export default async function TuningFileDetailsPage({
   
   try {
     // Fetch data on the server
-    const tuningFile = await fetchTuningFileDetails(params.id);
+    const tuningFile = use(fetchTuningFileDetails(params.id));
     
     const formatDate = (dateString: string) => {
       return new Date(dateString).toLocaleString();
