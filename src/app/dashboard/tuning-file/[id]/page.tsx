@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, notFound } from "next/navigation";
 import Link from "next/link";
+import { use } from "react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ECUFileDetailedProgress from "@/components/ECUFileDetailedProgress";
 import ECUFileComments from "@/components/ECUFileComments";
@@ -34,11 +35,10 @@ interface TuningFileDetails {
   user_id: number;
 }
 
-export default function TuningFileDetailsPage({
-  params,
-}: {
-  params: { id: string };
+export default function TuningFileDetailsPage(props: {
+  params: Promise<{ id: string }>;
 }) {
+  const params = use(props.params);
   const router = useRouter();
   const [tuningFile, setTuningFile] = useState<TuningFileDetails | null>(null);
   const [loading, setLoading] = useState(true);
