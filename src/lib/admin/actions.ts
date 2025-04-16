@@ -127,8 +127,11 @@ export async function updateTuningRequestStatus(requestId: number, status: strin
  */
 export async function fetchAdminDashboardStats() {
   try {
+    // Ensure we have a valid API URL
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+    
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/admin/stats`, 
+      `${apiUrl}/api/admin/stats`, 
       {
         next: { revalidate: CACHE_SHORT }, // Revalidate every minute
         headers: {

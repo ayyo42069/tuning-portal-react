@@ -7,7 +7,7 @@
 export async function fetchTuningFiles() {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tuning-files`, {
-      cache: 'no-store',
+      next: { revalidate: 60 },
       headers: {
         'Content-Type': 'application/json',
       },
@@ -31,7 +31,7 @@ export async function fetchTuningFiles() {
 export async function fetchUserProfile() {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/profile`, {
-      cache: 'no-store',
+      next: { revalidate: 60 },
       headers: {
         'Content-Type': 'application/json',
       },
