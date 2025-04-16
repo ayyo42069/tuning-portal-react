@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "@/lib/ThemeProvider";
-import { NotificationProvider } from "@/lib/NotificationProvider";
-import { AuthProvider } from "@/lib/AuthProvider";
-import { QueryProvider } from "@/lib/QueryProvider";
+import Providers from "@/components/Providers";
 import AuthDebugger from "@/components/AuthDebugger";
 
 import "./globals.css";
@@ -127,16 +124,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>
-          <QueryProvider>
-            <AuthProvider>
-              <NotificationProvider>
-                {children}
-                <AuthDebugger />
-              </NotificationProvider>
-            </AuthProvider>
-          </QueryProvider>
-        </ThemeProvider>
+        <Providers>
+          {children}
+          <AuthDebugger />
+        </Providers>
       </body>
     </html>
   );

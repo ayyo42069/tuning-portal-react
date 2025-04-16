@@ -42,3 +42,6 @@ next-env.d.ts
 
 #bin
 *.bin
+
+#mdc
+*.mdc

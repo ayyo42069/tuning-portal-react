@@ -19,6 +19,7 @@ import {
   Shield,
   X,
 } from "lucide-react";
+import DOMPurify from 'dompurify';
 
 // Password strength criteria
 const CRITERIA = {
@@ -348,29 +349,32 @@ export default function Register() {
           className="absolute w-[400px] h-[400px] rounded-full bg-gradient-to-r from-purple-500 to-pink-500 -bottom-32 left-1/3 will-change-transform filter blur-3xl"
         />
         {showTerms && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-md flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6">
-              <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
-                <Shield className="h-5 w-5 mr-2 text-blue-500" />
-                Terms of Service
-              </h3>
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
+              <button
+                onClick={() => setShowTerms(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <X className="h-6 w-6" />
+              </button>
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Terms and Conditions</h2>
               {termsContent ? (
                 <div
                   className="prose dark:prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: termsContent }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(termsContent) }}
                 />
               ) : (
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Loading terms...
                 </p>
               )}
-              <div className="mt-6 flex justify-end space-x-4">
-                <motion.button
+              <div className="mt-6 flex justify-end">
+                <button
                   onClick={() => setShowTerms(false)}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
                   Close
-                </motion.button>
+                </button>
               </div>
             </div>
           </div>

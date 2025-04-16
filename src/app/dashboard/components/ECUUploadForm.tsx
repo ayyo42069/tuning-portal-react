@@ -164,6 +164,7 @@ export default function ECUUploadForm() {
       const response = await fetch("/api/ecu/upload", {
         method: "POST",
         body: formData,
+        cache: "no-store"
       });
 
       if (!response.ok) {

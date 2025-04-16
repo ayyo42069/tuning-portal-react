@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
-import DashboardLayout from './layout-client';
+import { Suspense } from "react";
+import DashboardLayoutClient from "./layout-client";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export const metadata: Metadata = {
   title: 'Dashboard | Tuning Portal',
@@ -7,10 +9,16 @@ export const metadata: Metadata = {
   keywords: ['tuning', 'dashboard', 'ecu', 'files', 'management'],
 };
 
-export default function RootLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <DashboardLayout>{children}</DashboardLayout>;
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <DashboardLayoutClient>
+        {children}
+      </DashboardLayoutClient>
+    </Suspense>
+  );
 }

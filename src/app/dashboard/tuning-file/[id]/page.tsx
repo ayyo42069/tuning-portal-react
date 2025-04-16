@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, notFound } from "next/navigation";
 import Link from "next/link";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ECUFileDetailedProgress from "@/components/ECUFileDetailedProgress";
@@ -37,33 +37,35 @@ interface TuningFileDetails {
 export default function TuningFileDetailsPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
   const router = useRouter();
   const [tuningFile, setTuningFile] = useState<TuningFileDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showComments, setShowComments] = useState(false);
   const [fileId, setFileId] = useState<string | null>(null);
 
   // Set the file ID from params in useEffect to avoid the sync access warning
   useEffect(() => {
-    const getFileId = async () => {
-      const resolvedParams = await params;
-      if (resolvedParams && resolvedParams.id) {
-        setFileId(resolvedParams.id);
-      }
-    };
-
-    getFileId();
+    // Add validation to ensure id is a valid number
+    if (!params || !params.id || !/^\d+$/.test(params.id)) {
+      notFound(); // Redirect to 404 if ID is invalid
+      return;
+    }
+    
+    setFileId(params.id);
   }, [params]);
 
-  // Define the fetch function outside useEffect so we can reuse it for polling
+  // Remove the redundant validation useEffect and keep the fetch function
   const fetchTuningFileDetails = async () => {
     if (!fileId) return;
 
+    setLoading(true);
     try {
       const response = await fetch(`/api/tuning/file?id=${fileId}`, {
         credentials: "include",
+        cache: "no-store" // Add cache option to get fresh data
       });
 
       if (!response.ok) {
@@ -87,18 +89,8 @@ export default function TuningFileDetailsPage({
   };
 
   useEffect(() => {
-    // Only fetch when fileId is available
-    if (!fileId) return;
-
     fetchTuningFileDetails();
-
-    // Set up polling interval - check for updates every 30 seconds
-    // This is especially useful for files in 'pending' or 'processing' status
-    const intervalId = setInterval(fetchTuningFileDetails, 30000);
-
-    // Clean up interval on component unmount or when fileId changes
-    return () => clearInterval(intervalId);
-  }, [fileId, router]); // Use fileId in dependency array
+  }, [fileId, router]);
 
   const getStatusBadgeClass = (status: string) => {
     switch (status) {

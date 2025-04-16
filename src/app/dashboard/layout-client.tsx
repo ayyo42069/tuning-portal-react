@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   Home,
   History,
@@ -38,6 +38,7 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const { user, logout, isLoading } = useAuth();
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Check if user is authenticated, redirect if not
   useEffect(() => {
@@ -72,6 +73,20 @@ export default function DashboardLayout({
       document.removeEventListener("mousedown", handleOutsideClick);
     };
   }, [sidebarOpen]);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+    
+    if (sidebarRef.current) {
+      if (sidebarOpen) {
+        sidebarRef.current.classList.add("sidebar-hidden");
+        sidebarRef.current.classList.remove("sidebar-visible");
+      } else {
+        sidebarRef.current.classList.remove("sidebar-hidden");
+        sidebarRef.current.classList.add("sidebar-visible");
+      }
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -160,7 +175,7 @@ export default function DashboardLayout({
           {/* Mobile menu button */}
           <div className="md:hidden fixed top-4 left-4 z-50">
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={toggleSidebar}
               className="p-2 rounded-md bg-white dark:bg-gray-800 shadow-md"
               aria-label="Toggle menu"
             >
@@ -174,6 +189,7 @@ export default function DashboardLayout({
 
           {/* Sidebar */}
           <div
+            ref={sidebarRef}
             id="sidebar"
             className={`${
               sidebarOpen ? "translate-x-0" : "-translate-x-full"

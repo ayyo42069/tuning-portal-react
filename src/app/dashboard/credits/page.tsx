@@ -35,6 +35,7 @@ export default function CreditsPage() {
         // Fetch user profile
         const userResponse = await fetch("/api/user/profile", {
           credentials: "include",
+          cache: "no-store"
         });
 
         if (!userResponse.ok) {
@@ -42,7 +43,7 @@ export default function CreditsPage() {
             router.push("/auth/login");
             return;
           }
-          throw new Error(`Failed to fetch user data: ${userResponse.status}`);
+          throw new Error("Failed to fetch user profile");
         }
 
         const userData = await userResponse.json();
@@ -51,6 +52,7 @@ export default function CreditsPage() {
         // Fetch credit transactions
         const transactionsResponse = await fetch("/api/credits/transactions", {
           credentials: "include",
+          cache: "no-store"
         });
 
         if (!transactionsResponse.ok) {

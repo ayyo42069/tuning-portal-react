@@ -7,6 +7,7 @@ import {
   useState,
   ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 
 type NotificationType =
   | "file_status"
@@ -44,6 +45,7 @@ const NotificationContext = createContext<NotificationContextType | undefined>(
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
+  const pathname = usePathname();
 
   // Fetch notifications on component mount only if user is authenticated and not on public pages
   useEffect(() => {
@@ -62,7 +64,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     ];
 
     // Get current path from window location
-    const currentPath = window.location.pathname;
+    const currentPath = pathname;
 
     // Skip notification fetching on public routes
     if (
@@ -100,7 +102,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     };
 
     checkAuthAndFetch();
-  }, []);
+  }, [pathname]);
 
   // Calculate unread count whenever notifications change
   useEffect(() => {
@@ -126,7 +128,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       ];
 
       // Get current path from window location
-      const currentPath = window.location.pathname;
+      const currentPath = pathname;
 
       // Skip notification fetching on public routes
       if (

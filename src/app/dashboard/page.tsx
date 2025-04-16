@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import ECUUploadForm from "./components/ECUUploadForm";
+import ECUUploadFormWithErrorBoundary from "./components/ECUUploadFormWithErrorBoundary";
 import LoadingSpinner from "@/components/LoadingSpinner";
 // Ticket system now available via floating button
 import {
@@ -527,7 +527,7 @@ export default function Dashboard() {
                   </button>
                 </div>
                 <div className="relative z-10">
-                  <ECUUploadForm />
+                  <ECUUploadFormWithErrorBoundary />
                 </div>
               </div>
             </div>

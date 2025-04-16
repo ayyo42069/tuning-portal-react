@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/AuthProvider";
+import { useRouter } from "next/navigation";
 
 export default function AuthDebugger() {
   const { user, isLoading, error } = useAuth();
   const [cookies, setCookies] = useState<string>("");
   const [showDebugger, setShowDebugger] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     // Get all cookies
@@ -24,6 +26,26 @@ export default function AuthDebugger() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        router.push("/auth/login");
+      } else {
+        console.error("Logout failed");
+      }
+    } catch (error) {
+      console.error("Network error during logout");
+    }
+  };
 
   if (!showDebugger) return null;
 
@@ -87,18 +109,7 @@ export default function AuthDebugger() {
         </button>
         
         <button 
-          onClick={() => {
-            console.log("[AuthDebugger] Manually logging out...");
-            fetch("/api/auth/logout", { 
-              method: "POST",
-              credentials: "include" 
-            })
-              .then(() => {
-                console.log("[AuthDebugger] Logout successful");
-                window.location.href = "/auth/login";
-              })
-              .catch(err => console.error("[AuthDebugger] Logout error:", err));
-          }}
+          onClick={handleLogout}
           className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
         >
           Force Logout
