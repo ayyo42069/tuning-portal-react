@@ -11,7 +11,7 @@ const dbConfig = {
   connectionLimit: 25, // Increased from 10 for better concurrency
   queueLimit: 0,
   connectTimeout: 10000, // 10 seconds timeout
-  namedPlaceholders: true, // More efficient parameter binding
+  namedPlaceholders: false, // Use positional placeholders (?) instead of named ones
   enableKeepAlive: true, // Keep connections alive.
   keepAliveInitialDelay: 10000, // 10 seconds initial delay
 };
@@ -40,13 +40,13 @@ const getPerformanceNow = () => {
 // Function to execute SQL queries with prepared statements and caching
 export async function executeQuery<T>(
   query: string,
-  params: any[] = [],
+  params: any[] | undefined = [],
   options: { cache?: boolean; cacheTTL?: number } = {}
 ): Promise<T> {
   // Ensure params is always a valid array
   const validParams = Array.isArray(params) ? params : [];
   const startTime = getPerformanceNow();
-  const cacheKey = options.cache ? `${query}-${JSON.stringify(params)}` : "";
+  const cacheKey = options.cache ? `${query}-${JSON.stringify(validParams)}` : "";
 
   // Check cache if caching is enabled
   if (options.cache && queryCache.has(cacheKey)) {
@@ -66,7 +66,7 @@ export async function executeQuery<T>(
     // Log security-related queries for debugging
     if (query.includes("security_events")) {
       console.log(`Executing security query: ${query.substring(0, 100)}...`);
-      console.log(`Query params:`, params);
+      console.log(`Query params:`, validParams);
     }
 
     // Check if the query contains embedded values (not using parameterized queries)
@@ -142,7 +142,7 @@ export async function executeQuery<T>(
     console.error("Database query error:", error);
     if (query.includes("security_events")) {
       console.error(`Failed security query: ${query.substring(0, 100)}...`);
-      console.error(`Query params:`, params);
+      console.error(`Query params:`, validParams);
     }
     throw error;
   } finally {
@@ -153,7 +153,7 @@ export async function executeQuery<T>(
 // Function to execute transaction commands with retry logic
 export async function executeTransaction<T>(
   queries: string[] | string,
-  params: any[][] | any[] = [],
+  params: any[][] | any[] | undefined = [],
   maxRetries = 3
 ): Promise<T> {
   let connection;
@@ -170,17 +170,16 @@ export async function executeTransaction<T>(
 
       // Handle single query or multiple queries
       if (typeof queries === "string") {
-        // Ensure params is always an array, even if empty
-        // For MySQL prepared statements, we need to handle empty arrays properly
+        // Ensure params is always an array, even if empty or undefined
         const validParams = Array.isArray(params) ? params : [];
-        const safeParams = validParams.length > 0 ? validParams : [];
-        [results] = await connection.query(queries, safeParams);
+        [results] = await connection.execute(queries, validParams);
       } else {
         results = [];
         for (let i = 0; i < queries.length; i++) {
-          // Ensure params[i] is always an array, even if undefined
-          const safeParams = Array.isArray(params[i]) ? params[i] : [];
-          const [result] = await connection.execute(queries[i], safeParams);
+          // Ensure params[i] is always a valid array
+          const paramsForQuery = Array.isArray(params) && i < params.length ? params[i] : [];
+          const validParams = Array.isArray(paramsForQuery) ? paramsForQuery : [];
+          const [result] = await connection.execute(queries[i], validParams);
           results.push(result);
         }
       }
@@ -226,7 +225,7 @@ export async function executeTransaction<T>(
 // Function to get a single row with optional caching
 export async function getRow<T>(
   query: string,
-  params: any[] = [],
+  params: any[] | undefined = [],
   options: { cache?: boolean; cacheTTL?: number } = {}
 ): Promise<T | null> {
   const results = await executeQuery<T[]>(query, params, options);
