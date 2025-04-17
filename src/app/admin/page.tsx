@@ -2,6 +2,19 @@ import { Suspense } from 'react';
 import { fetchAdminDashboardStats } from '@/lib/admin/actions';
 import { StatCard, RecentActivity, Charts } from './AdminDashboardClient';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import dynamic from 'next/dynamic';
+import { headers } from 'next/headers';
+
+// Dynamically import the client component with SSR disabled
+const AdminDashboardComponent = dynamic(
+  () => import('./AdminDashboard'),
+  { ssr: false }
+);
+
+// This tells Next.js that this page should be dynamically rendered
+export const dynamicParams = false;
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 // Stats widget with robust error handling for static builds
 async function StatsWidget() {
@@ -121,47 +134,17 @@ async function RecentActivityWidget() {
   }
 }
 
-export default function AdminDashboard() {
+export default function AdminPage() {
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
-          Admin Dashboard
-        </h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-2">
-          Welcome to the admin dashboard, manage your tuning portal here.
-        </p>
+    <Suspense fallback={
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
+        <div className="flex justify-center items-center h-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        </div>
       </div>
-
-      {/* Stats section with suspense boundary and error fallback */}
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          Overview
-        </h2>
-        <Suspense fallback={<BackupStatsWidget />}>
-          <StatsWidget />
-        </Suspense>
-      </section>
-
-      {/* Charts section */}
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          Analytics
-        </h2>
-        <Suspense fallback={<div className="h-[300px] flex items-center justify-center bg-white dark:bg-gray-800 rounded-xl shadow p-4"><LoadingSpinner /></div>}>
-          <Charts />
-        </Suspense>
-      </section>
-
-      {/* Recent activity section with suspense boundary */}
-      <section>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          Recent Activity
-        </h2>
-        <Suspense fallback={<div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 h-[300px]"><LoadingSpinner /></div>}>
-          <RecentActivityWidget />
-        </Suspense>
-      </section>
-    </div>
+    }>
+      <AdminDashboardComponent />
+    </Suspense>
   );
 }
