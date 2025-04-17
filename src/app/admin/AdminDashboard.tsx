@@ -1,4 +1,4 @@
-import { AdminDashboardClient } from './AdminDashboardClient';
+import AdminDashboardClient from './AdminDashboardClient';
 
 export default function AdminDashboard() {
   const { StatCard, RecentActivity, Charts } = AdminDashboardClient;

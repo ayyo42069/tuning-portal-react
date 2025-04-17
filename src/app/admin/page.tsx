@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { fetchAdminDashboardStats } from '@/lib/admin/actions';
-import AdminDashboardClient from './AdminDashboardClient';
+import { StatCard, RecentActivity, Charts } from './AdminDashboardClient';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 // Stats widget with robust error handling for static builds
@@ -19,28 +19,28 @@ async function StatsWidget() {
     
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <AdminDashboardClient.StatCard 
+        <StatCard 
           title="Pending Requests"
           value={stats.pendingRequests ?? 0}
           change={stats.pendingRequestsChange ?? 0}
           icon="file-pending"
           color="blue"
         />
-        <AdminDashboardClient.StatCard 
+        <StatCard 
           title="Active Users"
           value={stats.activeUsers ?? 0}
           change={stats.activeUsersChange ?? 0}
           icon="users"
           color="green"
         />
-        <AdminDashboardClient.StatCard 
+        <StatCard 
           title="Credits Sold"
           value={stats.creditsSold ?? 0}
           change={stats.creditsSoldChange ?? 0}
           icon="credit"
           color="purple"
         />
-        <AdminDashboardClient.StatCard 
+        <StatCard 
           title="Revenue"
           value={`$${stats.revenue ?? 0}`}
           change={stats.revenueChange ?? 0}
@@ -59,28 +59,28 @@ async function StatsWidget() {
 function BackupStatsWidget() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <AdminDashboardClient.StatCard 
+      <StatCard 
         title="Pending Requests"
         value="--"
         change={0}
         icon="file-pending"
         color="blue"
       />
-      <AdminDashboardClient.StatCard 
+      <StatCard 
         title="Active Users"
         value="--"
         change={0}
         icon="users"
         color="green"
       />
-      <AdminDashboardClient.StatCard 
+      <StatCard 
         title="Credits Sold"
         value="--"
         change={0}
         icon="credit"
         color="purple"
       />
-      <AdminDashboardClient.StatCard 
+      <StatCard 
         title="Revenue"
         value="--"
         change={0}
@@ -106,7 +106,7 @@ async function RecentActivityWidget() {
     }
     
     return (
-      <AdminDashboardClient.RecentActivity 
+      <RecentActivity 
         activities={stats.recentActivities ?? []} 
       />
     );
@@ -149,7 +149,7 @@ export default function AdminDashboard() {
           Analytics
         </h2>
         <Suspense fallback={<div className="h-[300px] flex items-center justify-center bg-white dark:bg-gray-800 rounded-xl shadow p-4"><LoadingSpinner /></div>}>
-          <AdminDashboardClient.Charts />
+          <Charts />
         </Suspense>
       </section>
 
