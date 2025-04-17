@@ -15,6 +15,15 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 
+// Activity type interface
+interface Activity {
+  id: number;
+  type: string;
+  message: string;
+  timestamp: string | Date;
+  user?: string;
+}
+
 // Mock data for Overview
 const mockOverviewData = {
   pendingRequests: 12,
@@ -28,7 +37,7 @@ const mockOverviewData = {
 };
 
 // Mock data for Recent Activity
-const mockRecentActivity = [
+const mockRecentActivity: Activity[] = [
   {
     id: 1,
     type: "file",
@@ -138,7 +147,7 @@ export function StatCard({
 }
 
 // Recent activity component
-export function RecentActivity({ activities = mockRecentActivity }: { activities?: typeof mockRecentActivity }) {
+export function RecentActivity({ activities = mockRecentActivity }: { activities?: Activity[] }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <div className="flex items-center justify-between mb-4">
