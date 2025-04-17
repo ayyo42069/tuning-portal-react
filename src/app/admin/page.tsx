@@ -21,29 +21,29 @@ async function StatsWidget() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <AdminDashboardClient.StatCard 
           title="Pending Requests"
-          value={stats.pendingRequests || 0}
-          change={stats.pendingRequestsChange || 0}
+          value={stats.pendingRequests ?? 0}
+          change={stats.pendingRequestsChange ?? 0}
           icon="file-pending"
           color="blue"
         />
         <AdminDashboardClient.StatCard 
           title="Active Users"
-          value={stats.activeUsers || 0}
-          change={stats.activeUsersChange || 0}
+          value={stats.activeUsers ?? 0}
+          change={stats.activeUsersChange ?? 0}
           icon="users"
           color="green"
         />
         <AdminDashboardClient.StatCard 
           title="Credits Sold"
-          value={stats.creditsSold || 0}
-          change={stats.creditsSoldChange || 0}
+          value={stats.creditsSold ?? 0}
+          change={stats.creditsSoldChange ?? 0}
           icon="credit"
           color="purple"
         />
         <AdminDashboardClient.StatCard 
           title="Revenue"
-          value={`$${stats.revenue || 0}`}
-          change={stats.revenueChange || 0}
+          value={`$${stats.revenue ?? 0}`}
+          change={stats.revenueChange ?? 0}
           icon="dollars"
           color="amber"
         />
@@ -51,14 +51,7 @@ async function StatsWidget() {
     );
   } catch (error) {
     console.error("Error in StatsWidget:", error);
-    
-    // Always return a valid React element, never undefined
-    return (
-      <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-        <h3 className="text-md font-medium text-red-800 dark:text-red-200">Error Loading Data</h3>
-        <p className="text-sm text-red-600 dark:text-red-300 mt-1">Could not load dashboard statistics. Please try again later.</p>
-      </div>
-    );
+    return <BackupStatsWidget />;
   }
 }
 
@@ -114,13 +107,11 @@ async function RecentActivityWidget() {
     
     return (
       <AdminDashboardClient.RecentActivity 
-        activities={stats.recentActivities || []} 
+        activities={stats.recentActivities ?? []} 
       />
     );
   } catch (error) {
     console.error("Error in RecentActivityWidget:", error);
-    
-    // Always return a valid React element, never undefined
     return (
       <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
         <h3 className="text-md font-medium text-red-800 dark:text-red-200">Error Loading Data</h3>

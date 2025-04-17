@@ -18,15 +18,15 @@ import {
 export function StatCard({ 
   title, 
   value, 
-  change, 
-  icon, 
-  color 
+  change = 0, 
+  icon = "activity", 
+  color = "blue" 
 }: { 
   title: string; 
   value: number | string; 
-  change: number; 
-  icon: string; 
-  color: string;
+  change?: number; 
+  icon?: string; 
+  color?: string;
 }) {
   const iconMap = {
     "file-pending": <FileText />,
@@ -91,9 +91,9 @@ export function StatCard({
 
 // Recent activity component
 export function RecentActivity({ 
-  activities 
+  activities = [] 
 }: { 
-  activities: Array<{
+  activities?: Array<{
     id: number;
     type: string;
     message: string;
@@ -142,8 +142,10 @@ export function Charts() {
 }
 
 // Export all components
-export default {
+const AdminDashboardClient = {
   StatCard,
   RecentActivity,
   Charts
-}; 
+};
+
+export default AdminDashboardClient; 
