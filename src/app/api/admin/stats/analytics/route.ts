@@ -72,8 +72,8 @@ export async function GET(request: Request) {
         // Query for tuning files processed in the period
         const filesQuery = `
           SELECT COUNT(*) as count 
-          FROM tuning_files 
-          WHERE status = 'completed' AND completed_at BETWEEN ? AND ?
+          FROM ecu_files 
+          WHERE status = 'completed' AND updated_at BETWEEN ? AND ?
         `;
         const filesResult = await executeQuery<{count: number}[]>(filesQuery, [
           format(range.start, 'yyyy-MM-dd HH:mm:ss'),
@@ -83,8 +83,8 @@ export async function GET(request: Request) {
         // Query for revenue (credits purchased) in the period
         const revenueQuery = `
           SELECT SUM(amount) as total 
-          FROM credit_purchases 
-          WHERE created_at BETWEEN ? AND ?
+          FROM credit_transactions 
+          WHERE transaction_type = 'purchase' AND created_at BETWEEN ? AND ?
         `;
         const revenueResult = await executeQuery<{total: number}[]>(revenueQuery, [
           format(range.start, 'yyyy-MM-dd HH:mm:ss'),
