@@ -91,7 +91,9 @@ export function StatCard({
 
 // Recent activity component
 export function RecentActivity({ 
-  activities = [] 
+  activities = [],
+  isLoading = false,
+  error = null 
 }: { 
   activities?: Array<{
     id: number;
@@ -99,14 +101,52 @@ export function RecentActivity({
     message: string;
     timestamp: string;
     user?: string;
-  }> 
+  }>;
+  isLoading?: boolean;
+  error?: string | null;
 }) {
+  // Create a safe array to avoid mapping errors
+  const safeActivities = Array.isArray(activities) ? activities : [];
+  
+  if (isLoading) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+        <div className="p-6 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+        <div className="p-6">
+          <div className="text-red-500 flex items-center space-x-2">
+            <Activity className="h-5 w-5" />
+            <p>{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (safeActivities.length === 0) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+        <div className="p-6 text-center text-gray-500">
+          <p>No recent activity to display.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
       <div className="p-6">
         <div className="space-y-4">
-          {activities.map((activity) => (
-            <div key={activity.id} className="flex items-start">
+          {safeActivities.map((activity) => (
+            <div key={activity.id || Math.random()} className="flex items-start">
               <div className="flex-shrink-0">
                 <div className="p-2 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
                   <Activity className="h-5 w-5" />
@@ -114,10 +154,10 @@ export function RecentActivity({
               </div>
               <div className="ml-3">
                 <p className="text-sm text-gray-900 dark:text-white">
-                  {activity.message}
+                  {activity.message || 'Activity details not available'}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {activity.timestamp}
+                  {activity.timestamp || 'Unknown time'}
                 </p>
               </div>
             </div>

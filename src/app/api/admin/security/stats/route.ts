@@ -50,21 +50,43 @@ export async function GET(request: NextRequest) {
       true
     );
 
-    // Get security statistics
-    const stats = await getSecurityLogStats(days);
+    // Initialize default values
+    let stats = {
+      totalEvents: 0,
+      eventsByType: {},
+      eventsBySeverity: {},
+      recentFailedLogins: 0,
+      recentSuspiciousActivities: 0,
+      recentApiAccess: 0,
+    };
+    let unresolvedAlerts = [];
 
-    // Get unresolved alerts (limited to top 10)
-    const unresolvedAlerts = await getUnresolvedAlerts(10);
+    // Get security statistics with error handling
+    try {
+      stats = await getSecurityLogStats(days);
+    } catch (error) {
+      console.error("Error fetching security log stats:", error);
+      // Continue with default stats object
+    }
+
+    // Get unresolved alerts with error handling
+    try {
+      unresolvedAlerts = await getUnresolvedAlerts(10);
+    } catch (error) {
+      console.error("Error fetching unresolved alerts:", error);
+      // Continue with empty alerts array
+    }
 
     // Return the statistics and alerts
     return NextResponse.json({
+      success: true,
       stats,
       unresolvedAlerts,
     });
   } catch (error) {
     console.error("Error fetching security statistics:", error);
     return NextResponse.json(
-      { error: "Failed to fetch security statistics" },
+      { success: false, error: "Failed to fetch security statistics" },
       { status: 500 }
     );
   }
