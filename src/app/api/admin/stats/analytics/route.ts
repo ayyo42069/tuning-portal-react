@@ -57,15 +57,6 @@ export async function GET(request: NextRequest) {
     }
 
     const analyticsData = await Promise.all(dateRanges.map(async (range) => {
-      // Get users for this period
-      const usersResult = await executeQuery<any[]>(
-        `SELECT COUNT(DISTINCT user_id) as count 
-         FROM user_sessions 
-         WHERE last_activity BETWEEN ? AND ?`,
-        [range.start, range.end]
-      );
-      const users = usersResult[0]?.count || 0;
-
       // Get files for this period
       const filesResult = await executeQuery<any[]>(
         `SELECT COUNT(*) as count 
@@ -87,7 +78,6 @@ export async function GET(request: NextRequest) {
 
       return {
         label: format(range.start, period === 'daily' ? 'EEE' : period === 'weekly' ? "'Week' w" : 'MMM'),
-        users,
         files,
         revenue
       };

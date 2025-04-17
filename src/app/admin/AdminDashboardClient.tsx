@@ -140,29 +140,29 @@ export function Charts() {
   const getSampleDataForPeriod = (period: 'daily' | 'weekly' | 'monthly') => {
     if (period === 'daily') {
       return [
-        { label: 'Mon', users: 120, files: 45, revenue: 1200 },
-        { label: 'Tue', users: 132, files: 52, revenue: 1350 },
-        { label: 'Wed', users: 101, files: 49, revenue: 1100 },
-        { label: 'Thu', users: 134, files: 62, revenue: 1450 },
-        { label: 'Fri', users: 190, files: 73, revenue: 2100 },
-        { label: 'Sat', users: 121, files: 34, revenue: 980 },
-        { label: 'Sun', users: 89, files: 25, revenue: 820 }
+        { label: 'Mon', files: 45, revenue: 1200 },
+        { label: 'Tue', files: 52, revenue: 1350 },
+        { label: 'Wed', files: 49, revenue: 1100 },
+        { label: 'Thu', files: 62, revenue: 1450 },
+        { label: 'Fri', files: 73, revenue: 2100 },
+        { label: 'Sat', files: 34, revenue: 980 },
+        { label: 'Sun', files: 25, revenue: 820 }
       ];
     } else if (period === 'weekly') {
       return [
-        { label: 'Week 1', users: 543, files: 210, revenue: 6800 },
-        { label: 'Week 2', users: 590, files: 245, revenue: 7200 },
-        { label: 'Week 3', users: 620, files: 260, revenue: 7900 },
-        { label: 'Week 4', users: 680, files: 290, revenue: 8400 }
+        { label: 'Week 1', files: 210, revenue: 6800 },
+        { label: 'Week 2', files: 245, revenue: 7200 },
+        { label: 'Week 3', files: 260, revenue: 7900 },
+        { label: 'Week 4', files: 290, revenue: 8400 }
       ];
     } else {
       return [
-        { label: 'Jan', users: 2100, files: 890, revenue: 28000 },
-        { label: 'Feb', users: 2300, files: 920, revenue: 30000 },
-        { label: 'Mar', users: 2500, files: 980, revenue: 32000 },
-        { label: 'Apr', users: 2700, files: 1050, revenue: 35000 },
-        { label: 'May', users: 2900, files: 1120, revenue: 38000 },
-        { label: 'Jun', users: 3100, files: 1200, revenue: 41000 }
+        { label: 'Jan', files: 890, revenue: 28000 },
+        { label: 'Feb', files: 920, revenue: 30000 },
+        { label: 'Mar', files: 980, revenue: 32000 },
+        { label: 'Apr', files: 1050, revenue: 35000 },
+        { label: 'May', files: 1120, revenue: 38000 },
+        { label: 'Jun', files: 1200, revenue: 41000 }
       ];
     }
   };
@@ -210,7 +210,6 @@ export function Charts() {
   }, [chartType]);
   
   // Normalize data for visualization
-  const maxUsers = Math.max(...chartData.map(d => d.users));
   const maxFiles = Math.max(...chartData.map(d => d.files));
   const maxRevenue = Math.max(...chartData.map(d => d.revenue));
   
@@ -293,13 +292,6 @@ export function Charts() {
               {chartData.map((point, i) => (
                 <div key={i} className="flex flex-col items-center w-full">
                   <div className="w-full flex justify-center space-x-1 mb-1 h-[250px] items-end">
-                    {/* Users bar */}
-                    <div 
-                      className="w-3 bg-blue-500 rounded-t-sm" 
-                      style={{ height: `${maxUsers > 0 ? (point.users / maxUsers) * 100 : 0}%` }}
-                      title={`${point.users} users`}
-                    ></div>
-                    
                     {/* Files bar */}
                     <div 
                       className="w-3 bg-green-500 rounded-t-sm" 
@@ -324,10 +316,6 @@ export function Charts() {
           
           {/* Legend */}
           <div className="flex justify-center space-x-6 mt-4">
-            <div className="flex items-center">
-              <div className="w-3 h-3 bg-blue-500 rounded-sm mr-2"></div>
-              <span className="text-xs text-gray-600 dark:text-gray-300">Users</span>
-            </div>
             <div className="flex items-center">
               <div className="w-3 h-3 bg-green-500 rounded-sm mr-2"></div>
               <span className="text-xs text-gray-600 dark:text-gray-300">Files Processed</span>
