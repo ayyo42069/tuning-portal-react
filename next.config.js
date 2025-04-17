@@ -2,15 +2,12 @@
 const nextConfig = {
   output: 'standalone',
   experimental: {
-    // Improve build reliability by continuing even when some pages fail
-    staticGenerationFailOnError: false,
     // Retry failed page generation attempts
     staticGenerationRetryCount: 3,
     // Limit concurrent page generations to reduce server load
     staticGenerationMaxConcurrency: 4,
-    // If a data dependency fails, rendering will be retried during client navigation
-    serverComponentsExternalPackages: ['mysql2'],
   },
+  serverExternalPackages: ['mysql2'],
   images: {
     domains: [
       'images.unsplash.com',

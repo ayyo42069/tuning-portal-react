@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 // Stat card component
-function StatCard({ 
+export function StatCard({ 
   title, 
   value, 
   change, 
@@ -90,7 +90,7 @@ function StatCard({
 }
 
 // Recent activity component
-function RecentActivity({ 
+export function RecentActivity({ 
   activities 
 }: { 
   activities: Array<{
@@ -102,87 +102,48 @@ function RecentActivity({
   }> 
 }) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-      {activities.length === 0 ? (
-        <div className="text-center py-4">
-          <p className="text-gray-500 dark:text-gray-400">No recent activities</p>
-        </div>
-      ) : (
-        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+      <div className="p-6">
+        <div className="space-y-4">
           {activities.map((activity) => (
-            <div key={activity.id} className="py-4 first:pt-0 last:pb-0">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="mr-3">
-                    {activity.type === 'user' && (
-                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-                        <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                      </div>
-                    )}
-                    {activity.type === 'tuning' && (
-                      <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full">
-                        <FileCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
-                      </div>
-                    )}
-                    {activity.type === 'credit' && (
-                      <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-full">
-                        <CreditCard className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">{activity.message}</p>
-                    <div className="flex items-center mt-1">
-                      {activity.user && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400 mr-2">
-                          {activity.user}
-                        </span>
-                      )}
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {new Date(activity.timestamp).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
+            <div key={activity.id} className="flex items-start">
+              <div className="flex-shrink-0">
+                <div className="p-2 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                  <Activity className="h-5 w-5" />
                 </div>
-                <ChevronRight className="h-4 w-4 text-gray-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-gray-900 dark:text-white">
+                  {activity.message}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {activity.timestamp}
+                </p>
               </div>
             </div>
           ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
-// Charts component 
-function Charts() {
-  // In a real app, you would integrate a charting library here
+// Charts component
+export function Charts() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
-          Tuning Requests
-        </h3>
-        <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-          <p className="text-gray-500 dark:text-gray-400">Chart would be displayed here</p>
-        </div>
-      </div>
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
-          Revenue
-        </h3>
-        <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-          <p className="text-gray-500 dark:text-gray-400">Chart would be displayed here</p>
-        </div>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      <div className="h-[300px] flex items-center justify-center">
+        <p className="text-gray-500 dark:text-gray-400">
+          Charts will be implemented here
+        </p>
       </div>
     </div>
   );
 }
 
-const AdminDashboardClient = {
+// Export all components
+export default {
   StatCard,
   RecentActivity,
   Charts
-};
-
-export default AdminDashboardClient; 
+}; 
