@@ -142,7 +142,7 @@ export function Charts() {
 }
 
 // Export all components
-const AdminDashboardClient = {
+export const AdminDashboardClient = {
   StatCard,
   RecentActivity,
   Charts
