@@ -138,7 +138,7 @@ export function StatCard({
 }
 
 // Recent activity component
-export function RecentActivity() {
+export function RecentActivity({ activities = mockRecentActivity }: { activities?: typeof mockRecentActivity }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <div className="flex items-center justify-between mb-4">
@@ -148,7 +148,7 @@ export function RecentActivity() {
         </Link>
       </div>
       <div className="space-y-4">
-        {mockRecentActivity.map((activity) => (
+        {activities.map((activity) => (
           <div key={activity.id} className="flex items-start">
             <div className="flex-shrink-0">
               {activity.type === 'file' && (
