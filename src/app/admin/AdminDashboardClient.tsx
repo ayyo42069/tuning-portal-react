@@ -140,7 +140,9 @@ export function Charts() {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/admin/stats/analytics?period=${chartType}`);
+        const response = await fetch(`/api/admin/stats/analytics?period=${chartType}`, {
+          credentials: 'include'
+        });
         const data = await response.json();
         
         if (response.ok) {

@@ -22,7 +22,9 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function fetchDashboardData() {
       try {
-        const response = await fetch('/api/admin/stats');
+        const response = await fetch('/api/admin/stats', {
+          credentials: 'include' // This ensures cookies are sent with the request
+        });
         const data = await response.json();
         
         if (response.ok) {
