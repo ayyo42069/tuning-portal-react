@@ -135,46 +135,6 @@ export function Charts() {
   const [chartData, setChartData] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   
-  useEffect(() => {
-    // Only fetch data on the client side
-    if (typeof window !== 'undefined') {
-      async function fetchData() {
-        setIsLoading(true);
-        setError(null);
-        try {
-          const response = await fetch(`/api/admin/stats/analytics?period=${chartType}`, {
-            credentials: 'include'
-          });
-          const data = await response.json();
-          
-          if (response.ok) {
-            if (data.success && data.data) {
-              setChartData(data.data);
-            } else {
-              setError(data.error || 'Failed to fetch analytics data');
-              setChartData(getSampleDataForPeriod(chartType));
-            }
-          } else {
-            setError(data.error || 'Failed to fetch analytics data');
-            setChartData(getSampleDataForPeriod(chartType));
-          }
-        } catch (error) {
-          setError('Could not load analytics data. Please try again later.');
-          setChartData(getSampleDataForPeriod(chartType));
-          console.error('Error fetching analytics data:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-      
-      fetchData();
-    } else {
-      // On server-side, just set loading to false and use sample data
-      setIsLoading(false);
-      setChartData(getSampleDataForPeriod(chartType));
-    }
-  }, [chartType]);
-  
   // Sample data fallbacks for different periods
   const getSampleDataForPeriod = (period: 'daily' | 'weekly' | 'monthly') => {
     if (period === 'daily') {
@@ -205,6 +165,45 @@ export function Charts() {
       ];
     }
   };
+
+  useEffect(() => {
+    // Set initial data from sample data
+    setChartData(getSampleDataForPeriod(chartType));
+    
+    // Only fetch data on the client side
+    if (typeof window !== 'undefined') {
+      async function fetchData() {
+        setIsLoading(true);
+        setError(null);
+        try {
+          const response = await fetch(`/api/admin/stats/analytics?period=${chartType}`, {
+            credentials: 'include'
+          });
+          const data = await response.json();
+          
+          if (response.ok) {
+            if (data.success && data.data) {
+              setChartData(data.data);
+            } else {
+              setError(data.error || 'Failed to fetch analytics data');
+            }
+          } else {
+            setError(data.error || 'Failed to fetch analytics data');
+          }
+        } catch (error) {
+          setError('Could not load analytics data. Please try again later.');
+          console.error('Error fetching analytics data:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+      
+      fetchData();
+    } else {
+      // On server-side, just set loading to false
+      setIsLoading(false);
+    }
+  }, [chartType]);
   
   // Normalize data for visualization
   const maxUsers = Math.max(...chartData.map(d => d.users));

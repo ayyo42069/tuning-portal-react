@@ -2,7 +2,43 @@
 
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import AdminDashboardClient from './AdminDashboardClient';
+
+// Mock data for build time
+const mockDashboardData = {
+  pendingRequests: 0,
+  pendingRequestsChange: 0,
+  activeUsers: 0,
+  activeUsersChange: 0,
+  creditsSold: 0,
+  creditsSoldChange: 0,
+  revenue: 0,
+  revenueChange: 0,
+  recentActivities: []
+};
+
+// Mock activities for build time
+const mockActivities = [
+  {
+    id: 1,
+    type: "user",
+    message: "New user registration",
+    timestamp: "2024-04-17 12:00:00",
+    user: "John Doe"
+  },
+  {
+    id: 2,
+    type: "system",
+    message: "System update completed",
+    timestamp: "2024-04-17 11:30:00"
+  },
+  {
+    id: 3,
+    type: "payment",
+    message: "New subscription payment received",
+    timestamp: "2024-04-17 10:15:00",
+    user: "Jane Smith"
+  }
+];
 
 // Dynamically import the client components to ensure they're client-side only
 const StatCard = dynamic(() => import('./AdminDashboardClient').then(mod => mod.StatCard), { ssr: false });
@@ -10,17 +46,7 @@ const RecentActivity = dynamic(() => import('./AdminDashboardClient').then(mod =
 const Charts = dynamic(() => import('./AdminDashboardClient').then(mod => mod.Charts), { ssr: false });
 
 export default function AdminDashboard() {
-  const [dashboardData, setDashboardData] = useState({
-    pendingRequests: 0,
-    pendingRequestsChange: 0,
-    activeUsers: 0,
-    activeUsersChange: 0,
-    creditsSold: 0,
-    creditsSoldChange: 0,
-    revenue: 0,
-    revenueChange: 0,
-    recentActivities: []
-  });
+  const [dashboardData, setDashboardData] = useState(mockDashboardData);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,34 +80,11 @@ export default function AdminDashboard() {
 
       fetchDashboardData();
     } else {
-      // On server-side, just set loading to false
+      // On server-side, use mock data
+      setDashboardData(mockDashboardData);
       setIsLoading(false);
     }
   }, []);
-
-  // Mock activities as fallback if API fails
-  const mockActivities = [
-    {
-      id: 1,
-      type: "user",
-      message: "New user registration",
-      timestamp: "2024-04-17 12:00:00",
-      user: "John Doe"
-    },
-    {
-      id: 2,
-      type: "system",
-      message: "System update completed",
-      timestamp: "2024-04-17 11:30:00"
-    },
-    {
-      id: 3,
-      type: "payment",
-      message: "New subscription payment received",
-      timestamp: "2024-04-17 10:15:00",
-      user: "Jane Smith"
-    }
-  ];
 
   return (
     <div className="p-6">
