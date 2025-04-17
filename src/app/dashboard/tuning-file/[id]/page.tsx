@@ -34,8 +34,17 @@ interface TuningFileDetails {
 
 // Fetch tuning file details on the server
 async function fetchTuningFileDetails(fileId: string) {
-  // In Next.js App Router, relative fetch URLs automatically forward cookies
-  const response = await fetch(`/api/tuning/file?id=${fileId}`, {
+  // Need to use absolute URL for server-side fetching
+  let baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+  
+  // Make sure the URL has a protocol
+  if (!baseUrl.startsWith('http')) {
+    baseUrl = `https://${baseUrl}`;
+  }
+  
+  const apiUrl = `${baseUrl}/api/tuning/file?id=${fileId}`;
+  
+  const response = await fetch(apiUrl, {
     next: { revalidate: 30 } // Revalidate every 30 seconds
   });
 
