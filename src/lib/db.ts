@@ -69,33 +69,20 @@ export async function executeQuery<T>(
       console.log(`Query params:`, validParams);
     }
 
-    // Check if the query contains embedded values (not using parameterized queries)
-    const hasEmbeddedValues = query.includes("${") || 
-                             (query.includes("LIMIT") && !query.includes("LIMIT ?")) ||
-                             (query.includes("OFFSET") && !query.includes("OFFSET ?"));
-    
-    let results;
-    
-    if (hasEmbeddedValues) {
-      // For queries with embedded values, use query instead of execute
-      console.log("Using query() instead of execute() due to embedded values");
-      [results] = await connection.query(query);
-    } else {
-      // Process parameters to ensure proper types for MySQL
-      const processedParams = validParams.map(param => {
-        // Convert string numbers to actual numbers for numeric parameters
-        if (typeof param === 'string' && !isNaN(Number(param)) && param.trim() !== '') {
-          return Number(param);
-        }
-        return param;
-      });
+    // Process parameters to ensure proper types for MySQL
+    const processedParams = validParams.map(param => {
+      // Convert string numbers to actual numbers for numeric parameters
+      if (typeof param === 'string' && !isNaN(Number(param)) && param.trim() !== '') {
+        return Number(param);
+      }
+      return param;
+    });
 
-      // Log the processed parameters for debugging
-      console.log(`Processed parameters:`, processedParams);
-      
-      // Use the processed params for the query
-      [results] = await connection.execute(query, processedParams);
-    }
+    // Log the processed parameters for debugging
+    console.log(`Processed parameters:`, processedParams);
+    
+    // Execute the query with parameters
+    const [results] = await connection.execute(query, processedParams);
 
     // Enhanced logging for security queries
     if (query.includes("security_events")) {
