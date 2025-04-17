@@ -504,6 +504,8 @@ export async function resolveSecurityAlert(
  */
 export async function getUnresolvedAlerts(limit: number = 100): Promise<any[]> {
   try {
+    console.log("Getting unresolved alerts with limit:", limit);
+    // Convert limit to a hardcoded value in the SQL query string instead of using a parameter
     const alerts = await executeQuery(
       `SELECT sa.*, se.event_type, se.ip_address, u.username, u.email 
        FROM security_alerts sa 
@@ -511,8 +513,8 @@ export async function getUnresolvedAlerts(limit: number = 100): Promise<any[]> {
        LEFT JOIN users u ON sa.user_id = u.id 
        WHERE sa.is_resolved = 0 
        ORDER BY sa.severity DESC, sa.created_at DESC 
-       LIMIT ?`,
-      [limit]
+       LIMIT ${Number(limit)}`,
+      [] // No parameters needed since limit is now part of the SQL string
     );
 
     // Ensure alerts is always an array, even if the query returns null or undefined
