@@ -7,7 +7,23 @@ import { verifyToken } from '@/lib/auth';
 import { executeQuery } from '@/lib/db';
 
 // Mock data for build time
-const mockDashboardData = {
+const mockDashboardData: {
+  pendingRequests: number;
+  pendingRequestsChange: number;
+  activeUsers: number;
+  activeUsersChange: number;
+  creditsSold: number;
+  creditsSoldChange: number;
+  revenue: number;
+  revenueChange: number;
+  recentActivities: Array<{
+    id: number;
+    type: string;
+    message: string;
+    timestamp: string;
+    user: string;
+  }>;
+} = {
   pendingRequests: 0,
   pendingRequestsChange: 0,
   activeUsers: 0,

@@ -13,10 +13,7 @@ import {
   Activity,
   ChevronRight
 } from "lucide-react";
-import { cookies } from "next/headers";
-import { verifyToken } from "@/lib/auth";
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, format } from "date-fns";
-import { executeQuery } from "@/lib/db";
+import { format } from "date-fns";
 
 // Stat card component
 export function StatCard({ 
@@ -132,102 +129,6 @@ export function RecentActivity({
   );
 }
 
-// Server-side function to fetch analytics data
-async function getAnalyticsData(period: 'daily' | 'weekly' | 'monthly') {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value;
-    
-    if (!token) {
-      throw new Error('Authentication required');
-    }
-
-    const user = await verifyToken(token);
-    if (!user || user.role !== 'admin') {
-      throw new Error('Admin access required');
-    }
-
-    let dateRanges = [];
-    const now = new Date();
-
-    if (period === 'daily') {
-      // Get data for the last 7 days
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date(now);
-        date.setDate(date.getDate() - i);
-        dateRanges.push({
-          start: startOfDay(date),
-          end: endOfDay(date)
-        });
-      }
-    } else if (period === 'weekly') {
-      // Get data for the last 4 weeks
-      for (let i = 3; i >= 0; i--) {
-        const date = new Date(now);
-        date.setDate(date.getDate() - (i * 7));
-        dateRanges.push({
-          start: startOfWeek(date),
-          end: endOfWeek(date)
-        });
-      }
-    } else {
-      // Get data for the last 6 months
-      for (let i = 5; i >= 0; i--) {
-        const date = new Date(now);
-        date.setMonth(date.getMonth() - i);
-        dateRanges.push({
-          start: startOfMonth(date),
-          end: endOfMonth(date)
-        });
-      }
-    }
-
-    const analyticsData = await Promise.all(dateRanges.map(async (range) => {
-      // Get users for this period
-      const usersResult = await executeQuery<any[]>(
-        `SELECT COUNT(DISTINCT user_id) as count 
-         FROM user_sessions 
-         WHERE last_activity BETWEEN ? AND ?`,
-        [range.start, range.end]
-      );
-      const users = usersResult[0]?.count || 0;
-
-      // Get files for this period
-      const filesResult = await executeQuery<any[]>(
-        `SELECT COUNT(*) as count 
-         FROM ecu_files 
-         WHERE created_at BETWEEN ? AND ?`,
-        [range.start, range.end]
-      );
-      const files = filesResult[0]?.count || 0;
-
-      // Get revenue for this period
-      const revenueResult = await executeQuery<any[]>(
-        `SELECT SUM(amount) as total 
-         FROM payments 
-         WHERE status = 'completed' 
-         AND created_at BETWEEN ? AND ?`,
-        [range.start, range.end]
-      );
-      const revenue = revenueResult[0]?.total || 0;
-
-      return {
-        label: format(range.start, period === 'daily' ? 'EEE' : period === 'weekly' ? "'Week' w" : 'MMM'),
-        users,
-        files,
-        revenue
-      };
-    }));
-
-    return {
-      data: analyticsData
-    };
-  } catch (error) {
-    console.error('Error fetching analytics data:', error);
-    throw error;
-  }
-}
-
 // Charts component
 export function Charts() {
   const [chartType, setChartType] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
@@ -285,7 +186,7 @@ export function Charts() {
           const data = await response.json();
           
           if (response.ok) {
-            if (data.success && data.data) {
+            if (data.data) {
               setChartData(data.data);
             } else {
               setError(data.error || 'Failed to fetch analytics data');
