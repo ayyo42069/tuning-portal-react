@@ -21,8 +21,8 @@ export async function PUT(request: NextRequest) {
     // Mark all notifications as read for this user
     await executeQuery(
       `UPDATE notifications 
-       SET is_read = true 
-       WHERE user_id = ? AND is_read = false`,
+       SET is_read = 1 
+       WHERE user_id = ? AND is_read = 0`,
       [user.id]
     );
 

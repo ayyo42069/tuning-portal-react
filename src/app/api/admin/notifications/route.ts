@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
         n.is_global as isGlobal,
         n.created_at as createdAt
       FROM notifications n
-      WHERE (n.user_id = ? OR n.is_global = true)
+      WHERE (n.user_id = ? OR n.is_global = 1)
       ORDER BY n.created_at DESC
       LIMIT 50`,
       [user.id]
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
         message,
         type,
         isGlobal ? null : userId,
-        isGlobal,
+        isGlobal ? 1 : 0,
         referenceId,
         referenceType,
       ]

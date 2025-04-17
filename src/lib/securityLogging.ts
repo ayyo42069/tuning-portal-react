@@ -450,7 +450,7 @@ export async function getSecurityStats(): Promise<SecurityStats> {
     const unresolvedAlertsResult = await executeQuery<CountResult[]>(`
       SELECT COUNT(*) as total
       FROM security_alerts
-      WHERE is_resolved = FALSE
+      WHERE is_resolved = 0
     `);
     const unresolvedAlerts = unresolvedAlertsResult[0].total;
 
@@ -482,7 +482,7 @@ export async function resolveSecurityAlert(
   try {
     await executeQuery(
       `UPDATE security_alerts 
-       SET is_resolved = TRUE, 
+       SET is_resolved = 1, 
            resolved_by = ?, 
            resolution_notes = ?, 
            resolved_at = NOW() 
@@ -509,7 +509,7 @@ export async function getUnresolvedAlerts(limit: number = 100): Promise<any[]> {
        FROM security_alerts sa 
        JOIN security_events se ON sa.event_id = se.id 
        LEFT JOIN users u ON sa.user_id = u.id 
-       WHERE sa.is_resolved = FALSE 
+       WHERE sa.is_resolved = 0 
        ORDER BY sa.severity DESC, sa.created_at DESC 
        LIMIT ?`,
       [limit]

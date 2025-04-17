@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     // Check if user is banned from chat
     const banCheck = await executeQuery<any[]>(
       `SELECT * FROM chat_bans 
-       WHERE user_id = ? AND (is_permanent = true OR expires_at > NOW())`,
+       WHERE user_id = ? AND (is_permanent = 1 OR expires_at > NOW())`,
       [user.id]
     );
 
@@ -74,13 +74,13 @@ export async function GET(request: NextRequest) {
     if (privateUserId) {
       // Only admins can see private messages between other users
       if (user.role === "admin") {
-        query += ` AND cm.is_private = true AND (
+        query += ` AND cm.is_private = 1 AND (
           (cm.sender_id = ? AND cm.recipient_id = ?) OR 
           (cm.sender_id = ? AND cm.recipient_id = ?)
         )`;
         queryParams.push(user.id, privateUserId, privateUserId, user.id);
       } else {
-        query += ` AND cm.is_private = true AND (
+        query += ` AND cm.is_private = 1 AND (
           (cm.sender_id = ? AND cm.recipient_id = ?) OR 
           (cm.sender_id = ? AND cm.recipient_id = ?)
         )`;
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
       }
     } else {
       // Public messages or private messages involving the current user
-      query += ` AND (cm.is_private = false OR cm.sender_id = ? OR cm.recipient_id = ?)`;
+      query += ` AND (cm.is_private = 0 OR cm.sender_id = ? OR cm.recipient_id = ?)`;
       queryParams.push(user.id, user.id);
     }
 
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
     // Check if user is banned from chat
     const banCheck = await executeQuery<any[]>(
       `SELECT * FROM chat_bans 
-       WHERE user_id = ? AND (is_permanent = true OR expires_at > NOW())`,
+       WHERE user_id = ? AND (is_permanent = 1 OR expires_at > NOW())`,
       [user.id]
     );
 
@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
       if (user.role !== "admin") {
         // Check if this is a response to an admin message
         const previousMessages = await executeQuery<any[]>(
-          `SELECT * FROM chat_messages WHERE recipient_id = ? AND sender_id = ? AND is_private = true ORDER BY created_at DESC LIMIT 1`,
+          `SELECT * FROM chat_messages WHERE recipient_id = ? AND sender_id = ? AND is_private = 1 ORDER BY created_at DESC LIMIT 1`,
           [user.id, recipientId]
         );
 
@@ -249,7 +249,7 @@ export async function POST(request: NextRequest) {
       `INSERT INTO chat_messages 
         (sender_id, recipient_id, message, is_private) 
        VALUES (?, ?, ?, ?)`,
-      [user.id, recipientId, encryptedMessage, isPrivate]
+      [user.id, recipientId, encryptedMessage, isPrivate ? 1 : 0]
     );
 
     // Fetch the newly created message with user details
