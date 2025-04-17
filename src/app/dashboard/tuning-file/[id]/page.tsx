@@ -34,12 +34,9 @@ interface TuningFileDetails {
 
 // Fetch tuning file details on the server
 async function fetchTuningFileDetails(fileId: string) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tuning/file?id=${fileId}`, {
-    next: { revalidate: 30 }, // Revalidate every 30 seconds
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include', // Include cookies for authentication
+  // In Next.js App Router, relative fetch URLs automatically forward cookies
+  const response = await fetch(`/api/tuning/file?id=${fileId}`, {
+    next: { revalidate: 30 } // Revalidate every 30 seconds
   });
 
   if (!response.ok) {
