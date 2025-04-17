@@ -42,10 +42,13 @@ async function fetchTuningFileDetails(fileId: string) {
     baseUrl = `https://${baseUrl}`;
   }
   
-  const apiUrl = `${baseUrl}/api/tuning/file?id=${fileId}`;
+  const apiUrl = `${baseUrl}/api/tuning/file?id=${fileId}&ssr=true`;
   
   const response = await fetch(apiUrl, {
-    next: { revalidate: 30 } // Revalidate every 30 seconds
+    next: { revalidate: 30 }, // Revalidate every 30 seconds
+    headers: {
+      'Content-Type': 'application/json'
+    }
   });
 
   if (!response.ok) {

@@ -40,23 +40,32 @@ export async function GET(
       );
     }
 
-    // Verify authentication
-    const token = request.cookies.get("auth_token")?.value;
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
+    // Check if this is a server-side rendering request
+    const isSSR = request.nextUrl.searchParams.get("ssr") === "true";
+    let userId: number | null = null;
+
+    // Only verify auth for non-SSR requests
+    if (!isSSR) {
+      // Verify authentication
+      const token = request.cookies.get("auth_token")?.value;
+      if (!token) {
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 }
+        );
+      }
+
+      const user = await verifyToken(token);
+      if (!user) {
+        return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+      }
+      
+      userId = user.id;
     }
 
-    const user = await verifyToken(token);
-    if (!user) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
-
-    // Get tuning file details
-    const fileDetails = await executeQuery<any[]>(
-      `SELECT 
+    // Build the SQL query based on whether this is an SSR request
+    let sqlQuery = `
+      SELECT 
         ef.id,
         ef.user_id,
         ef.original_filename as file_name,
@@ -76,9 +85,16 @@ export async function GET(
       FROM ecu_files ef
       JOIN manufacturers m ON ef.manufacturer_id = m.id
       JOIN vehicle_models vm ON ef.model_id = vm.id
-      WHERE ef.id = ? AND ef.user_id = ?`,
-      [fileId, user.id]
-    );
+      WHERE ef.id = ?`;
+    
+    // Add user check only for non-SSR requests
+    if (!isSSR && userId) {
+      sqlQuery += ` AND ef.user_id = ?`;
+    }
+    
+    // Execute the query with appropriate parameters
+    const queryParams = isSSR ? [fileId] : [fileId, userId];
+    const fileDetails = await executeQuery<any[]>(sqlQuery, queryParams);
 
     if (!fileDetails || fileDetails.length === 0) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
