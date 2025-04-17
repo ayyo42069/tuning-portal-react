@@ -64,10 +64,10 @@ export default function TuningFileDetailsPage(props: {
     notFound();
   }
   
+  // Fetch data on the server - moved outside try/catch
+  const tuningFile = use(fetchTuningFileDetails(params.id));
+  
   try {
-    // Fetch data on the server
-    const tuningFile = use(fetchTuningFileDetails(params.id));
-    
     const formatDate = (dateString: string) => {
       return new Date(dateString).toLocaleString();
     };
