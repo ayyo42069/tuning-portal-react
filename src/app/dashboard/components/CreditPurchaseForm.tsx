@@ -15,8 +15,8 @@ interface CreditBalance {
 }
 
 // Initialize Stripe with the publishable key from environment variables
-const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+const stripePromise = process.env.STRIPE_PUBLISHABLE_KEY
+  ? loadStripe(process.env.STRIPE_PUBLISHABLE_KEY)
   : null;
 
 if (!stripePromise) {
