@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: mo0kkkc4gkcgwss8o4c0000w
--- Generation Time: Apr 17, 2025 at 03:32 PM
+-- Generation Time: Apr 17, 2025 at 11:16 PM
 -- Server version: 8.4.4
 -- PHP Version: 8.3.17
 
@@ -20,55 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `tuning_portal`
 --
-
--- --------------------------------------------------------
-
---
--- Table structure for table `chat_bans`
---
-
-CREATE TABLE `chat_bans` (
-  `id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `banned_by` int NOT NULL,
-  `reason` text COLLATE utf8mb4_general_ci,
-  `is_permanent` tinyint(1) DEFAULT '0',
-  `expires_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `chat_messages`
---
-
-CREATE TABLE `chat_messages` (
-  `id` int NOT NULL,
-  `sender_id` int NOT NULL,
-  `recipient_id` int DEFAULT NULL,
-  `message` text COLLATE utf8mb4_general_ci NOT NULL,
-  `is_private` tinyint(1) DEFAULT '0',
-  `is_edited` tinyint(1) DEFAULT '0',
-  `edited_by` int DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `chat_mutes`
---
-
-CREATE TABLE `chat_mutes` (
-  `id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `muted_by` int NOT NULL,
-  `reason` text COLLATE utf8mb4_general_ci,
-  `expires_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -179,22 +130,6 @@ CREATE TABLE `manufacturers` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `models`
---
-
-CREATE TABLE `models` (
-  `id` int NOT NULL,
-  `manufacturer_id` int NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `year_start` int DEFAULT NULL,
-  `year_end` int DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `notifications`
 --
 
@@ -297,35 +232,6 @@ CREATE TABLE `security_events` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `sessions`
---
-
-CREATE TABLE `sessions` (
-  `id` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `user_id` int NOT NULL,
-  `expires_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `last_activity` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `session_terminations`
---
-
-CREATE TABLE `session_terminations` (
-  `id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `terminated_by` int NOT NULL,
-  `terminated_at` datetime NOT NULL,
-  `reason` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `acknowledged` tinyint(1) DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `tickets`
 --
 
@@ -341,24 +247,6 @@ CREATE TABLE `tickets` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `resolved_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ticket_attachments`
---
-
-CREATE TABLE `ticket_attachments` (
-  `id` int NOT NULL,
-  `ticket_id` int NOT NULL,
-  `response_id` int DEFAULT NULL,
-  `file_name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `file_path` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `file_size` int NOT NULL,
-  `file_type` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `uploaded_by` int NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -496,20 +384,6 @@ CREATE TABLE `user_credits` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user_profiles`
---
-
-CREATE TABLE `user_profiles` (
-  `id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `bio` text COLLATE utf8mb4_general_ci,
-  `avatar_url` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `preferences` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin
-) ;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `vehicle_models`
 --
 
@@ -522,33 +396,6 @@ CREATE TABLE `vehicle_models` (
 --
 -- Indexes for dumped tables
 --
-
---
--- Indexes for table `chat_bans`
---
-ALTER TABLE `chat_bans`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `banned_by` (`banned_by`),
-  ADD KEY `idx_chat_bans_user` (`user_id`);
-
---
--- Indexes for table `chat_messages`
---
-ALTER TABLE `chat_messages`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `edited_by` (`edited_by`),
-  ADD KEY `idx_chat_messages_sender` (`sender_id`),
-  ADD KEY `idx_chat_messages_recipient` (`recipient_id`),
-  ADD KEY `idx_chat_messages_private` (`is_private`),
-  ADD KEY `idx_chat_messages_created` (`created_at`);
-
---
--- Indexes for table `chat_mutes`
---
-ALTER TABLE `chat_mutes`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `muted_by` (`muted_by`),
-  ADD KEY `idx_chat_mutes_user` (`user_id`);
 
 --
 -- Indexes for table `credit_transactions`
@@ -608,13 +455,6 @@ ALTER TABLE `manufacturers`
   ADD UNIQUE KEY `name` (`name`);
 
 --
--- Indexes for table `models`
---
-ALTER TABLE `models`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_model_manufacturer` (`manufacturer_id`,`name`);
-
---
 -- Indexes for table `notifications`
 --
 ALTER TABLE `notifications`
@@ -669,23 +509,6 @@ ALTER TABLE `security_events`
   ADD KEY `idx_security_events_created` (`created_at`);
 
 --
--- Indexes for table `sessions`
---
-ALTER TABLE `sessions`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `idx_sessions_expires` (`expires_at`),
-  ADD KEY `idx_sessions_last_activity` (`last_activity`);
-
---
--- Indexes for table `session_terminations`
---
-ALTER TABLE `session_terminations`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `terminated_by` (`terminated_by`),
-  ADD KEY `idx_session_terminations_user_id` (`user_id`);
-
---
 -- Indexes for table `tickets`
 --
 ALTER TABLE `tickets`
@@ -695,15 +518,6 @@ ALTER TABLE `tickets`
   ADD KEY `idx_tickets_status` (`status`),
   ADD KEY `idx_tickets_priority` (`priority`),
   ADD KEY `idx_tickets_status_priority` (`status`,`priority`);
-
---
--- Indexes for table `ticket_attachments`
---
-ALTER TABLE `ticket_attachments`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `ticket_id` (`ticket_id`),
-  ADD KEY `response_id` (`response_id`),
-  ADD KEY `uploaded_by` (`uploaded_by`);
 
 --
 -- Indexes for table `ticket_history`
@@ -767,13 +581,6 @@ ALTER TABLE `user_credits`
   ADD KEY `user_id` (`user_id`);
 
 --
--- Indexes for table `user_profiles`
---
-ALTER TABLE `user_profiles`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`);
-
---
 -- Indexes for table `vehicle_models`
 --
 ALTER TABLE `vehicle_models`
@@ -783,24 +590,6 @@ ALTER TABLE `vehicle_models`
 --
 -- AUTO_INCREMENT for dumped tables
 --
-
---
--- AUTO_INCREMENT for table `chat_bans`
---
-ALTER TABLE `chat_bans`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `chat_messages`
---
-ALTER TABLE `chat_messages`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `chat_mutes`
---
-ALTER TABLE `chat_mutes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `credit_transactions`
@@ -836,12 +625,6 @@ ALTER TABLE `email_verification_tokens`
 -- AUTO_INCREMENT for table `manufacturers`
 --
 ALTER TABLE `manufacturers`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `models`
---
-ALTER TABLE `models`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
@@ -881,21 +664,9 @@ ALTER TABLE `security_events`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `session_terminations`
---
-ALTER TABLE `session_terminations`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `tickets`
 --
 ALTER TABLE `tickets`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `ticket_attachments`
---
-ALTER TABLE `ticket_attachments`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
@@ -941,12 +712,6 @@ ALTER TABLE `user_credits`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `user_profiles`
---
-ALTER TABLE `user_profiles`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `vehicle_models`
 --
 ALTER TABLE `vehicle_models`
@@ -955,28 +720,6 @@ ALTER TABLE `vehicle_models`
 --
 -- Constraints for dumped tables
 --
-
---
--- Constraints for table `chat_bans`
---
-ALTER TABLE `chat_bans`
-  ADD CONSTRAINT `chat_bans_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `chat_bans_ibfk_2` FOREIGN KEY (`banned_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `chat_messages`
---
-ALTER TABLE `chat_messages`
-  ADD CONSTRAINT `chat_messages_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `chat_messages_ibfk_2` FOREIGN KEY (`recipient_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `chat_messages_ibfk_3` FOREIGN KEY (`edited_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `chat_mutes`
---
-ALTER TABLE `chat_mutes`
-  ADD CONSTRAINT `chat_mutes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `chat_mutes_ibfk_2` FOREIGN KEY (`muted_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `credit_transactions`
@@ -1020,12 +763,6 @@ ALTER TABLE `email_verification_tokens`
   ADD CONSTRAINT `email_verification_tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `models`
---
-ALTER TABLE `models`
-  ADD CONSTRAINT `models_ibfk_1` FOREIGN KEY (`manufacturer_id`) REFERENCES `manufacturers` (`id`) ON DELETE CASCADE;
-
---
 -- Constraints for table `notifications`
 --
 ALTER TABLE `notifications`
@@ -1052,32 +789,11 @@ ALTER TABLE `security_events`
   ADD CONSTRAINT `security_events_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
--- Constraints for table `sessions`
---
-ALTER TABLE `sessions`
-  ADD CONSTRAINT `sessions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `session_terminations`
---
-ALTER TABLE `session_terminations`
-  ADD CONSTRAINT `session_terminations_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `session_terminations_ibfk_2` FOREIGN KEY (`terminated_by`) REFERENCES `users` (`id`);
-
---
 -- Constraints for table `tickets`
 --
 ALTER TABLE `tickets`
   ADD CONSTRAINT `tickets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `tickets_ibfk_2` FOREIGN KEY (`assigned_to`) REFERENCES `users` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `ticket_attachments`
---
-ALTER TABLE `ticket_attachments`
-  ADD CONSTRAINT `ticket_attachments_ibfk_1` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `ticket_attachments_ibfk_2` FOREIGN KEY (`response_id`) REFERENCES `ticket_responses` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `ticket_attachments_ibfk_3` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `ticket_history`
@@ -1118,12 +834,6 @@ ALTER TABLE `user_activity_logs`
 --
 ALTER TABLE `user_credits`
   ADD CONSTRAINT `user_credits_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `user_profiles`
---
-ALTER TABLE `user_profiles`
-  ADD CONSTRAINT `user_profiles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `vehicle_models`

@@ -66,11 +66,11 @@ export async function GET(request: NextRequest) {
       );
       const files = filesResult[0]?.count || 0;
 
-      // Get revenue for this period
+      // Get revenue for this period (from credit transactions)
       const revenueResult = await executeQuery<any[]>(
         `SELECT SUM(amount) as total 
-         FROM payments 
-         WHERE status = 'completed' 
+         FROM credit_transactions 
+         WHERE transaction_type = 'purchase' 
          AND created_at BETWEEN ? AND ?`,
         [range.start, range.end]
       );
