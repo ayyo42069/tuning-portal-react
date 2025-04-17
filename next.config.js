@@ -28,6 +28,12 @@ const nextConfig = {
     
     return config;
   },
+  // Turbopack configuration
+  turbopack: {
+    // Mirror the webpack externals configuration
+    resolveAlias: {},
+    rules: {}
+  },
 };
 
 module.exports = nextConfig; 
