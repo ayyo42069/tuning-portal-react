@@ -1,10 +1,15 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import AdminDashboardClient from './AdminDashboardClient';
 
+// Dynamically import the client components to ensure they're client-side only
+const StatCard = dynamic(() => import('./AdminDashboardClient').then(mod => mod.StatCard), { ssr: false });
+const RecentActivity = dynamic(() => import('./AdminDashboardClient').then(mod => mod.RecentActivity), { ssr: false });
+const Charts = dynamic(() => import('./AdminDashboardClient').then(mod => mod.Charts), { ssr: false });
+
 export default function AdminDashboard() {
-  const { StatCard, RecentActivity, Charts } = AdminDashboardClient;
   const [dashboardData, setDashboardData] = useState({
     pendingRequests: 0,
     pendingRequestsChange: 0,
@@ -20,32 +25,38 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchDashboardData() {
-      try {
-        const response = await fetch('/api/admin/stats', {
-          credentials: 'include' // This ensures cookies are sent with the request
-        });
-        const data = await response.json();
-        
-        if (response.ok) {
-          if (data.success) {
-            setDashboardData(data);
-            setError(null);
+    // Only fetch data on the client side
+    if (typeof window !== 'undefined') {
+      async function fetchDashboardData() {
+        try {
+          const response = await fetch('/api/admin/stats', {
+            credentials: 'include'
+          });
+          const data = await response.json();
+          
+          if (response.ok) {
+            if (data.success) {
+              setDashboardData(data);
+              setError(null);
+            } else {
+              setError(data.error || 'Failed to fetch dashboard statistics');
+            }
           } else {
             setError(data.error || 'Failed to fetch dashboard statistics');
           }
-        } else {
-          setError(data.error || 'Failed to fetch dashboard statistics');
+        } catch (error) {
+          setError('Could not load dashboard statistics. Please try again later.');
+          console.error('Error fetching dashboard stats:', error);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        setError('Could not load dashboard statistics. Please try again later.');
-        console.error('Error fetching dashboard stats:', error);
-      } finally {
-        setIsLoading(false);
       }
-    }
 
-    fetchDashboardData();
+      fetchDashboardData();
+    } else {
+      // On server-side, just set loading to false
+      setIsLoading(false);
+    }
   }, []);
 
   // Mock activities as fallback if API fails

@@ -136,36 +136,43 @@ export function Charts() {
   const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
-    async function fetchData() {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(`/api/admin/stats/analytics?period=${chartType}`, {
-          credentials: 'include'
-        });
-        const data = await response.json();
-        
-        if (response.ok) {
-          if (data.success && data.data) {
-            setChartData(data.data);
+    // Only fetch data on the client side
+    if (typeof window !== 'undefined') {
+      async function fetchData() {
+        setIsLoading(true);
+        setError(null);
+        try {
+          const response = await fetch(`/api/admin/stats/analytics?period=${chartType}`, {
+            credentials: 'include'
+          });
+          const data = await response.json();
+          
+          if (response.ok) {
+            if (data.success && data.data) {
+              setChartData(data.data);
+            } else {
+              setError(data.error || 'Failed to fetch analytics data');
+              setChartData(getSampleDataForPeriod(chartType));
+            }
           } else {
             setError(data.error || 'Failed to fetch analytics data');
             setChartData(getSampleDataForPeriod(chartType));
           }
-        } else {
-          setError(data.error || 'Failed to fetch analytics data');
+        } catch (error) {
+          setError('Could not load analytics data. Please try again later.');
           setChartData(getSampleDataForPeriod(chartType));
+          console.error('Error fetching analytics data:', error);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        setError('Could not load analytics data. Please try again later.');
-        setChartData(getSampleDataForPeriod(chartType));
-        console.error('Error fetching analytics data:', error);
-      } finally {
-        setIsLoading(false);
       }
+      
+      fetchData();
+    } else {
+      // On server-side, just set loading to false and use sample data
+      setIsLoading(false);
+      setChartData(getSampleDataForPeriod(chartType));
     }
-    
-    fetchData();
   }, [chartType]);
   
   // Sample data fallbacks for different periods
