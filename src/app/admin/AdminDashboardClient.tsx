@@ -169,7 +169,12 @@ export function RecentActivity({ activities = mockRecentActivity }: { activities
                 )}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                {format(activity.timestamp, 'MMM d, h:mm a')}
+                {format(
+                  typeof activity.timestamp === 'string' 
+                    ? new Date(activity.timestamp) 
+                    : activity.timestamp, 
+                  'MMM d, h:mm a'
+                )}
               </p>
             </div>
           </div>
