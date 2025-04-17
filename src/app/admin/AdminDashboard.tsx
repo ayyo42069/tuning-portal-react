@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import { cookies } from 'next/headers';
+import { verifyToken } from '@/lib/auth';
+import { executeQuery } from '@/lib/db';
 
 // Mock data for build time
 const mockDashboardData = {
@@ -45,60 +48,172 @@ const StatCard = dynamic(() => import('./AdminDashboardClient').then(mod => mod.
 const RecentActivity = dynamic(() => import('./AdminDashboardClient').then(mod => mod.RecentActivity), { ssr: false });
 const Charts = dynamic(() => import('./AdminDashboardClient').then(mod => mod.Charts), { ssr: false });
 
-export default function AdminDashboard() {
-  const [dashboardData, setDashboardData] = useState(mockDashboardData);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Only fetch data on the client side
-    if (typeof window !== 'undefined') {
-      async function fetchDashboardData() {
-        try {
-          // Using the built-in Next.js API route at /api/admin/stats
-          const response = await fetch('/api/admin/stats', {
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
-          const data = await response.json();
-          
-          if (response.ok) {
-            if (data.success) {
-              setDashboardData(data);
-              setError(null);
-            } else {
-              setError(data.error || 'Failed to fetch dashboard statistics');
-            }
-          } else {
-            setError(data.error || 'Failed to fetch dashboard statistics');
-          }
-        } catch (error) {
-          setError('Could not load dashboard statistics. Please try again later.');
-          console.error('Error fetching dashboard stats:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-
-      fetchDashboardData();
-    } else {
-      // On server-side, use mock data
-      setDashboardData(mockDashboardData);
-      setIsLoading(false);
+// Server-side function to fetch dashboard data
+async function getDashboardData() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+    
+    if (!token) {
+      throw new Error('Authentication required');
     }
-  }, []);
+
+    const user = await verifyToken(token);
+    if (!user || user.role !== 'admin') {
+      throw new Error('Admin access required');
+    }
+
+    // Get pending requests count and change
+    const pendingRequestsResult = await executeQuery<any[]>(
+      `SELECT COUNT(*) as count FROM ecu_files WHERE status = 'pending'`
+    );
+    const pendingRequests = pendingRequestsResult[0]?.count || 0;
+
+    const pendingRequestsChangeResult = await executeQuery<any[]>(
+      `SELECT 
+        (COUNT(*) - (
+          SELECT COUNT(*) FROM ecu_files 
+          WHERE status = 'pending' 
+          AND created_at < NOW() - INTERVAL 7 DAY
+        )) / NULLIF((
+          SELECT COUNT(*) FROM ecu_files 
+          WHERE status = 'pending' 
+          AND created_at < NOW() - INTERVAL 7 DAY
+        ), 0) * 100 as change_percent
+      FROM ecu_files 
+      WHERE status = 'pending'`
+    );
+    const pendingRequestsChange = Math.round(pendingRequestsChangeResult[0]?.change_percent || 0);
+
+    // Get active users count and change
+    const activeUsersResult = await executeQuery<any[]>(
+      `SELECT COUNT(DISTINCT user_id) as count 
+       FROM user_sessions 
+       WHERE last_activity > NOW() - INTERVAL 30 DAY`
+    );
+    const activeUsers = activeUsersResult[0]?.count || 0;
+
+    const activeUsersChangeResult = await executeQuery<any[]>(
+      `SELECT 
+        (COUNT(DISTINCT user_id) - (
+          SELECT COUNT(DISTINCT user_id) 
+          FROM user_sessions 
+          WHERE last_activity > NOW() - INTERVAL 60 DAY 
+          AND last_activity < NOW() - INTERVAL 30 DAY
+        )) / NULLIF((
+          SELECT COUNT(DISTINCT user_id) 
+          FROM user_sessions 
+          WHERE last_activity > NOW() - INTERVAL 60 DAY 
+          AND last_activity < NOW() - INTERVAL 30 DAY
+        ), 0) * 100 as change_percent
+      FROM user_sessions 
+      WHERE last_activity > NOW() - INTERVAL 30 DAY`
+    );
+    const activeUsersChange = Math.round(activeUsersChangeResult[0]?.change_percent || 0);
+
+    // Get credits sold and change
+    const creditsSoldResult = await executeQuery<any[]>(
+      `SELECT SUM(amount) as total FROM credit_transactions WHERE type = 'purchase'`
+    );
+    const creditsSold = creditsSoldResult[0]?.total || 0;
+
+    const creditsSoldChangeResult = await executeQuery<any[]>(
+      `SELECT 
+        (SUM(amount) - (
+          SELECT SUM(amount) 
+          FROM credit_transactions 
+          WHERE type = 'purchase' 
+          AND created_at < NOW() - INTERVAL 30 DAY
+        )) / NULLIF((
+          SELECT SUM(amount) 
+          FROM credit_transactions 
+          WHERE type = 'purchase' 
+          AND created_at < NOW() - INTERVAL 30 DAY
+        ), 0) * 100 as change_percent
+      FROM credit_transactions 
+      WHERE type = 'purchase' 
+      AND created_at > NOW() - INTERVAL 30 DAY`
+    );
+    const creditsSoldChange = Math.round(creditsSoldChangeResult[0]?.change_percent || 0);
+
+    // Get revenue and change
+    const revenueResult = await executeQuery<any[]>(
+      `SELECT SUM(amount) as total FROM payments WHERE status = 'completed'`
+    );
+    const revenue = revenueResult[0]?.total || 0;
+
+    const revenueChangeResult = await executeQuery<any[]>(
+      `SELECT 
+        (SUM(amount) - (
+          SELECT SUM(amount) 
+          FROM payments 
+          WHERE status = 'completed' 
+          AND created_at < NOW() - INTERVAL 30 DAY
+        )) / NULLIF((
+          SELECT SUM(amount) 
+          FROM payments 
+          WHERE status = 'completed' 
+          AND created_at < NOW() - INTERVAL 30 DAY
+        ), 0) * 100 as change_percent
+      FROM payments 
+      WHERE status = 'completed' 
+      AND created_at > NOW() - INTERVAL 30 DAY`
+    );
+    const revenueChange = Math.round(revenueChangeResult[0]?.change_percent || 0);
+
+    // Get recent activities
+    const recentActivitiesResult = await executeQuery<any[]>(
+      `SELECT 
+        id,
+        type,
+        message,
+        created_at as timestamp,
+        user_id
+      FROM activities 
+      ORDER BY created_at DESC 
+      LIMIT 10`
+    );
+
+    const recentActivities = recentActivitiesResult.map(activity => ({
+      id: activity.id,
+      type: activity.type,
+      message: activity.message,
+      timestamp: activity.timestamp,
+      user: activity.user_id
+    }));
+
+    return {
+      pendingRequests,
+      pendingRequestsChange,
+      activeUsers,
+      activeUsersChange,
+      creditsSold,
+      creditsSoldChange,
+      revenue,
+      revenueChange,
+      recentActivities
+    };
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+    throw error;
+  }
+}
+
+export default async function AdminDashboard() {
+  let dashboardData = mockDashboardData;
+  let error = null;
+
+  try {
+    dashboardData = await getDashboardData();
+  } catch (err) {
+    error = err instanceof Error ? err.message : 'Failed to fetch dashboard statistics';
+  }
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
       
-      {isLoading ? (
-        <div className="flex justify-center items-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        </div>
-      ) : error ? (
+      {error ? (
         <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
