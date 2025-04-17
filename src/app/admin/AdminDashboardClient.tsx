@@ -176,8 +176,12 @@ export function Charts() {
         setIsLoading(true);
         setError(null);
         try {
+          // Using the built-in Next.js API route at /api/admin/stats/analytics
           const response = await fetch(`/api/admin/stats/analytics?period=${chartType}`, {
-            credentials: 'include'
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json'
+            }
           });
           const data = await response.json();
           

@@ -55,8 +55,12 @@ export default function AdminDashboard() {
     if (typeof window !== 'undefined') {
       async function fetchDashboardData() {
         try {
+          // Using the built-in Next.js API route at /api/admin/stats
           const response = await fetch('/api/admin/stats', {
-            credentials: 'include'
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json'
+            }
           });
           const data = await response.json();
           
