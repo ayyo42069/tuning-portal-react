@@ -126,43 +126,6 @@ export async function updateTuningRequestStatus(requestId: number, status: strin
  * Server action to fetch dashboard stats with appropriate caching
  */
 export async function fetchAdminDashboardStats() {
-  // Mock data for static builds and fallbacks
-  const mockStats = {
-    success: true,
-    pendingRequests: 5,
-    pendingRequestsChange: 2,
-    activeUsers: 120,
-    activeUsersChange: 5, 
-    creditsSold: 2500,
-    creditsSoldChange: 10,
-    revenue: 4320,
-    revenueChange: 8,
-    recentActivities: [
-      {
-        id: 1,
-        type: 'user',
-        message: 'New user registered',
-        timestamp: new Date().toISOString(),
-        user: 'John Doe'
-      },
-      {
-        id: 2,
-        type: 'tuning',
-        message: 'Tuning file completed',
-        timestamp: new Date().toISOString(),
-        user: 'Jane Smith'
-      }
-    ]
-  };
-
-  // Skip actual API calls during build time
-  if (process.env.NODE_ENV === 'production' && 
-      (process.env.NEXT_PHASE === 'phase-production-build' || 
-       typeof window === 'undefined' && !process.env.VERCEL_URL)) {
-    console.log('🏗️ Build-time: Using mock data for admin dashboard stats');
-    return mockStats;
-  }
-  
   try {
     // For runtime, use the appropriate URL
     let url;
@@ -200,14 +163,27 @@ export async function fetchAdminDashboardStats() {
     // Handle failed or invalid responses
     if (!response || !response.ok) {
       console.warn(`API response not ok: ${response?.status || 'Request failed'}`);
-      return mockStats;
+      throw new Error(`Failed to fetch dashboard stats: ${response?.status || 'Request failed'}`);
     }
     
     return response.json();
   } catch (error) {
     console.error('Error fetching admin dashboard stats:', error);
-    // Return mock data instead of error data 
-    // This helps prevent undefined component errors
-    return mockStats;
+    
+    // Fallback data structure in case of errors
+    // This prevents undefined component errors
+    return {
+      success: false,
+      error: 'Failed to fetch dashboard stats',
+      pendingRequests: 0,
+      pendingRequestsChange: 0,
+      activeUsers: 0,
+      activeUsersChange: 0,
+      creditsSold: 0, 
+      creditsSoldChange: 0,
+      revenue: 0,
+      revenueChange: 0,
+      recentActivities: []
+    };
   }
 } 
