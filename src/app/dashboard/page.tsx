@@ -13,6 +13,7 @@ import {
   MessageSquare,
   CreditCard,
   X,
+  BookOpen,
 } from "lucide-react";
 import { useAuth } from "@/lib/AuthProvider";
 import { useTuningFiles, useUserProfile } from "@/lib/hooks/useDataFetching";
@@ -272,194 +273,296 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Main ECU Upload Card */}
-      <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border p-6 transition-all duration-300 hover:bg-card/60">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg">
-              <Upload className="w-8 h-8 text-white" />
+      <div className="relative group">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+        <div className="relative bg-white/10 dark:bg-gray-900/10 backdrop-blur-xl rounded-xl border border-white/20 dark:border-gray-800/20 p-6 transition-all duration-300 hover:bg-white/15 dark:hover:bg-gray-900/15">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                <div className="relative w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                  <Upload className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">Upload ECU File</h2>
+                <p className="text-blue-100 mt-1">
+                  Upload your ECU file for tuning. Our experts will optimize your vehicle's performance.
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-foreground">Upload ECU File</h2>
-              <p className="text-muted-foreground mt-1">
-                Upload your ECU file for tuning. Our experts will optimize your vehicle's performance.
-              </p>
-            </div>
+            <button 
+              onClick={() => setShowUploadForm(true)}
+              className="relative group/btn"
+            >
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg blur opacity-30 group-hover/btn:opacity-50 transition duration-1000 group-hover/btn:duration-200"></div>
+              <div className="relative px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-medium rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
+                <Upload className="w-5 h-5" />
+                Start Upload
+              </div>
+            </button>
           </div>
-          <button 
-            onClick={() => setShowUploadForm(true)}
-            className="px-6 py-3 bg-gradient-to-r from-primary to-primary/80 text-white font-medium rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2"
-          >
-            <Upload className="w-5 h-5" />
-            Start Upload
-          </button>
         </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Completed Tunes */}
-        <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border p-6 transition-all duration-300 hover:bg-card/60">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Completed Tunes</p>
-              <h3 className="text-3xl font-bold text-foreground mt-1">
-                {recentFiles.filter((file) => file.status === "completed").length}
-              </h3>
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative bg-white/10 dark:bg-gray-900/10 backdrop-blur-xl rounded-xl border border-white/20 dark:border-gray-800/20 p-6 transition-all duration-300 hover:bg-white/15 dark:hover:bg-gray-900/15">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-blue-100">Completed Tunes</p>
+                <h3 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-emerald-500 mt-1">
+                  {recentFiles.filter((file) => file.status === "completed").length}
+                </h3>
+              </div>
+              <div className="p-3 bg-green-500/10 rounded-xl">
+                <BarChart3 className="w-6 h-6 text-green-500" />
+              </div>
             </div>
-            <div className="p-3 bg-primary/10 rounded-xl">
-              <BarChart3 className="w-6 h-6 text-primary" />
+            <div className="mt-4 w-full bg-white/10 dark:bg-gray-800/20 rounded-full h-2">
+              <div
+                className="bg-gradient-to-r from-green-400 to-emerald-600 h-2 rounded-full"
+                style={{ width: "64%" }}
+              />
             </div>
-          </div>
-          <div className="mt-4 w-full bg-muted rounded-full h-2">
-            <div
-              className="bg-primary h-2 rounded-full"
-              style={{ width: "64%" }}
-            />
           </div>
         </div>
 
         {/* Processing */}
-        <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border p-6 transition-all duration-300 hover:bg-card/60">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Processing</p>
-              <h3 className="text-3xl font-bold text-foreground mt-1">
-                {recentFiles.filter((file) => file.status === "processing").length}
-              </h3>
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative bg-white/10 dark:bg-gray-900/10 backdrop-blur-xl rounded-xl border border-white/20 dark:border-gray-800/20 p-6 transition-all duration-300 hover:bg-white/15 dark:hover:bg-gray-900/15">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-blue-100">Processing</p>
+                <h3 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-indigo-500 mt-1">
+                  {recentFiles.filter((file) => file.status === "processing").length}
+                </h3>
+              </div>
+              <div className="p-3 bg-blue-500/10 rounded-xl">
+                <Clock className="w-6 h-6 text-blue-500" />
+              </div>
             </div>
-            <div className="p-3 bg-primary/10 rounded-xl">
-              <Clock className="w-6 h-6 text-primary" />
+            <div className="mt-4 w-full bg-white/10 dark:bg-gray-800/20 rounded-full h-2">
+              <div
+                className="bg-gradient-to-r from-blue-400 to-indigo-600 h-2 rounded-full"
+                style={{ width: "47%" }}
+              />
             </div>
-          </div>
-          <div className="mt-4 w-full bg-muted rounded-full h-2">
-            <div
-              className="bg-primary h-2 rounded-full"
-              style={{ width: "47%" }}
-            />
           </div>
         </div>
 
         {/* Available Credits */}
-        <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border p-6 transition-all duration-300 hover:bg-card/60">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Available Credits</p>
-              <h3 className="text-3xl font-bold text-foreground mt-1">
-                {user?.credits ?? 0}
-              </h3>
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative bg-white/10 dark:bg-gray-900/10 backdrop-blur-xl rounded-xl border border-white/20 dark:border-gray-800/20 p-6 transition-all duration-300 hover:bg-white/15 dark:hover:bg-gray-900/15">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-blue-100">Available Credits</p>
+                <h3 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-500 mt-1">
+                  {user?.credits ?? 0}
+                </h3>
+              </div>
+              <div className="p-3 bg-purple-500/10 rounded-xl">
+                <CreditCard className="w-6 h-6 text-purple-500" />
+              </div>
             </div>
-            <div className="p-3 bg-primary/10 rounded-xl">
-              <CreditCard className="w-6 h-6 text-primary" />
+            <div className="mt-4 w-full bg-white/10 dark:bg-gray-800/20 rounded-full h-2">
+              <div
+                className="bg-gradient-to-r from-purple-400 to-pink-600 h-2 rounded-full"
+                style={{ width: "35%" }}
+              />
             </div>
-          </div>
-          <div className="mt-4 w-full bg-muted rounded-full h-2">
-            <div
-              className="bg-primary h-2 rounded-full"
-              style={{ width: "35%" }}
-            />
           </div>
         </div>
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border p-6 transition-all duration-300 hover:bg-card/60">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-3 bg-primary/10 rounded-xl">
-            <BarChart3 className="w-6 h-6 text-primary" />
+      <div className="relative group">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+        <div className="relative bg-white/10 dark:bg-gray-900/10 backdrop-blur-xl rounded-xl border border-white/20 dark:border-gray-800/20 p-6 transition-all duration-300 hover:bg-white/15 dark:hover:bg-gray-900/15">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-cyan-500/10 rounded-xl">
+              <BarChart3 className="w-6 h-6 text-cyan-500" />
+            </div>
+            <h3 className="text-xl font-bold text-white">Recent Activity</h3>
           </div>
-          <h3 className="text-xl font-bold text-foreground">Recent Activity</h3>
-        </div>
 
-        {recentFiles.length > 0 ? (
-          <div className="space-y-4">
-            {recentFiles.map((file) => (
-              <div
-                key={file.id}
-                className="bg-card/30 backdrop-blur-sm rounded-lg border border-border p-4 hover:bg-card/40 transition-all duration-200"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="font-medium text-foreground truncate max-w-[180px]">
-                      {file.file_name}
+          {recentFiles.length > 0 ? (
+            <div className="space-y-4">
+              {recentFiles.map((file) => (
+                <div
+                  key={file.id}
+                  className="bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm rounded-lg border border-white/10 dark:border-gray-800/10 p-4 hover:bg-white/10 dark:hover:bg-gray-800/10 transition-all duration-200"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="font-medium text-white truncate max-w-[180px]">
+                        {file.file_name}
+                      </div>
+                      <div className="text-sm text-blue-100">
+                        {file.vehicle_info}
+                      </div>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span
+                          className={`px-2.5 py-1 text-xs rounded-full ${
+                            file.status === "completed"
+                              ? "bg-green-500/10 text-green-500"
+                              : file.status === "processing"
+                              ? "bg-blue-500/10 text-blue-500"
+                              : file.status === "pending"
+                              ? "bg-yellow-500/10 text-yellow-500"
+                              : "bg-red-500/10 text-red-500"
+                          }`}
+                        >
+                          {file.status.charAt(0).toUpperCase() + file.status.slice(1)}
+                        </span>
+                        <span className="text-xs text-blue-100">
+                          {new Date(file.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {file.vehicle_info}
-                    </div>
-                    <div className="mt-2 flex items-center gap-2">
-                      <span
-                        className={`px-2.5 py-1 text-xs rounded-full ${
-                          file.status === "completed"
-                            ? "bg-green-500/10 text-green-500"
-                            : file.status === "processing"
-                            ? "bg-blue-500/10 text-blue-500"
-                            : file.status === "pending"
-                            ? "bg-yellow-500/10 text-yellow-500"
-                            : "bg-red-500/10 text-red-500"
-                        }`}
-                      >
-                        {file.status.charAt(0).toUpperCase() + file.status.slice(1)}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(file.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
+                    <button
+                      onClick={() => router.push(`/dashboard/tuning-file/${file.id}`)}
+                      className="relative group/btn"
+                    >
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg blur opacity-30 group-hover/btn:opacity-50 transition duration-1000 group-hover/btn:duration-200"></div>
+                      <div className="relative px-4 py-2 bg-cyan-500/10 text-cyan-500 text-sm font-medium rounded-lg hover:bg-cyan-500/20 transition-colors">
+                        View
+                      </div>
+                    </button>
                   </div>
-                  <button
-                    onClick={() => router.push(`/dashboard/tuning-file/${file.id}`)}
-                    className="px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-lg hover:bg-primary/20 transition-colors"
-                  >
-                    View
-                  </button>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-6">
-            <p className="text-muted-foreground">No recent activity</p>
-          </div>
-        )}
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-blue-100">No recent activity</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Support Section */}
-      <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border p-6 transition-all duration-300 hover:bg-card/60">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-3 bg-primary/10 rounded-xl">
-            <MessageSquare className="w-6 h-6 text-primary" />
+      <div className="relative group">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+        <div className="relative bg-white/10 dark:bg-gray-900/10 backdrop-blur-xl rounded-xl border border-white/20 dark:border-gray-800/20 p-6 transition-all duration-300 hover:bg-white/15 dark:hover:bg-gray-900/15">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative p-3 bg-purple-500/10 rounded-xl">
+                <MessageSquare className="w-6 h-6 text-purple-500" />
+              </div>
+            </div>
+            <h3 className="text-xl font-bold text-white">Need Help?</h3>
           </div>
-          <h3 className="text-xl font-bold text-foreground">Support</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Quick Support Card */}
+            <div className="relative group/card">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur opacity-30 group-hover/card:opacity-50 transition duration-1000 group-hover/card:duration-200"></div>
+              <div className="relative bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm rounded-xl border border-white/10 dark:border-gray-800/10 p-4 hover:bg-white/10 dark:hover:bg-gray-800/10 transition-all duration-200">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-purple-500/10 rounded-lg">
+                    <MessageSquare className="w-5 h-5 text-purple-500" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-white">Quick Support</h4>
+                    <p className="text-sm text-blue-100 mt-1">
+                      Get instant help with your tuning files or account questions.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-xs text-purple-400">Available 24/7</span>
+                  <button className="relative group/btn">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg blur opacity-30 group-hover/btn:opacity-50 transition duration-1000 group-hover/btn:duration-200"></div>
+                    <div className="relative px-3 py-1.5 bg-purple-500/10 text-purple-500 text-sm font-medium rounded-lg hover:bg-purple-500/20 transition-colors">
+                      Open Ticket
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Knowledge Base Card */}
+            <div className="relative group/card">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur opacity-30 group-hover/card:opacity-50 transition duration-1000 group-hover/card:duration-200"></div>
+              <div className="relative bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm rounded-xl border border-white/10 dark:border-gray-800/10 p-4 hover:bg-white/10 dark:hover:bg-gray-800/10 transition-all duration-200">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-purple-500/10 rounded-lg">
+                    <BookOpen className="w-5 h-5 text-purple-500" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-white">Knowledge Base</h4>
+                    <p className="text-sm text-blue-100 mt-1">
+                      Browse our guides and tutorials for self-help resources.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-xs text-purple-400">Self-Service</span>
+                  <button className="relative group/btn">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg blur opacity-30 group-hover/btn:opacity-50 transition duration-1000 group-hover/btn:duration-200"></div>
+                    <div className="relative px-3 py-1.5 bg-purple-500/10 text-purple-500 text-sm font-medium rounded-lg hover:bg-purple-500/20 transition-colors">
+                      Browse Articles
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 pt-6 border-t border-white/10 dark:border-gray-800/10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-500/10 rounded-lg">
+                <Clock className="w-5 h-5 text-purple-500" />
+              </div>
+              <div>
+                <p className="text-sm text-blue-100">
+                  Average response time: <span className="text-purple-400">15 minutes</span>
+                </p>
+                <p className="text-xs text-blue-100/80 mt-1">
+                  Our support team is ready to help you with any questions or issues.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-        <p className="text-muted-foreground">
-          Need help with your tuning files or have questions about our services?
-        </p>
-        <p className="text-muted-foreground mt-2">
-          Click the support button in the bottom right corner to access our ticket system.
-        </p>
       </div>
 
       {/* ECU Upload Modal */}
       {showUploadForm && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xl z-50 flex items-center justify-center">
           <div className="relative w-full max-w-4xl mx-4">
-            <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border p-6">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center">
-                    <Upload className="w-6 h-6 text-white" />
+            <div className="relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative bg-white/10 dark:bg-gray-900/10 backdrop-blur-xl rounded-xl border border-white/20 dark:border-gray-800/20 p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                      <div className="relative w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center">
+                        <Upload className="w-6 h-6 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold text-white">Upload ECU File</h3>
                   </div>
-                  <h3 className="text-2xl font-bold text-foreground">Upload ECU File</h3>
+                  <button
+                    onClick={() => setShowUploadForm(false)}
+                    className="p-2 rounded-full hover:bg-white/10 transition-colors"
+                    aria-label="Close"
+                  >
+                    <X className="w-6 h-6 text-white" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => setShowUploadForm(false)}
-                  className="p-2 rounded-full hover:bg-card/20 transition-colors"
-                  aria-label="Close"
-                >
-                  <X className="w-6 h-6 text-foreground" />
-                </button>
+                <ECUUploadFormWithErrorBoundary />
               </div>
-              <ECUUploadFormWithErrorBoundary />
             </div>
           </div>
         </div>

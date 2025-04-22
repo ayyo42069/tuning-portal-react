@@ -32,8 +32,8 @@ export default function DashboardLayout({
       <DynamicIsland variant="dashboard" />
       
       {/* Main content area */}
-      <main className="flex-1 p-4 md:p-6 mt-20 max-w-7xl mx-auto">
-        <div className="space-y-6">
+      <main className="flex-1 p-4 md:p-6 mt-24 max-w-7xl mx-auto">
+        <div className="space-y-8">
           {children}
         </div>
       </main>
