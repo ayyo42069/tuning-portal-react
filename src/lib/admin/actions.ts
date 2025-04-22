@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { createBuildAuthHeader } from '../buildAuth';
 
 // Define caching times
 const CACHE_LONG = 60 * 60; // 1 hour
@@ -148,7 +149,7 @@ export async function fetchAdminDashboardStats() {
     const controller = new AbortController();
     const fetchPromise = fetch(url, {
       next: { revalidate: 60 }, // Revalidate every minute
-      headers: { 'Content-Type': 'application/json' },
+      headers: createBuildAuthHeader(),
       signal: controller.signal
     });
     

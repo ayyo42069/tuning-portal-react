@@ -2,36 +2,42 @@ import { NextRequest, NextResponse } from "next/server";
 import { executeQuery } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import { logApiAccess } from "@/lib/securityMiddleware";
+import { isBuildTimeRequest } from "@/lib/buildAuth";
 
 export async function GET(request: NextRequest) {
   try {
-    // Verify authentication and admin role
-    const token = request.cookies.get("auth_token")?.value;
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
+    // Check if this is a build-time request
+    const isBuild = await isBuildTimeRequest();
+    
+    if (!isBuild) {
+      // Verify authentication and admin role for non-build requests
+      const token = request.cookies.get("auth_token")?.value;
+      if (!token) {
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 }
+        );
+      }
+
+      const user = await verifyToken(token);
+      if (!user || user.role !== "admin") {
+        // Log unauthorized access attempt
+        await logApiAccess(
+          user?.id || undefined,
+          request,
+          "/api/admin/stats",
+          true
+        );
+
+        return NextResponse.json(
+          { error: "Admin access required" },
+          { status: 403 }
+        );
+      }
+
+      // Log the API access for non-build requests
+      await logApiAccess(user.id, request, "/api/admin/stats", false);
     }
-
-    const user = await verifyToken(token);
-    if (!user || user.role !== "admin") {
-      // Log unauthorized access attempt
-      await logApiAccess(
-        user?.id || undefined,
-        request,
-        "/api/admin/stats",
-        true
-      );
-
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 }
-      );
-    }
-
-    // Log the API access
-    await logApiAccess(user.id, request, "/api/admin/stats", false);
 
     // Get pending requests count and change (compared to last week)
     const pendingRequestsResult = await executeQuery<any[]>(
