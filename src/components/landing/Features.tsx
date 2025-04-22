@@ -1,7 +1,25 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
+import dynamic from "next/dynamic";
+
+// Dynamically import icons
+const BoltIcon = dynamic(
+  () => import("@heroicons/react/24/outline").then((mod) => mod.BoltIcon),
+  { ssr: false }
+);
+const ChartBarIcon = dynamic(
+  () => import("@heroicons/react/24/outline").then((mod) => mod.ChartBarIcon),
+  { ssr: false }
+);
+const Cog6ToothIcon = dynamic(
+  () => import("@heroicons/react/24/outline").then((mod) => mod.Cog6ToothIcon),
+  { ssr: false }
+);
+const ShieldCheckIcon = dynamic(
+  () => import("@heroicons/react/24/outline").then((mod) => mod.ShieldCheckIcon),
+  { ssr: false }
+);
 
 interface FeaturesProps {
   inView: boolean;
@@ -29,82 +47,28 @@ export const Features = ({ inView }: FeaturesProps) => {
 
   const features = [
     {
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-12 h-12" fill="none">
-          <path
-            d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M9 17l-2 2m0 0l-2-2m2 2V9"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ),
-      title: "Performance Optimization",
+      icon: <BoltIcon className="w-6 h-6 text-blue-400" />,
+      title: "Performance Tuning",
       description:
-        "Unlock your vehicle's full potential with our advanced ECU tuning solutions.",
+        "Unlock your vehicle's full potential with custom performance tuning.",
     },
     {
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-12 h-12" fill="none">
-          <path
-            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ),
-      title: "Custom Tuning",
+      icon: <ChartBarIcon className="w-6 h-6 text-purple-400" />,
+      title: "Fuel Efficiency",
       description:
-        "Tailored solutions to meet your specific performance goals and requirements.",
+        "Optimize your engine for better fuel economy without sacrificing power.",
     },
     {
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-12 h-12" fill="none">
-          <path
-            d="M13 10V3L4 14h7v7l9-11h-7z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ),
-      title: "Enhanced Efficiency",
+      icon: <Cog6ToothIcon className="w-6 h-6 text-blue-400" />,
+      title: "Custom Maps",
       description:
-        "Improve fuel efficiency while maintaining optimal performance levels.",
+        "Tailored tuning maps for your specific vehicle and driving style.",
     },
     {
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-12 h-12" fill="none">
-          <path
-            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ),
-      title: "Safety First",
+      icon: <ShieldCheckIcon className="w-6 h-6 text-purple-400" />,
+      title: "Safe & Reliable",
       description:
-        "All tunes are thoroughly tested to ensure reliability and engine safety.",
+        "Professional tuning with safety as our top priority.",
     },
   ];
 
@@ -130,17 +94,24 @@ export const Features = ({ inView }: FeaturesProps) => {
   ];
 
   return (
-    <section className="py-20 relative overflow-hidden">
-      {/* Background with subtle pattern */}
-      <div className="absolute inset-0 bg-gray-50 dark:bg-gray-900 z-0"></div>
-      <div className="absolute inset-0 opacity-5 z-0">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "url('/patterns/circuit-board.svg')",
-            backgroundSize: "300px",
-          }}
-        ></div>
+    <section className="relative overflow-hidden py-20">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-slate-900 to-purple-900"></div>
+
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div
+          initial={{ x: -100, y: -100 }}
+          animate={{ x: 0, y: 0 }}
+          transition={{ duration: 2, ease: "easeOut" }}
+          className="absolute w-[600px] h-[600px] rounded-full bg-blue-500/20 blur-3xl"
+        />
+        <motion.div
+          initial={{ x: 100, y: 100 }}
+          animate={{ x: 0, y: 0 }}
+          transition={{ duration: 2, ease: "easeOut", delay: 0.2 }}
+          className="absolute w-[500px] h-[500px] rounded-full bg-purple-500/20 blur-3xl"
+        />
       </div>
 
       <motion.div
@@ -150,30 +121,30 @@ export const Features = ({ inView }: FeaturesProps) => {
         className="container mx-auto px-4 relative z-10"
       >
         <motion.div variants={itemVariants} className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-4xl font-bold text-white mb-4">
             Why Choose Us
           </h2>
-          <div className="w-24 h-1 gradient-bg mx-auto mb-6"></div>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mb-6"></div>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
             Experience the perfect blend of performance, efficiency, and
             reliability
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
             <motion.div
               key={index}
               variants={itemVariants}
-              className="card p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              className="p-8 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:border-blue-500/30 transition-all duration-300 group"
             >
-              <div className="w-12 h-12 gradient-bg rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 {feature.icon}
               </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+              <h3 className="text-xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors duration-300">
                 {feature.title}
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className="text-gray-300">
                 {feature.description}
               </p>
             </motion.div>
