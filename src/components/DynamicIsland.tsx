@@ -34,6 +34,11 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
+  // Reset expanded state on pathname change
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [pathname]);
+
   // Handle scroll for glassmorphic effect
   useEffect(() => {
     const handleScroll = () => {
@@ -124,6 +129,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
 
   return (
     <motion.div
+      key={variant}
       className={`fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-4xl z-50 ${
         isScrolled ? "backdrop-blur-xl bg-white/10 dark:bg-gray-900/10" : "backdrop-blur-md bg-white/5 dark:bg-gray-900/5"
       }`}
@@ -144,12 +150,15 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
       >
         {/* Header */}
         <motion.div 
-          className="flex items-center justify-between p-4"
+          className={`flex items-center ${isExpanded ? 'justify-between' : 'justify-center'} p-4 relative`}
           variants={itemVariants}
           initial="hidden"
           animate="visible"
         >
-          <div className="flex items-center space-x-4">
+          {/* Left side - Menu button and Logo */}
+          <motion.div 
+            className={`flex items-center space-x-4 ${isExpanded ? '' : 'absolute left-4'}`}
+          >
             <motion.button
               onClick={() => setIsExpanded(!isExpanded)}
               className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
@@ -163,6 +172,10 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                 <Menu className="h-5 w-5 text-gray-700 dark:text-gray-300" />
               )}
             </motion.button>
+          </motion.div>
+
+          {/* Center - Logo */}
+          <div className="flex items-center">
             <Link href="/" className="flex items-center">
               <motion.span 
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -180,7 +193,10 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
             </Link>
           </div>
 
-          <div className="flex items-center space-x-4">
+          {/* Right side - Actions */}
+          <motion.div 
+            className={`flex items-center space-x-4 ${isExpanded ? '' : 'absolute right-4'}`}
+          >
             {variant === "dashboard" && (
               <>
                 <motion.div 
@@ -208,7 +224,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
             >
               <ThemeToggle />
             </motion.button>
-          </div>
+          </motion.div>
         </motion.div>
 
         {/* Expanded Content */}

@@ -29,7 +29,7 @@ export default function DashboardLayout({
       <DashboardDebug />
       
       {/* Dynamic Island */}
-      <DynamicIsland variant="dashboard" />
+      <DynamicIsland key="dashboard" variant="dashboard" />
       
       {/* Main content area */}
       <main className="flex-1 p-4 md:p-6 mt-24 max-w-7xl mx-auto">
