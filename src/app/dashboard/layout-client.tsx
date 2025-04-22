@@ -24,7 +24,7 @@ export default function DashboardLayout({
   }, [user, isLoading, router]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       {/* Debug component */}
       <DashboardDebug />
       
@@ -32,8 +32,10 @@ export default function DashboardLayout({
       <DynamicIsland variant="dashboard" />
       
       {/* Main content area */}
-      <main className="flex-1 p-6 md:p-8 mt-24 overflow-auto">
-        {children}
+      <main className="flex-1 p-4 md:p-6 mt-20 max-w-7xl mx-auto">
+        <div className="space-y-6">
+          {children}
+        </div>
       </main>
       
       {/* Floating ticket button */}

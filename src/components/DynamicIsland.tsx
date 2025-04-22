@@ -59,6 +59,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
         type: "spring",
         stiffness: 300,
         damping: 30,
+        mass: 0.5,
       },
     },
     expanded: {
@@ -68,13 +69,23 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
         type: "spring",
         stiffness: 300,
         damping: 30,
+        mass: 0.5,
       },
     },
   };
 
   const contentVariants = {
     hidden: { opacity: 0, y: -20 },
-    visible: { opacity: 1, y: 0 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+        mass: 0.5,
+      }
+    },
   };
 
   return (
@@ -101,10 +112,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
             )}
           </button>
           <Link href="/" className="flex items-center">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">TP</span>
-            </div>
-            <span className="ml-2 text-lg font-semibold text-gray-900 dark:text-white">Tuning Portal</span>
+            <span className="text-lg font-semibold text-gray-900 dark:text-white">Tuning Portal</span>
           </Link>
         </div>
 
@@ -129,7 +137,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
       </div>
 
       {/* Expanded Content */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isExpanded && (
           <motion.div
             className="p-4 border-t border-white/10 dark:border-gray-800/10"

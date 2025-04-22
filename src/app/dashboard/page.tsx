@@ -12,6 +12,7 @@ import {
   Upload,
   MessageSquare,
   CreditCard,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/lib/AuthProvider";
 import { useTuningFiles, useUserProfile } from "@/lib/hooks/useDataFetching";
@@ -271,271 +272,198 @@ export default function Dashboard() {
   }
 
   return (
-    <div>
-      {/* Main ECU Upload Card - Featured prominently */}
-      <div className="mb-8">
-        <div
-          className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-xl overflow-hidden cursor-pointer hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300 border border-white/20 dark:border-blue-900/30 group"
-          onClick={() => setShowUploadForm(true)}
-        >
-          <div className="p-8 flex flex-col items-center text-center relative overflow-hidden">
-            {/* Background glow effect */}
-            <div className="absolute -right-20 -top-20 w-40 h-40 bg-cyan-500/20 rounded-full blur-3xl group-hover:bg-cyan-500/30 transition-all duration-500"></div>
-            <div className="absolute -left-20 -bottom-20 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/30 transition-all duration-500"></div>
-
-            <div className="w-20 h-20 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/30 transition-all duration-300 z-10">
-              <Upload className="w-10 h-10 text-white" />
+    <div className="space-y-6">
+      {/* Main ECU Upload Card */}
+      <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border p-6 transition-all duration-300 hover:bg-card/60">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg">
+              <Upload className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-3xl font-bold text-white mb-3 z-10">
-              Upload ECU File
-            </h3>
-            <p className="text-blue-100 max-w-md mb-6 z-10">
-              Upload your ECU file for tuning. Our experts will optimize your
-              vehicle's performance.
-            </p>
-            <button className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-medium rounded-lg hover:shadow-xl hover:shadow-cyan-500/20 transition-all duration-300 transform hover:-translate-y-1 flex items-center z-10">
-              <Upload className="w-5 h-5 mr-2" />
-              Start Upload
-            </button>
+            <div>
+              <h2 className="text-2xl font-bold text-foreground">Upload ECU File</h2>
+              <p className="text-muted-foreground mt-1">
+                Upload your ECU file for tuning. Our experts will optimize your vehicle's performance.
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={() => setShowUploadForm(true)}
+            className="px-6 py-3 bg-gradient-to-r from-primary to-primary/80 text-white font-medium rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2"
+          >
+            <Upload className="w-5 h-5" />
+            Start Upload
+          </button>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Completed Tunes */}
+        <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border p-6 transition-all duration-300 hover:bg-card/60">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Completed Tunes</p>
+              <h3 className="text-3xl font-bold text-foreground mt-1">
+                {recentFiles.filter((file) => file.status === "completed").length}
+              </h3>
+            </div>
+            <div className="p-3 bg-primary/10 rounded-xl">
+              <BarChart3 className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+          <div className="mt-4 w-full bg-muted rounded-full h-2">
+            <div
+              className="bg-primary h-2 rounded-full"
+              style={{ width: "64%" }}
+            />
+          </div>
+        </div>
+
+        {/* Processing */}
+        <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border p-6 transition-all duration-300 hover:bg-card/60">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Processing</p>
+              <h3 className="text-3xl font-bold text-foreground mt-1">
+                {recentFiles.filter((file) => file.status === "processing").length}
+              </h3>
+            </div>
+            <div className="p-3 bg-primary/10 rounded-xl">
+              <Clock className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+          <div className="mt-4 w-full bg-muted rounded-full h-2">
+            <div
+              className="bg-primary h-2 rounded-full"
+              style={{ width: "47%" }}
+            />
+          </div>
+        </div>
+
+        {/* Available Credits */}
+        <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border p-6 transition-all duration-300 hover:bg-card/60">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Available Credits</p>
+              <h3 className="text-3xl font-bold text-foreground mt-1">
+                {user?.credits ?? 0}
+              </h3>
+            </div>
+            <div className="p-3 bg-primary/10 rounded-xl">
+              <CreditCard className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+          <div className="mt-4 w-full bg-muted rounded-full h-2">
+            <div
+              className="bg-primary h-2 rounded-full"
+              style={{ width: "35%" }}
+            />
           </div>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/20 dark:border-gray-700/30 group hover:shadow-xl transition-all duration-300">
-          <div className="p-6 relative overflow-hidden">
-            {/* Background glow */}
-            <div className="absolute -right-10 -top-10 w-20 h-20 bg-green-500/20 rounded-full blur-2xl group-hover:bg-green-500/30 transition-all duration-500"></div>
-
-            <div className="flex justify-between items-start mb-4 relative z-10">
-              <div>
-                <p className="text-sm font-medium text-blue-100">
-                  Completed Tunes
-                </p>
-                <h4 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-green-500 mt-1">
-                  {
-                    recentFiles.filter((file) => file.status === "completed")
-                      .length
-                  }
-                </h4>
-              </div>
-              <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg shadow-green-500/20">
-                <BarChart3 className="w-6 h-6 text-white" />
-              </div>
-            </div>
-            <div className="w-full bg-white/10 dark:bg-gray-700/50 rounded-full h-2.5">
-              <div
-                className="bg-gradient-to-r from-green-400 to-green-600 h-2.5 rounded-full"
-                style={{ width: "64%" }}
-              ></div>
-            </div>
+      {/* Recent Activity */}
+      <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border p-6 transition-all duration-300 hover:bg-card/60">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-3 bg-primary/10 rounded-xl">
+            <BarChart3 className="w-6 h-6 text-primary" />
           </div>
+          <h3 className="text-xl font-bold text-foreground">Recent Activity</h3>
         </div>
 
-        <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/20 dark:border-gray-700/30 group hover:shadow-xl transition-all duration-300">
-          <div className="p-6 relative overflow-hidden">
-            {/* Background glow */}
-            <div className="absolute -right-10 -top-10 w-20 h-20 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-500/30 transition-all duration-500"></div>
-
-            <div className="flex justify-between items-start mb-4 relative z-10">
-              <div>
-                <p className="text-sm font-medium text-blue-100">Processing</p>
-                <h4 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-blue-500 mt-1">
-                  {
-                    recentFiles.filter((file) => file.status === "processing")
-                      .length
-                  }
-                </h4>
-              </div>
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg shadow-blue-500/20">
-                <Clock className="w-6 h-6 text-white" />
-              </div>
-            </div>
-            <div className="w-full bg-white/10 dark:bg-gray-700/50 rounded-full h-2.5">
+        {recentFiles.length > 0 ? (
+          <div className="space-y-4">
+            {recentFiles.map((file) => (
               <div
-                className="bg-gradient-to-r from-blue-400 to-blue-600 h-2.5 rounded-full"
-                style={{ width: "47%" }}
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/20 dark:border-gray-700/30 group hover:shadow-xl transition-all duration-300">
-          <div className="p-6 relative overflow-hidden">
-            {/* Background glow */}
-            <div className="absolute -right-10 -top-10 w-20 h-20 bg-purple-500/20 rounded-full blur-2xl group-hover:bg-purple-500/30 transition-all duration-500"></div>
-
-            <div className="flex justify-between items-start mb-4 relative z-10">
-              <div>
-                <p className="text-sm font-medium text-blue-100">
-                  Available Credits
-                </p>
-                <h4 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-purple-500 mt-1">
-                  {user?.credits ?? 0}
-                </h4>
-              </div>
-              <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg shadow-purple-500/20">
-                <CreditCard className="w-6 h-6 text-white" />
-              </div>
-            </div>
-            <div className="w-full bg-white/10 dark:bg-gray-700/50 rounded-full h-2.5">
-              <div
-                className="bg-gradient-to-r from-purple-400 to-purple-600 h-2.5 rounded-full"
-                style={{ width: "35%" }}
-              ></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {/* Recent Activity Card */}
-        <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/20 dark:border-gray-700/30 group hover:shadow-xl transition-all duration-300">
-          <div className="p-6 relative overflow-hidden">
-            {/* Background glow */}
-            <div className="absolute -right-10 -top-10 w-20 h-20 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-500/30 transition-all duration-500"></div>
-
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center relative z-10">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg shadow-blue-500/20 mr-3">
-                <BarChart3 className="w-5 h-5 text-white" />
-              </div>
-              Recent Activity
-            </h3>
-
-            {recentFiles.length > 0 ? (
-              <div className="space-y-3 relative z-10">
-                {recentFiles.map((file) => (
-                  <div
-                    key={file.id}
-                    className="p-4 bg-white/5 dark:bg-gray-700/30 backdrop-blur-sm rounded-lg border border-white/10 dark:border-gray-600/30 hover:bg-white/10 transition-all duration-200"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div
-                          className="font-medium text-white truncate"
-                          style={{ maxWidth: "180px" }}
-                        >
-                          {file.file_name}
-                        </div>
-                        <div className="text-sm text-blue-100">
-                          {file.vehicle_info}
-                        </div>
-                        <div className="mt-2 flex items-center">
-                          <span
-                            className={`px-2.5 py-1 text-xs rounded-full ${getStatusBadgeClass(
-                              file.status
-                            )}`}
-                          >
-                            {file.status.charAt(0).toUpperCase() +
-                              file.status.slice(1)}
-                          </span>
-                          <span className="text-xs text-blue-200/70 ml-2">
-                            {new Date(file.created_at).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
-                      <div>
-                        <button
-                          onClick={() =>
-                            router.push(`/dashboard/tuning-file/${file.id}`)
-                          }
-                          className="px-3 py-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-medium rounded-lg hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300"
-                        >
-                          View
-                        </button>
-                      </div>
+                key={file.id}
+                className="bg-card/30 backdrop-blur-sm rounded-lg border border-border p-4 hover:bg-card/40 transition-all duration-200"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="font-medium text-foreground truncate max-w-[180px]">
+                      {file.file_name}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {file.vehicle_info}
+                    </div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span
+                        className={`px-2.5 py-1 text-xs rounded-full ${
+                          file.status === "completed"
+                            ? "bg-green-500/10 text-green-500"
+                            : file.status === "processing"
+                            ? "bg-blue-500/10 text-blue-500"
+                            : file.status === "pending"
+                            ? "bg-yellow-500/10 text-yellow-500"
+                            : "bg-red-500/10 text-red-500"
+                        }`}
+                      >
+                        {file.status.charAt(0).toUpperCase() + file.status.slice(1)}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(file.created_at).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
-                ))}
+                  <button
+                    onClick={() => router.push(`/dashboard/tuning-file/${file.id}`)}
+                    className="px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-lg hover:bg-primary/20 transition-colors"
+                  >
+                    View
+                  </button>
+                </div>
               </div>
-            ) : (
-              <div className="text-center py-6 relative z-10">
-                <p className="text-blue-100">No recent activity</p>
-              </div>
-            )}
+            ))}
           </div>
-        </div>
-
-        {/* Support Card - Removed embedded ticket system in favor of floating button */}
-        <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/20 dark:border-gray-700/30 group hover:shadow-xl transition-all duration-300">
-          <div className="p-6 relative overflow-hidden">
-            {/* Background glow */}
-            <div className="absolute -left-10 -bottom-10 w-20 h-20 bg-purple-500/20 rounded-full blur-2xl group-hover:bg-purple-500/30 transition-all duration-500"></div>
-
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center relative z-10">
-              <div className="p-2 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg shadow-purple-500/20 mr-3">
-                <MessageSquare className="w-5 h-5 text-white" />
-              </div>
-              Support
-            </h3>
-            <p className="text-blue-100 mb-4 relative z-10">
-              Need help with your tuning files or have questions about our
-              services?
-            </p>
-            <p className="text-blue-100 relative z-10">
-              Click the support button{" "}
-              <span className="inline-flex items-center justify-center w-6 h-6 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full text-white shadow-lg shadow-purple-500/20">
-                <MessageSquare className="w-3 h-3" />
-              </span>{" "}
-              in the bottom right corner to access our ticket system.
-            </p>
+        ) : (
+          <div className="text-center py-6">
+            <p className="text-muted-foreground">No recent activity</p>
           </div>
+        )}
+      </div>
+
+      {/* Support Section */}
+      <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border p-6 transition-all duration-300 hover:bg-card/60">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-3 bg-primary/10 rounded-xl">
+            <MessageSquare className="w-6 h-6 text-primary" />
+          </div>
+          <h3 className="text-xl font-bold text-foreground">Support</h3>
         </div>
+        <p className="text-muted-foreground">
+          Need help with your tuning files or have questions about our services?
+        </p>
+        <p className="text-muted-foreground mt-2">
+          Click the support button in the bottom right corner to access our ticket system.
+        </p>
       </div>
 
       {/* ECU Upload Modal */}
       {showUploadForm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center overflow-y-auto">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="relative w-full max-w-4xl mx-4">
-            <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-2xl border border-white/20 dark:border-gray-700/30 overflow-hidden">
-              <div className="p-8 relative">
-                {/* Background glow effects */}
-                <div className="absolute -right-20 -top-20 w-40 h-40 bg-cyan-500/20 rounded-full blur-3xl"></div>
-                <div className="absolute -left-20 -bottom-20 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
-
-                <div className="flex justify-between items-center mb-8 relative z-10">
-                  <div className="flex items-center">
-                    <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center mr-4 shadow-lg shadow-cyan-500/20">
-                      <Upload className="w-6 h-6 text-white" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-white">
-                      Upload ECU File
-                    </h3>
+            <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border p-6">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center">
+                    <Upload className="w-6 h-6 text-white" />
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowUploadForm(false);
-                    }}
-                    className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 border border-white/10"
-                    aria-label="Close"
-                  >
-                    <svg
-                      className="h-6 w-6 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
+                  <h3 className="text-2xl font-bold text-foreground">Upload ECU File</h3>
                 </div>
-                <div className="relative z-10">
-                  <ECUUploadFormWithErrorBoundary />
-                </div>
+                <button
+                  onClick={() => setShowUploadForm(false)}
+                  className="p-2 rounded-full hover:bg-card/20 transition-colors"
+                  aria-label="Close"
+                >
+                  <X className="w-6 h-6 text-foreground" />
+                </button>
               </div>
+              <ECUUploadFormWithErrorBoundary />
             </div>
           </div>
         </div>
       )}
-
-      {/* Opening Hours Card has been removed and moved to the sidebar */}
     </div>
   );
 }
