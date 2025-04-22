@@ -24,21 +24,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     
     if (storedTheme) {
       setTheme(storedTheme);
+      document.documentElement.setAttribute('data-theme', storedTheme);
     } else if (prefersDark) {
       setTheme("dark");
+      document.documentElement.setAttribute('data-theme', 'dark');
       Cookies.set("theme", "dark", { expires: 365 });
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
     }
   }, []);
 
-  // Update HTML class and cookie when theme changes
+  // Update HTML data attribute and cookie when theme changes
   useEffect(() => {
     if (!mounted) return;
 
-    const root = window.document.documentElement;
-    root.classList.remove("light", "dark");
-    root.classList.add(theme);
-    root.classList.add("theme-transition");
-
+    document.documentElement.setAttribute('data-theme', theme);
     Cookies.set("theme", theme, { expires: 365 });
   }, [theme, mounted]);
 

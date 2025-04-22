@@ -24,7 +24,7 @@
   --transition-timing: ease-in-out;
 }
 
-@custom-variant dark {
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *)) {
   --background: #0a0a0a;
   --foreground: #ededed;
   --card-background: #1f2937;
@@ -63,7 +63,7 @@
 
 /* System preference dark mode */
 @media (prefers-color-scheme: dark) {
-  :root:not(.light) {
+  :root:not([data-theme=light]) {
     --background: #0a0a0a;
     --foreground: #ededed;
     --card-background: #1f2937;
