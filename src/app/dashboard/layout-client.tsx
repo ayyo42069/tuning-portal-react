@@ -90,7 +90,7 @@ export default function DashboardLayout({
       <DashboardDebug />
       
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+      <header className="sticky top-0 z-50 header">
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left side - Logo and Menu */}
@@ -109,7 +109,7 @@ export default function DashboardLayout({
             </div>
 
             {/* Right side - Controls */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
               <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg">
                 <CreditCard className="h-4 w-4 text-blue-500" />
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -141,7 +141,7 @@ export default function DashboardLayout({
         <aside
           ref={sidebarRef}
           id="sidebar"
-          className={`fixed md:static z-40 w-64 min-h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transform transition-transform duration-300 ease-in-out ${
+          className={`fixed md:static z-40 w-64 min-h-screen sidebar transform transition-transform duration-300 ease-in-out ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
           }`}
         >
@@ -168,10 +168,8 @@ export default function DashboardLayout({
           <nav className="p-4 space-y-2">
             <Link
               href="/dashboard"
-              className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
-                pathname === "/dashboard"
-                  ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                  : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+              className={`flex items-center px-4 py-3 rounded-lg transition-colors sidebar-item ${
+                pathname === "/dashboard" ? "active" : ""
               }`}
             >
               <Home className="h-5 w-5 mr-3" />
@@ -179,10 +177,8 @@ export default function DashboardLayout({
             </Link>
             <Link
               href="/dashboard/tuning-history"
-              className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
-                pathname === "/dashboard/tuning-history"
-                  ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                  : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+              className={`flex items-center px-4 py-3 rounded-lg transition-colors sidebar-item ${
+                pathname === "/dashboard/tuning-history" ? "active" : ""
               }`}
             >
               <History className="h-5 w-5 mr-3" />
@@ -190,10 +186,8 @@ export default function DashboardLayout({
             </Link>
             <Link
               href="/dashboard/credits"
-              className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
-                pathname === "/dashboard/credits"
-                  ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                  : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+              className={`flex items-center px-4 py-3 rounded-lg transition-colors sidebar-item ${
+                pathname === "/dashboard/credits" ? "active" : ""
               }`}
             >
               <CreditCard className="h-5 w-5 mr-3" />
@@ -202,10 +196,8 @@ export default function DashboardLayout({
             {user?.role === "admin" && (
               <Link
                 href="/admin"
-                className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
-                  pathname.startsWith("/admin")
-                    ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                    : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                className={`flex items-center px-4 py-3 rounded-lg transition-colors sidebar-item ${
+                  pathname.startsWith("/admin") ? "active" : ""
                 }`}
               >
                 <Settings className="h-5 w-5 mr-3" />

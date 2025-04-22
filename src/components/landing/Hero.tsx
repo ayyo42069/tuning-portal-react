@@ -41,7 +41,7 @@ export const Hero = ({ inView }: HeroProps) => {
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-blue-900 to-blue-800 dark:from-blue-950 dark:to-blue-900 text-white py-20 lg:py-32">
+    <section className="relative overflow-hidden gradient-bg text-white py-20 lg:py-32">
       {/* SVG Pattern Background */}
       <div className="absolute inset-0 z-0 opacity-10">
         <div
@@ -101,7 +101,7 @@ export const Hero = ({ inView }: HeroProps) => {
               className="text-5xl lg:text-6xl font-bold leading-tight"
             >
               Unlock Your Vehicle's{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-400">
+              <span className="gradient-text">
                 True Potential
               </span>
             </motion.h2>
@@ -120,7 +120,7 @@ export const Hero = ({ inView }: HeroProps) => {
             >
               <Link
                 href="/auth/register"
-                className="px-8 py-4 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center group"
+                className="px-8 py-4 rounded-lg gradient-bg text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center group"
               >
                 Get Started
                 <ChevronRightIcon className="w-5 h-5 ml-2 group-hover:ml-3 transition-all duration-300" />

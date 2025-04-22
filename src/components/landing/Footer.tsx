@@ -37,7 +37,7 @@ export const Footer = ({ inView }: FooterProps) => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative overflow-hidden bg-gradient-to-b from-blue-800 to-blue-900 dark:from-blue-900 dark:to-blue-950 text-white py-16">
+    <footer className="relative overflow-hidden gradient-bg text-white py-16">
       {/* SVG Pattern Background */}
       <div className="absolute inset-0 z-0 opacity-10">
         <div
@@ -88,7 +88,7 @@ export const Footer = ({ inView }: FooterProps) => {
           {/* Company Info */}
           <motion.div variants={itemVariants} className="space-y-4">
             <Link href="/" className="flex items-center space-x-2 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:shadow-cyan-500/20 transition-all duration-300">
+              <div className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center shadow-lg group-hover:shadow-cyan-500/20 transition-all duration-300">
                 <svg
                   className="w-6 h-6 text-white"
                   viewBox="0 0 24 24"

@@ -18,7 +18,7 @@ export const Header = () => {
   return (
     <header className="relative overflow-hidden">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-700 via-indigo-800 to-purple-900 dark:from-blue-800 dark:via-indigo-900 dark:to-purple-950"></div>
+      <div className="absolute inset-0 gradient-bg"></div>
 
       {/* Circuit pattern overlay */}
       <div className="absolute inset-0 opacity-5">
@@ -86,7 +86,7 @@ export const Header = () => {
                 </span>
                 <Link
                   href="/dashboard"
-                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 font-medium"
+                  className="px-4 py-2 rounded-lg gradient-bg text-white hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 font-medium"
                 >
                   Dashboard
                 </Link>
@@ -107,7 +107,7 @@ export const Header = () => {
                 </Link>
                 <Link
                   href="/auth/register"
-                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 font-medium"
+                  className="px-4 py-2 rounded-lg gradient-bg text-white hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 font-medium"
                 >
                   Register
                 </Link>

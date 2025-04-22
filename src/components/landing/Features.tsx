@@ -153,24 +153,24 @@ export const Features = ({ inView }: FeaturesProps) => {
           <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Why Choose Us
           </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-cyan-500 to-blue-600 mx-auto mb-6"></div>
+          <div className="w-24 h-1 gradient-bg mx-auto mb-6"></div>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Experience the perfect blend of performance, efficiency, and
             reliability
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <motion.div
               key={index}
               variants={itemVariants}
-              className="p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-cyan-200 dark:hover:border-blue-700 group"
+              className="card p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-cyan-50 to-blue-100 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center mb-6 text-cyan-600 dark:text-blue-400 group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors duration-300">
+              <div className="w-12 h-12 gradient-bg rounded-lg flex items-center justify-center mb-4">
                 {feature.icon}
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                 {feature.title}
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
