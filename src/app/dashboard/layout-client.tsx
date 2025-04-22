@@ -91,7 +91,7 @@ export default function DashboardLayout({
       
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left side - Logo and Menu */}
             <div className="flex items-center">
@@ -106,18 +106,6 @@ export default function DashboardLayout({
                 <img src="/images/logo.png" alt="Tuning Portal Logo" className="h-8 w-8" />
                 <span className="ml-2 text-xl font-semibold text-gray-900 dark:text-white">Tuning Portal</span>
               </Link>
-            </div>
-
-            {/* Center - Search */}
-            <div className="flex-1 max-w-2xl mx-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="w-full px-4 py-2 pl-10 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-              </div>
             </div>
 
             {/* Right side - Controls */}
@@ -142,43 +130,6 @@ export default function DashboardLayout({
               >
                 <ThemeToggle />
               </button>
-              
-              <div className="relative">
-                <button
-                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  aria-label="User menu"
-                >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold">
-                    {user?.username?.charAt(0).toUpperCase() || "U"}
-                  </div>
-                  <ChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                </button>
-                
-                {/* Dropdown menu */}
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1">
-                  <Link
-                    href="/dashboard/profile"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <User className="h-4 w-4 mr-2" />
-                    Profile
-                  </Link>
-                  <Link
-                    href="/dashboard/help"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <HelpCircle className="h-4 w-4 mr-2" />
-                    Help & Support
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Logout
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -249,23 +200,21 @@ export default function DashboardLayout({
               Credits
             </Link>
             {user?.role === "admin" && (
-              <>
-                <Link
-                  href="/admin"
-                  className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
-                    pathname.startsWith("/admin")
-                      ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                      : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
-                >
-                  <Settings className="h-5 w-5 mr-3" />
-                  Admin Panel
-                </Link>
-                <div className="px-4 py-3">
-                  <OpeningHours />
-                </div>
-              </>
+              <Link
+                href="/admin"
+                className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+                  pathname.startsWith("/admin")
+                    ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                    : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}
+              >
+                <Settings className="h-5 w-5 mr-3" />
+                Admin Panel
+              </Link>
             )}
+            <div className="px-4 py-3">
+              <OpeningHours />
+            </div>
           </nav>
         </aside>
 
