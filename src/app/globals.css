@@ -1,56 +1,51 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-@theme {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #171717;
+    --card-background: #ffffff;
+    --card-border: #e5e7eb;
+    --button-background: #f3f4f6;
+    --button-hover: #e5e7eb;
+    --button-text: #111827;
+    --header-background: #ffffff;
+    --header-border: #e5e7eb;
+    --input-background: #ffffff;
+    --input-border: #d1d5db;
+    --input-focus-border: #3b82f6;
+    --text-light: #4b5563;
+    --text-lighter: #6b7280;
+  }
+
+  .dark {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --card-background: #1f2937;
+    --card-border: #374151;
+    --button-background: #374151;
+    --button-hover: #4b5563;
+    --button-text: #f9fafb;
+    --header-background: #111827;
+    --header-border: #374151;
+    --input-background: #111827;
+    --input-border: #4b5563;
+    --input-focus-border: #60a5fa;
+    --text-light: #d1d5db;
+    --text-lighter: #9ca3af;
+  }
 }
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --card-background: #ffffff;
-  --card-border: #e5e7eb;
-  --button-background: #f3f4f6;
-  --button-hover: #e5e7eb;
-  --button-text: #111827;
-  --header-background: #ffffff;
-  --header-border: #e5e7eb;
-  --input-background: #ffffff;
-  --input-border: #d1d5db;
-  --input-focus-border: #3b82f6;
-  --text-light: #4b5563; /* Medium gray for better contrast in light mode */
-  --text-lighter: #6b7280; /* Darker gray for secondary text in light mode */
+@layer utilities {
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *:before,
+  .theme-transition *:after {
+    @apply transition-colors duration-300 ease-in-out;
+  }
 }
 
-.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --card-background: #1f2937;
-  --card-border: #374151;
-  --button-background: #374151;
-  --button-hover: #4b5563;
-  --button-text: #f9fafb;
-  --header-background: #111827;
-  --header-border: #374151;
-  --input-background: #111827;
-  --input-border: #4b5563;
-  --input-focus-border: #60a5fa;
-  --text-light: #d1d5db; /* Light gray for dark mode */
-  --text-lighter: #9ca3af; /* Medium gray for secondary text in dark mode */
-}
-
-/* Theme transition class for smooth animations */
-.theme-transition,
-.theme-transition *,
-.theme-transition *:before,
-.theme-transition *:after {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-duration: 300ms;
-  transition-timing-function: ease-in-out;
-}
-
-/* For system preference - this will be overridden by the .dark class when manually toggled */
+/* System preference dark mode */
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
     --background: #0a0a0a;
@@ -68,37 +63,20 @@
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: var(--font-sans, Arial), sans-serif;
-}
+@layer components {
+  .card {
+    @apply bg-card-background border border-card-border rounded-lg p-4;
+  }
 
-/* Additional utility classes for components */
-.card {
-  background-color: var(--card-background);
-  border-color: var(--card-border);
-}
+  .btn {
+    @apply bg-button-background text-button-text px-4 py-2 rounded-md hover:bg-button-hover transition-colors duration-200;
+  }
 
-.btn {
-  background-color: var(--button-background);
-  color: var(--button-text);
-}
+  .header {
+    @apply bg-header-background border-b border-header-border;
+  }
 
-.btn:hover {
-  background-color: var(--button-hover);
-}
-
-.header {
-  background-color: var(--header-background);
-  border-color: var(--header-border);
-}
-
-.input {
-  background-color: var(--input-background);
-  border-color: var(--input-border);
-}
-
-.input:focus {
-  border-color: var(--input-focus-border);
+  .input {
+    @apply bg-input-background border border-input-border rounded-md px-3 py-2 focus:border-input-focus-border focus:outline-none;
+  }
 }
