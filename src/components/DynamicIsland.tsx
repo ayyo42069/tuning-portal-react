@@ -248,28 +248,25 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                   <div className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5">
                     <nav className="space-y-2">
                       <Link
-                        href="/features"
+                        href="/#features"
                         className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
                       >
+                        <Search className="h-5 w-5 mr-3 text-blue-500" />
                         Features
                       </Link>
                       <Link
-                        href="/pricing"
+                        href="/#pricing"
                         className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
                       >
+                        <CreditCard className="h-5 w-5 mr-3 text-green-500" />
                         Pricing
                       </Link>
                       <Link
-                        href="/about"
+                        href="/dashboard"
                         className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
                       >
-                        About Us
-                      </Link>
-                      <Link
-                        href="/contact"
-                        className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
-                      >
-                        Contact
+                        <Home className="h-5 w-5 mr-3 text-purple-500" />
+                        Dashboard
                       </Link>
                     </nav>
                   </div>
