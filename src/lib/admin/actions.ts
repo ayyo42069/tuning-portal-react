@@ -1,13 +1,14 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createBuildAuthHeader } from '../buildAuth';
+import { createBuildAuthHeader } from '@/lib/buildAuth';
 
 // Define caching times
-const CACHE_LONG = 60 * 60; // 1 hour
-const CACHE_MEDIUM = 60 * 10; // 10 minutes
-const CACHE_SHORT = 60; // 1 minute
-const CACHE_NONE = 0; // No cache
+const CACHE_TIMES = {
+  SHORT: 60, // 1 minute
+  MEDIUM: 300, // 5 minutes
+  LONG: 3600, // 1 hour
+};
 
 /**
  * Server action to fetch users list with caching
@@ -46,7 +47,7 @@ export async function fetchTuningRequests(status?: string) {
       : `${process.env.NEXT_PUBLIC_API_URL}/api/admin/tuning-requests`;
       
     const response = await fetch(url, {
-      next: { revalidate: CACHE_SHORT }, // Revalidate every minute
+      next: { revalidate: CACHE_TIMES.SHORT }, // Revalidate every minute
       headers: {
         'Content-Type': 'application/json',
       },
@@ -71,7 +72,7 @@ export async function fetchSecurityLogs(page = 1, limit = 50) {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/admin/security/logs?page=${page}&limit=${limit}`, 
       {
-        next: { revalidate: CACHE_MEDIUM }, // Cache for 10 minutes
+        next: { revalidate: CACHE_TIMES.MEDIUM }, // Cache for 5 minutes
         headers: {
           'Content-Type': 'application/json',
         },
@@ -148,7 +149,7 @@ export async function fetchAdminDashboardStats() {
     // Create fetch request with abort controller
     const controller = new AbortController();
     const fetchPromise = fetch(url, {
-      next: { revalidate: 60 }, // Revalidate every minute
+      next: { revalidate: CACHE_TIMES.SHORT }, // Revalidate every minute
       headers: createBuildAuthHeader(),
       signal: controller.signal
     });
@@ -164,6 +165,24 @@ export async function fetchAdminDashboardStats() {
     // Handle failed or invalid responses
     if (!response || !response.ok) {
       console.warn(`API response not ok: ${response?.status || 'Request failed'}`);
+      
+      // Return mock data during build time
+      if (process.env.NODE_ENV === 'production' && process.env.BUILD_AUTH_TOKEN) {
+        console.log('🏗️ Build-time: Using mock data for admin stats');
+        return {
+          success: true,
+          pendingRequests: 0,
+          pendingRequestsChange: 0,
+          activeUsers: 0,
+          activeUsersChange: 0,
+          creditsSold: 0,
+          creditsSoldChange: 0,
+          revenue: 0,
+          revenueChange: 0,
+          recentActivities: []
+        };
+      }
+      
       throw new Error(`Failed to fetch dashboard stats: ${response?.status || 'Request failed'}`);
     }
     

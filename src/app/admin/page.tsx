@@ -2,6 +2,20 @@ import { Suspense } from 'react';
 import { fetchAdminDashboardStats } from '@/lib/admin/actions';
 import { StatCard, RecentActivity, Charts } from './AdminDashboardClient';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { createBuildAuthHeader } from '@/lib/buildAuth';
+
+// Mock data for build time
+const mockDashboardData = {
+  pendingRequests: 0,
+  pendingRequestsChange: 0,
+  activeUsers: 0,
+  activeUsersChange: 0,
+  creditsSold: 0,
+  creditsSoldChange: 0,
+  revenue: 0,
+  revenueChange: 0,
+  recentActivities: []
+};
 
 // Stats widget with robust error handling for static builds
 async function StatsWidget() {
