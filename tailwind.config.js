@@ -28,6 +28,9 @@ export default {
         sans: ["var(--font-sans)"],
         mono: ["var(--font-mono)"],
       },
+      transitionProperty: {
+        'colors': 'background-color, border-color, color, fill, stroke',
+      },
     },
   },
   plugins: [],

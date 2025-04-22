@@ -37,10 +37,7 @@
 }
 
 @layer utilities {
-  .theme-transition,
-  .theme-transition *,
-  .theme-transition *:before,
-  .theme-transition *:after {
+  .theme-transition {
     @apply transition-colors duration-300 ease-in-out;
   }
 }
@@ -60,23 +57,26 @@
     --input-background: #111827;
     --input-border: #4b5563;
     --input-focus-border: #60a5fa;
+    --text-light: #d1d5db;
+    --text-lighter: #9ca3af;
   }
 }
 
 @layer components {
   .card {
-    @apply bg-card-background border border-card-border rounded-lg p-4;
+    @apply bg-card-background border border-card-border rounded-lg p-4 theme-transition;
   }
 
   .btn {
-    @apply bg-button-background text-button-text px-4 py-2 rounded-md hover:bg-button-hover transition-colors duration-200;
+    @apply bg-button-background text-button-text px-4 py-2 rounded-md hover:bg-button-hover theme-transition;
   }
 
   .header {
-    @apply bg-header-background border-b border-header-border;
+    @apply bg-header-background border-b border-header-border theme-transition;
   }
 
   .input {
-    @apply bg-input-background border border-input-border rounded-md px-3 py-2 focus:border-input-focus-border focus:outline-none;
+    @apply bg-input-background border border-input-border rounded-md px-3 py-2 focus:border-input-focus-border focus:outline-none theme-transition;
   }
 }
+
