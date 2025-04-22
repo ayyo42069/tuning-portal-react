@@ -1,45 +1,12 @@
 'use server';
 
+import { createBuildAuthHeader } from '@/lib/buildAuth';
+
 /**
  * Server action to fetch tuning files
  * This can be imported and used in server components directly
  */
 export async function fetchTuningFiles() {
-  // Mock data for static builds and fallbacks
-  const mockTuningFiles = {
-    success: true,
-    tuningFiles: [
-      {
-        id: 1,
-        file_name: 'BMW M3 Stage 1.bin',
-        vehicle_info: 'BMW M3 (F80) 2018',
-        status: 'completed',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        credits_used: 3,
-        tuning_options: 'Stage 1, ECU Remap, Increased Torque'
-      },
-      {
-        id: 2,
-        file_name: 'Mercedes C63 AMG.bin',
-        vehicle_info: 'Mercedes C63 AMG 2019',
-        status: 'processing',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        credits_used: 4,
-        tuning_options: 'Full Custom, Throttle Response, Improved Efficiency'
-      }
-    ]
-  };
-
-  // Skip actual API calls during build time
-  if (process.env.NODE_ENV === 'production' && 
-      (process.env.NEXT_PHASE === 'phase-production-build' || 
-       typeof window === 'undefined' && !process.env.VERCEL_URL)) {
-    console.log('🏗️ Build-time: Using mock data for tuning files');
-    return mockTuningFiles;
-  }
-  
   try {
     // For runtime, use the appropriate URL
     let url;
@@ -62,7 +29,7 @@ export async function fetchTuningFiles() {
     const controller = new AbortController();
     const fetchPromise = fetch(url, {
       next: { revalidate: 60 }, // Revalidate every minute
-      headers: { 'Content-Type': 'application/json' },
+      headers: createBuildAuthHeader(),
       signal: controller.signal
     });
     
@@ -77,14 +44,13 @@ export async function fetchTuningFiles() {
     // Handle failed or invalid responses
     if (!response || !response.ok) {
       console.warn(`API response not ok: ${response?.status || 'Request failed'}`);
-      return mockTuningFiles;
+      throw new Error(`Failed to fetch tuning files: ${response?.status || 'Request failed'}`);
     }
     
     return response.json();
   } catch (error) {
     console.error('Error fetching tuning files:', error);
-    // Return mock data instead of error data 
-    return mockTuningFiles;
+    throw error; // Propagate the error instead of returning mock data
   }
 }
 
