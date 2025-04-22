@@ -279,6 +279,29 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Recent Activity */}
         <div className="lg:col-span-2 space-y-6">
+          {/* ECU Upload Card */}
+          <div className="relative group/card">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/20 to-blue-500/20 rounded-xl blur opacity-20 group-hover/card:opacity-30 transition duration-1000 group-hover/card:duration-200"></div>
+            <div className="relative bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm rounded-xl border border-white/10 dark:border-gray-800/10 p-6 hover:bg-white/10 dark:hover:bg-gray-800/10 transition-all duration-200">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-indigo-500/10 rounded-lg">
+                    <Upload className="w-5 h-5 text-indigo-500/80" />
+                  </div>
+                  <h2 className="text-lg font-medium text-white">Upload ECU File</h2>
+                </div>
+                <button
+                  onClick={() => setShowUploadForm(true)}
+                  className="px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500/80 rounded-lg transition-colors"
+                >
+                  New Upload
+                </button>
+              </div>
+              <p className="text-sm text-blue-100/80">
+                Upload your ECU file for tuning. We support most manufacturer formats.
+              </p>
+            </div>
+          </div>
           {/* Recent Files Card */}
           <div className="relative group/card">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur opacity-20 group-hover/card:opacity-30 transition duration-1000 group-hover/card:duration-200"></div>
@@ -318,29 +341,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* ECU Upload Card */}
-          <div className="relative group/card">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/20 to-blue-500/20 rounded-xl blur opacity-20 group-hover/card:opacity-30 transition duration-1000 group-hover/card:duration-200"></div>
-            <div className="relative bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm rounded-xl border border-white/10 dark:border-gray-800/10 p-6 hover:bg-white/10 dark:hover:bg-gray-800/10 transition-all duration-200">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-indigo-500/10 rounded-lg">
-                    <Upload className="w-5 h-5 text-indigo-500/80" />
-                  </div>
-                  <h2 className="text-lg font-medium text-white">Upload ECU File</h2>
-                </div>
-                <button
-                  onClick={() => setShowUploadForm(true)}
-                  className="px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500/80 rounded-lg transition-colors"
-                >
-                  New Upload
-                </button>
-              </div>
-              <p className="text-sm text-blue-100/80">
-                Upload your ECU file for tuning. We support most manufacturer formats.
-              </p>
-            </div>
-          </div>
+          
         </div>
 
         {/* Right Column - Opening Hours and Support */}
