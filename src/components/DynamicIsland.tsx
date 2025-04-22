@@ -173,8 +173,164 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                 transition={{ ...spring, delay: 0.1 }}
                 className="p-4"
               >
-                {/* Rest of the expanded content */}
-                {children}
+                {variant === "dashboard" ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* User Profile */}
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ ...spring, delay: 0.2 }}
+                      className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10"
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl">
+                          {user?.username?.charAt(0).toUpperCase() || "U"}
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                            {user?.username || "User"}
+                          </h3>
+                          <p className={`text-sm ${
+                            user?.role === "admin" ? "text-red-500" : "text-green-500"
+                          }`}>
+                            {user?.role}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+
+                    {/* Navigation */}
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ ...spring, delay: 0.3 }}
+                      className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10"
+                    >
+                      <nav className="space-y-2">
+                        <Link
+                          href="/dashboard"
+                          className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                            pathname === "/dashboard" ? "bg-white/10 dark:bg-gray-800/10" : "hover:bg-white/5 dark:hover:bg-gray-800/5"
+                          }`}
+                        >
+                          <Home className="h-5 w-5 mr-3" />
+                          Dashboard
+                        </Link>
+                        <Link
+                          href="/dashboard/tuning-history"
+                          className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                            pathname === "/dashboard/tuning-history" ? "bg-white/10 dark:bg-gray-800/10" : "hover:bg-white/5 dark:hover:bg-gray-800/5"
+                          }`}
+                        >
+                          <History className="h-5 w-5 mr-3" />
+                          Tuning History
+                        </Link>
+                        <Link
+                          href="/dashboard/credits"
+                          className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                            pathname === "/dashboard/credits" ? "bg-white/10 dark:bg-gray-800/10" : "hover:bg-white/5 dark:hover:bg-gray-800/5"
+                          }`}
+                        >
+                          <CreditCard className="h-5 w-5 mr-3" />
+                          Credits
+                        </Link>
+                        {user?.role === "admin" && (
+                          <Link
+                            href="/admin"
+                            className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                              pathname.startsWith("/admin") ? "bg-white/10 dark:bg-gray-800/10" : "hover:bg-white/5 dark:hover:bg-gray-800/5"
+                            }`}
+                          >
+                            <Settings className="h-5 w-5 mr-3" />
+                            Admin Panel
+                          </Link>
+                        )}
+                      </nav>
+                    </motion.div>
+
+                    {/* Quick Actions */}
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ ...spring, delay: 0.4 }}
+                      className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10"
+                    >
+                      <div className="space-y-2">
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center w-full px-4 py-2 rounded-lg text-red-500 hover:bg-red-500/10 transition-colors"
+                        >
+                          <LogOut className="h-5 w-5 mr-3" />
+                          Logout
+                        </button>
+                        <Link
+                          href="/help"
+                          className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
+                        >
+                          <HelpCircle className="h-5 w-5 mr-3" />
+                          Help & Support
+                        </Link>
+                      </div>
+                    </motion.div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Landing Page Navigation */}
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ ...spring, delay: 0.2 }}
+                      className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10"
+                    >
+                      <nav className="space-y-2">
+                        <Link
+                          href="/#features"
+                          className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
+                        >
+                          <Search className="h-5 w-5 mr-3 text-blue-500" />
+                          Features
+                        </Link>
+                        <Link
+                          href="/#pricing"
+                          className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
+                        >
+                          <CreditCard className="h-5 w-5 mr-3 text-green-500" />
+                          Pricing
+                        </Link>
+                        <Link
+                          href="/dashboard"
+                          className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
+                        >
+                          <Home className="h-5 w-5 mr-3 text-purple-500" />
+                          Dashboard
+                        </Link>
+                      </nav>
+                    </motion.div>
+
+                    {/* Auth Actions */}
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ ...spring, delay: 0.3 }}
+                      className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10"
+                    >
+                      <div className="space-y-2">
+                        <Link
+                          href="/auth/login"
+                          className="flex items-center justify-center px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:opacity-90 transition-opacity"
+                        >
+                          Login
+                        </Link>
+                        <Link
+                          href="/auth/register"
+                          className="flex items-center justify-center px-4 py-2 rounded-lg border border-white/20 dark:border-gray-800/20 hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
+                        >
+                          Register
+                        </Link>
+                      </div>
+                    </motion.div>
+                  </div>
+                )}
               </motion.div>
             </motion.div>
           )}
