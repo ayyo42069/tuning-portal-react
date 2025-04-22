@@ -18,7 +18,11 @@ const MapPinIcon = dynamic(
   { ssr: false }
 );
 
-export const Footer = () => {
+interface FooterProps {
+  inView: boolean;
+}
+
+export const Footer = ({ inView }: FooterProps) => {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -59,11 +63,13 @@ export const Footer = () => {
         />
       </div>
 
-      <div className="container mx-auto px-4 py-16 relative z-10">
+      <motion.div
+        initial="hidden"
+        animate={inView ? "visible" : "hidden"}
+        variants={containerVariants}
+        className="container mx-auto px-4 py-12 relative z-10"
+      >
         <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
           className="grid md:grid-cols-2 lg:grid-cols-4 gap-12"
         >
           {/* Company Info */}
@@ -212,7 +218,7 @@ export const Footer = () => {
         >
           <p>&copy; {new Date().getFullYear()} Tuning Portal. All rights reserved.</p>
         </motion.div>
-      </div>
+      </motion.div>
     </footer>
   );
 };

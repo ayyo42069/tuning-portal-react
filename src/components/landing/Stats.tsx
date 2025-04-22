@@ -208,7 +208,7 @@ export const Stats = ({ inView }: StatsProps) => {
   return (
     <section className="py-20 relative overflow-hidden">
       {/* Background with subtle pattern */}
-      <div className="absolute inset-0 bg-white dark:bg-gray-800 z-0"></div>
+      <div className="absolute inset-0 bg-background z-0"></div>
       <div className="absolute inset-0 opacity-5 z-0">
         <div
           className="absolute inset-0"
@@ -226,12 +226,12 @@ export const Stats = ({ inView }: StatsProps) => {
         className="container mx-auto px-4 relative z-10"
       >
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-3xl font-bold text-foreground mb-4">
             Our Impact by the Numbers
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-cyan-500 to-blue-600 mx-auto"></div>
           {lastUpdated && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            <p className="text-sm text-muted-foreground mt-2">
               Last updated: {formatDate(lastUpdated)}
             </p>
           )}
@@ -240,11 +240,11 @@ export const Stats = ({ inView }: StatsProps) => {
         <div className="grid md:grid-cols-3 gap-8 text-center mb-12">
           <motion.div
             variants={itemVariants}
-            className="p-8 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700"
+            className="p-8 bg-card rounded-xl shadow-lg border border-border"
           >
             <div className="mb-4 flex justify-center">
               <svg
-                className="w-12 h-12 text-cyan-500 dark:text-cyan-400"
+                className="w-12 h-12 text-primary"
                 viewBox="0 0 24 24"
                 fill="none"
               >
@@ -272,18 +272,18 @@ export const Stats = ({ inView }: StatsProps) => {
             <div className="text-5xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-2">
               {count.users.toLocaleString()}
             </div>
-            <div className="text-gray-600 dark:text-gray-300 text-lg">
+            <div className="text-muted-foreground text-lg">
               Active Users
             </div>
           </motion.div>
 
           <motion.div
             variants={itemVariants}
-            className="p-8 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700"
+            className="p-8 bg-card rounded-xl shadow-lg border border-border"
           >
             <div className="mb-4 flex justify-center">
               <svg
-                className="w-12 h-12 text-cyan-500 dark:text-cyan-400"
+                className="w-12 h-12 text-primary"
                 viewBox="0 0 24 24"
                 fill="none"
               >
@@ -306,18 +306,18 @@ export const Stats = ({ inView }: StatsProps) => {
             <div className="text-5xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-2">
               {count.files.toLocaleString()}
             </div>
-            <div className="text-gray-600 dark:text-gray-300 text-lg">
+            <div className="text-muted-foreground text-lg">
               Tuning Files Created
             </div>
           </motion.div>
 
           <motion.div
             variants={itemVariants}
-            className="p-8 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700"
+            className="p-8 bg-card rounded-xl shadow-lg border border-border"
           >
             <div className="mb-4 flex justify-center">
               <svg
-                className="w-12 h-12 text-cyan-500 dark:text-cyan-400"
+                className="w-12 h-12 text-primary"
                 viewBox="0 0 24 24"
                 fill="none"
               >
@@ -340,7 +340,7 @@ export const Stats = ({ inView }: StatsProps) => {
             <div className="text-5xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-2">
               {count.satisfaction}%
             </div>
-            <div className="text-gray-600 dark:text-gray-300 text-lg">
+            <div className="text-muted-foreground text-lg">
               Customer Satisfaction
             </div>
           </motion.div>
@@ -350,48 +350,48 @@ export const Stats = ({ inView }: StatsProps) => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <motion.div
             variants={itemVariants}
-            className="p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-md border border-gray-100 dark:border-gray-700"
+            className="p-6 bg-card rounded-xl shadow-md border border-border"
           >
             <div className="text-3xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-1">
               {count.manufacturers}
             </div>
-            <div className="text-gray-600 dark:text-gray-300 text-sm">
+            <div className="text-muted-foreground text-sm">
               Vehicle Manufacturers
             </div>
           </motion.div>
 
           <motion.div
             variants={itemVariants}
-            className="p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-md border border-gray-100 dark:border-gray-700"
+            className="p-6 bg-card rounded-xl shadow-md border border-border"
           >
             <div className="text-3xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-1">
               {count.models}
             </div>
-            <div className="text-gray-600 dark:text-gray-300 text-sm">
+            <div className="text-muted-foreground text-sm">
               Vehicle Models Supported
             </div>
           </motion.div>
 
           <motion.div
             variants={itemVariants}
-            className="p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-md border border-gray-100 dark:border-gray-700"
+            className="p-6 bg-card rounded-xl shadow-md border border-border"
           >
             <div className="text-3xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-1">
               {count.completedFiles.toLocaleString()}
             </div>
-            <div className="text-gray-600 dark:text-gray-300 text-sm">
+            <div className="text-muted-foreground text-sm">
               Successfully Tuned Files
             </div>
           </motion.div>
 
           <motion.div
             variants={itemVariants}
-            className="p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-md border border-gray-100 dark:border-gray-700"
+            className="p-6 bg-card rounded-xl shadow-md border border-border"
           >
             <div className="text-3xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-1">
               {count.avgProcessingTime}
             </div>
-            <div className="text-gray-600 dark:text-gray-300 text-sm">
+            <div className="text-muted-foreground text-sm">
               Avg. Processing Hours
             </div>
           </motion.div>
