@@ -57,9 +57,9 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
       borderRadius: "9999px",
       transition: {
         type: "spring",
-        stiffness: 300,
+        stiffness: 400,
         damping: 30,
-        mass: 0.5,
+        mass: 0.8,
       },
     },
     expanded: {
@@ -67,23 +67,57 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
       borderRadius: "24px",
       transition: {
         type: "spring",
-        stiffness: 300,
+        stiffness: 400,
         damping: 30,
-        mass: 0.5,
+        mass: 0.8,
       },
     },
   };
 
   const contentVariants = {
-    hidden: { opacity: 0, y: -20 },
+    hidden: { 
+      opacity: 0, 
+      y: -20,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 30,
+        mass: 0.8,
+      }
+    },
     visible: { 
       opacity: 1, 
       y: 0,
       transition: {
         type: "spring",
-        stiffness: 300,
+        stiffness: 400,
         damping: 30,
-        mass: 0.5,
+        mass: 0.8,
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      }
+    },
+  };
+
+  const itemVariants = {
+    hidden: { 
+      opacity: 0, 
+      y: -10,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 30,
+        mass: 0.8,
+      }
+    },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 30,
+        mass: 0.8,
       }
     },
   };
@@ -103,49 +137,79 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
         animate={isExpanded ? { borderRadius: "24px" } : { borderRadius: "9999px" }}
         transition={{
           type: "spring",
-          stiffness: 300,
+          stiffness: 400,
           damping: 30,
-          mass: 0.5,
+          mass: 0.8,
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4">
+        <motion.div 
+          className="flex items-center justify-between p-4"
+          variants={itemVariants}
+          initial="hidden"
+          animate="visible"
+        >
           <div className="flex items-center space-x-4">
-            <button
+            <motion.button
               onClick={() => setIsExpanded(!isExpanded)}
               className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
               aria-label={isExpanded ? "Collapse" : "Expand"}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               {isExpanded ? (
                 <X className="h-5 w-5 text-gray-700 dark:text-gray-300" />
               ) : (
                 <Menu className="h-5 w-5 text-gray-700 dark:text-gray-300" />
               )}
-            </button>
+            </motion.button>
             <Link href="/" className="flex items-center">
-              <span className="text-lg font-semibold text-gray-900 dark:text-white">Tuning Portal</span>
+              <motion.span 
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ 
+                  type: "spring",
+                  stiffness: 400,
+                  damping: 30,
+                  mass: 0.8,
+                }}
+                className="text-lg font-semibold text-gray-900 dark:text-white"
+              >
+                Tuning Portal
+              </motion.span>
             </Link>
           </div>
 
           <div className="flex items-center space-x-4">
             {variant === "dashboard" && (
               <>
-                <div className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-white/10 dark:bg-gray-800/10">
+                <motion.div 
+                  className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-white/10 dark:bg-gray-800/10"
+                  variants={itemVariants}
+                >
                   <CreditCard className="h-4 w-4 text-blue-500" />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
                     {user?.credits || 0} Credits
                   </span>
-                </div>
-                <div className="relative">
+                </motion.div>
+                <motion.div 
+                  className="relative"
+                  variants={itemVariants}
+                >
                   <NotificationBell />
-                </div>
+                </motion.div>
               </>
             )}
-            <button className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors">
+            <motion.button 
+              className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
+              variants={itemVariants}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <ThemeToggle />
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Expanded Content */}
         <AnimatePresence>
@@ -245,49 +309,65 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Landing Page Navigation */}
-                  <div className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5">
+                  <motion.div 
+                    className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5"
+                    variants={itemVariants}
+                  >
                     <nav className="space-y-2">
-                      <Link
-                        href="/#features"
-                        className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
-                      >
-                        <Search className="h-5 w-5 mr-3 text-blue-500" />
-                        Features
-                      </Link>
-                      <Link
-                        href="/#pricing"
-                        className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
-                      >
-                        <CreditCard className="h-5 w-5 mr-3 text-green-500" />
-                        Pricing
-                      </Link>
-                      <Link
-                        href="/dashboard"
-                        className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
-                      >
-                        <Home className="h-5 w-5 mr-3 text-purple-500" />
-                        Dashboard
-                      </Link>
+                      <motion.div variants={itemVariants}>
+                        <Link
+                          href="/#features"
+                          className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
+                        >
+                          <Search className="h-5 w-5 mr-3 text-blue-500" />
+                          Features
+                        </Link>
+                      </motion.div>
+                      <motion.div variants={itemVariants}>
+                        <Link
+                          href="/#pricing"
+                          className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
+                        >
+                          <CreditCard className="h-5 w-5 mr-3 text-green-500" />
+                          Pricing
+                        </Link>
+                      </motion.div>
+                      <motion.div variants={itemVariants}>
+                        <Link
+                          href="/dashboard"
+                          className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
+                        >
+                          <Home className="h-5 w-5 mr-3 text-purple-500" />
+                          Dashboard
+                        </Link>
+                      </motion.div>
                     </nav>
-                  </div>
+                  </motion.div>
 
                   {/* Auth Actions */}
-                  <div className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5">
+                  <motion.div 
+                    className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5"
+                    variants={itemVariants}
+                  >
                     <div className="space-y-2">
-                      <Link
-                        href="/auth/login"
-                        className="flex items-center justify-center px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:opacity-90 transition-opacity"
-                      >
-                        Login
-                      </Link>
-                      <Link
-                        href="/auth/register"
-                        className="flex items-center justify-center px-4 py-2 rounded-lg border border-white/20 dark:border-gray-800/20 hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
-                      >
-                        Register
-                      </Link>
+                      <motion.div variants={itemVariants}>
+                        <Link
+                          href="/auth/login"
+                          className="flex items-center justify-center px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:opacity-90 transition-opacity"
+                        >
+                          Login
+                        </Link>
+                      </motion.div>
+                      <motion.div variants={itemVariants}>
+                        <Link
+                          href="/auth/register"
+                          className="flex items-center justify-center px-4 py-2 rounded-lg border border-white/20 dark:border-gray-800/20 hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
+                        >
+                          Register
+                        </Link>
+                      </motion.div>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               )}
             </motion.div>
