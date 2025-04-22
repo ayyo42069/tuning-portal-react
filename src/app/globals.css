@@ -1,44 +1,61 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --background: #ffffff;
+  --foreground: #171717;
+  --card-background: #ffffff;
+  --card-border: #e5e7eb;
+  --button-background: #f3f4f6;
+  --button-hover: #e5e7eb;
+  --button-text: #111827;
+  --header-background: #ffffff;
+  --header-border: #e5e7eb;
+  --input-background: #ffffff;
+  --input-border: #d1d5db;
+  --input-focus-border: #3b82f6;
+  --text-light: #4b5563;
+  --text-lighter: #6b7280;
+
+  --transition-colors: background-color, border-color, color, fill, stroke;
+  --transition-duration: 300ms;
+  --transition-timing: ease-in-out;
+}
+
+@custom-variant dark (&:where(.dark, .dark *)) {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card-background: #1f2937;
+  --card-border: #374151;
+  --button-background: #374151;
+  --button-hover: #4b5563;
+  --button-text: #f9fafb;
+  --header-background: #111827;
+  --header-border: #374151;
+  --input-background: #111827;
+  --input-border: #4b5563;
+  --input-focus-border: #60a5fa;
+  --text-light: #d1d5db;
+  --text-lighter: #9ca3af;
+}
+
 @layer base {
   :root {
-    --background: #ffffff;
-    --foreground: #171717;
-    --card-background: #ffffff;
-    --card-border: #e5e7eb;
-    --button-background: #f3f4f6;
-    --button-hover: #e5e7eb;
-    --button-text: #111827;
-    --header-background: #ffffff;
-    --header-border: #e5e7eb;
-    --input-background: #ffffff;
-    --input-border: #d1d5db;
-    --input-focus-border: #3b82f6;
-    --text-light: #4b5563;
-    --text-lighter: #6b7280;
+    color-scheme: light dark;
   }
 
-  .dark {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --card-background: #1f2937;
-    --card-border: #374151;
-    --button-background: #374151;
-    --button-hover: #4b5563;
-    --button-text: #f9fafb;
-    --header-background: #111827;
-    --header-border: #374151;
-    --input-background: #111827;
-    --input-border: #4b5563;
-    --input-focus-border: #60a5fa;
-    --text-light: #d1d5db;
-    --text-lighter: #9ca3af;
+  body {
+    @apply bg-background text-foreground font-sans;
   }
 }
 
 @layer utilities {
   .theme-transition {
-    @apply transition-colors duration-300 ease-in-out;
+    transition-property: var(--transition-colors);
+    transition-duration: var(--transition-duration);
+    transition-timing-function: var(--transition-timing);
   }
 }
 
@@ -64,19 +81,31 @@
 
 @layer components {
   .card {
-    @apply bg-card-background border border-card-border rounded-lg p-4 theme-transition;
+    @apply bg-card-background border border-card-border rounded-lg p-4;
+    transition-property: var(--transition-colors);
+    transition-duration: var(--transition-duration);
+    transition-timing-function: var(--transition-timing);
   }
 
   .btn {
-    @apply bg-button-background text-button-text px-4 py-2 rounded-md hover:bg-button-hover theme-transition;
+    @apply bg-button-background text-button-text px-4 py-2 rounded-md hover:bg-button-hover;
+    transition-property: var(--transition-colors);
+    transition-duration: var(--transition-duration);
+    transition-timing-function: var(--transition-timing);
   }
 
   .header {
-    @apply bg-header-background border-b border-header-border theme-transition;
+    @apply bg-header-background border-b border-header-border;
+    transition-property: var(--transition-colors);
+    transition-duration: var(--transition-duration);
+    transition-timing-function: var(--transition-timing);
   }
 
   .input {
-    @apply bg-input-background border border-input-border rounded-md px-3 py-2 focus:border-input-focus-border focus:outline-none theme-transition;
+    @apply bg-input-background border border-input-border rounded-md px-3 py-2 focus:border-input-focus-border focus:outline-none;
+    transition-property: var(--transition-colors);
+    transition-duration: var(--transition-duration);
+    transition-timing-function: var(--transition-timing);
   }
 }
 
