@@ -44,13 +44,33 @@ export async function fetchTuningFiles() {
     // Handle failed or invalid responses
     if (!response || !response.ok) {
       console.warn(`API response not ok: ${response?.status || 'Request failed'}`);
+      
+      // Return empty array during build time
+      if (process.env.NODE_ENV === 'production' && process.env.BUILD_AUTH_TOKEN) {
+        console.log('🏗️ Build-time: Using empty array for tuning files');
+        return {
+          success: true,
+          tuningFiles: []
+        };
+      }
+      
       throw new Error(`Failed to fetch tuning files: ${response?.status || 'Request failed'}`);
     }
     
     return response.json();
   } catch (error) {
     console.error('Error fetching tuning files:', error);
-    throw error; // Propagate the error instead of returning mock data
+    
+    // Return empty array during build time
+    if (process.env.NODE_ENV === 'production' && process.env.BUILD_AUTH_TOKEN) {
+      console.log('🏗️ Build-time: Using empty array for tuning files after error');
+      return {
+        success: true,
+        tuningFiles: []
+      };
+    }
+    
+    throw error;
   }
 }
 
