@@ -6,8 +6,7 @@ import AuthDebugger from "@/components/AuthDebugger";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/AuthProvider";
-import DynamicIsland from "@/components/DynamicIsland";
-import { usePathname } from "next/navigation";
+import DynamicIslandWrapper from "@/components/DynamicIslandWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -93,10 +92,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Get the current pathname
-  const pathname = usePathname();
-  const isDashboard = pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin');
-
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <head>
@@ -134,7 +129,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          {!isDashboard && <DynamicIsland variant="landing" />}
+          <DynamicIslandWrapper />
           <Providers>
             {children}
             <AuthDebugger />
