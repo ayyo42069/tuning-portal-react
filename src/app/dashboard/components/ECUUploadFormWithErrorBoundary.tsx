@@ -46,7 +46,11 @@ function ECUUploadFormFallback() {
  * ECUUploadForm with error boundary wrapper
  * This component wraps the ECU Upload form with an error boundary to catch and handle errors gracefully
  */
-export default function ECUUploadFormWithErrorBoundary() {
+interface ECUUploadFormWithErrorBoundaryProps {
+  onClose: () => void;
+}
+
+export default function ECUUploadFormWithErrorBoundary({ onClose }: ECUUploadFormWithErrorBoundaryProps) {
   const [key, setKey] = useState(0);
 
   return (
@@ -54,7 +58,7 @@ export default function ECUUploadFormWithErrorBoundary() {
       fallback={<ECUUploadFormFallback />}
       key={key}
     >
-      <ECUUploadForm />
+      <ECUUploadForm onClose={onClose} />
     </ErrorBoundary>
   );
 } 

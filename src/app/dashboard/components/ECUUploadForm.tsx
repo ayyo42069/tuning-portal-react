@@ -93,7 +93,11 @@ interface TuningOption {
   credit_cost: number;
 }
 
-export default function ECUUploadForm() {
+interface ECUUploadFormProps {
+  onClose: () => void;
+}
+
+export default function ECUUploadForm({ onClose }: ECUUploadFormProps) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
@@ -188,6 +192,11 @@ export default function ECUUploadForm() {
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: [queryKeys.tuningFiles] });
       queryClient.invalidateQueries({ queryKey: [queryKeys.user] });
+
+      // Close the modal after a short delay
+      setTimeout(() => {
+        onClose();
+      }, 2000);
     },
     onError: (error: Error) => {
       setError(error.message || "An error occurred during upload");
