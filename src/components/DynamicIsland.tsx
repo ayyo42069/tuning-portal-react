@@ -66,17 +66,18 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
   return (
     <motion.div
       layout
-      className={`fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-4xl z-50 ${
-        isScrolled ? "backdrop-blur-xl bg-white/10 dark:bg-gray-900/10" : "backdrop-blur-md bg-white/5 dark:bg-gray-900/5"
-      }`}
+      className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-4xl z-50"
       transition={spring}
     >
       <motion.div
         layout
-        className="w-full h-full border border-white/20 dark:border-gray-800/20 shadow-lg overflow-hidden"
         style={{
           borderRadius: isExpanded ? "24px" : "9999px",
+          overflow: "hidden"
         }}
+        className={`w-full h-full border border-white/20 dark:border-gray-800/20 shadow-lg ${
+          isScrolled ? "backdrop-blur-xl bg-white/10 dark:bg-gray-900/10" : "backdrop-blur-md bg-white/5 dark:bg-gray-900/5"
+        }`}
         transition={spring}
       >
         {/* Header - Always visible */}
