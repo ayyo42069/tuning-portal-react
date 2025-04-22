@@ -4,20 +4,39 @@
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light mode colors - enhanced for better readability */
+  --background: #f8fafc;
+  --foreground: #1e293b;
   --card-background: #ffffff;
-  --card-border: #e5e7eb;
-  --button-background: #f3f4f6;
-  --button-hover: #e5e7eb;
-  --button-text: #111827;
+  --card-border: #e2e8f0;
+  --button-background: #f1f5f9;
+  --button-hover: #e2e8f0;
+  --button-text: #1e293b;
   --header-background: #ffffff;
-  --header-border: #e5e7eb;
+  --header-border: #e2e8f0;
   --input-background: #ffffff;
-  --input-border: #d1d5db;
+  --input-border: #cbd5e1;
   --input-focus-border: #3b82f6;
-  --text-light: #4b5563;
-  --text-lighter: #6b7280;
+  --text-light: #64748b;
+  --text-lighter: #94a3b8;
+  --sidebar-background: #ffffff;
+  --sidebar-border: #e2e8f0;
+  --sidebar-text: #1e293b;
+  --sidebar-hover: #f1f5f9;
+  --sidebar-active: #e2e8f0;
+  --dropdown-background: #ffffff;
+  --dropdown-border: #e2e8f0;
+  --dropdown-text: #1e293b;
+  --dropdown-hover: #f1f5f9;
+  --notification-background: #ffffff;
+  --notification-border: #e2e8f0;
+  --notification-text: #1e293b;
+  --notification-hover: #f1f5f9;
+  --badge-background: #f1f5f9;
+  --badge-text: #1e293b;
+  --gradient-from: #3b82f6;
+  --gradient-to: #8b5cf6;
+  --gradient-text: #ffffff;
 
   --transition-colors: background-color, border-color, color, fill, stroke;
   --transition-duration: 300ms;
@@ -25,20 +44,39 @@
 }
 
 @custom-variant dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --card-background: #1f2937;
-  --card-border: #374151;
-  --button-background: #374151;
-  --button-hover: #4b5563;
-  --button-text: #f9fafb;
-  --header-background: #111827;
-  --header-border: #374151;
-  --input-background: #111827;
-  --input-border: #4b5563;
+  /* Dark mode colors - enhanced for better contrast and readability */
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card-background: #1e293b;
+  --card-border: #334155;
+  --button-background: #334155;
+  --button-hover: #475569;
+  --button-text: #f8fafc;
+  --header-background: #1e293b;
+  --header-border: #334155;
+  --input-background: #1e293b;
+  --input-border: #475569;
   --input-focus-border: #60a5fa;
-  --text-light: #d1d5db;
-  --text-lighter: #9ca3af;
+  --text-light: #cbd5e1;
+  --text-lighter: #94a3b8;
+  --sidebar-background: #1e293b;
+  --sidebar-border: #334155;
+  --sidebar-text: #f8fafc;
+  --sidebar-hover: #334155;
+  --sidebar-active: #475569;
+  --dropdown-background: #1e293b;
+  --dropdown-border: #334155;
+  --dropdown-text: #f8fafc;
+  --dropdown-hover: #334155;
+  --notification-background: #1e293b;
+  --notification-border: #334155;
+  --notification-text: #f8fafc;
+  --notification-hover: #334155;
+  --badge-background: #334155;
+  --badge-text: #f8fafc;
+  --gradient-from: #60a5fa;
+  --gradient-to: #a78bfa;
+  --gradient-text: #ffffff;
 }
 
 @layer base {
@@ -53,20 +91,38 @@
   }
 
   [data-theme=dark] {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --card-background: #1f2937;
-    --card-border: #374151;
-    --button-background: #374151;
-    --button-hover: #4b5563;
-    --button-text: #f9fafb;
-    --header-background: #111827;
-    --header-border: #374151;
-    --input-background: #111827;
-    --input-border: #4b5563;
+    --background: #0f172a;
+    --foreground: #f8fafc;
+    --card-background: #1e293b;
+    --card-border: #334155;
+    --button-background: #334155;
+    --button-hover: #475569;
+    --button-text: #f8fafc;
+    --header-background: #1e293b;
+    --header-border: #334155;
+    --input-background: #1e293b;
+    --input-border: #475569;
     --input-focus-border: #60a5fa;
-    --text-light: #d1d5db;
-    --text-lighter: #9ca3af;
+    --text-light: #cbd5e1;
+    --text-lighter: #94a3b8;
+    --sidebar-background: #1e293b;
+    --sidebar-border: #334155;
+    --sidebar-text: #f8fafc;
+    --sidebar-hover: #334155;
+    --sidebar-active: #475569;
+    --dropdown-background: #1e293b;
+    --dropdown-border: #334155;
+    --dropdown-text: #f8fafc;
+    --dropdown-hover: #334155;
+    --notification-background: #1e293b;
+    --notification-border: #334155;
+    --notification-text: #f8fafc;
+    --notification-hover: #334155;
+    --badge-background: #334155;
+    --badge-text: #f8fafc;
+    --gradient-from: #60a5fa;
+    --gradient-to: #a78bfa;
+    --gradient-text: #ffffff;
   }
 }
 
@@ -81,20 +137,38 @@
 /* System preference dark mode */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme=light]) {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --card-background: #1f2937;
-    --card-border: #374151;
-    --button-background: #374151;
-    --button-hover: #4b5563;
-    --button-text: #f9fafb;
-    --header-background: #111827;
-    --header-border: #374151;
-    --input-background: #111827;
-    --input-border: #4b5563;
+    --background: #0f172a;
+    --foreground: #f8fafc;
+    --card-background: #1e293b;
+    --card-border: #334155;
+    --button-background: #334155;
+    --button-hover: #475569;
+    --button-text: #f8fafc;
+    --header-background: #1e293b;
+    --header-border: #334155;
+    --input-background: #1e293b;
+    --input-border: #475569;
     --input-focus-border: #60a5fa;
-    --text-light: #d1d5db;
-    --text-lighter: #9ca3af;
+    --text-light: #cbd5e1;
+    --text-lighter: #94a3b8;
+    --sidebar-background: #1e293b;
+    --sidebar-border: #334155;
+    --sidebar-text: #f8fafc;
+    --sidebar-hover: #334155;
+    --sidebar-active: #475569;
+    --dropdown-background: #1e293b;
+    --dropdown-border: #334155;
+    --dropdown-text: #f8fafc;
+    --dropdown-hover: #334155;
+    --notification-background: #1e293b;
+    --notification-border: #334155;
+    --notification-text: #f8fafc;
+    --notification-hover: #334155;
+    --badge-background: #334155;
+    --badge-text: #f8fafc;
+    --gradient-from: #60a5fa;
+    --gradient-to: #a78bfa;
+    --gradient-text: #ffffff;
   }
 }
 
@@ -129,6 +203,84 @@
     transition-property: var(--transition-colors);
     transition-duration: var(--transition-duration);
     transition-timing-function: var(--transition-timing);
+  }
+
+  .sidebar {
+    background-color: var(--sidebar-background);
+    border-right: 1px solid var(--sidebar-border);
+    color: var(--sidebar-text);
+    transition-property: var(--transition-colors);
+    transition-duration: var(--transition-duration);
+    transition-timing-function: var(--transition-timing);
+  }
+
+  .sidebar-item {
+    color: var(--sidebar-text);
+    transition-property: var(--transition-colors);
+    transition-duration: var(--transition-duration);
+    transition-timing-function: var(--transition-timing);
+  }
+
+  .sidebar-item:hover {
+    background-color: var(--sidebar-hover);
+  }
+
+  .sidebar-item.active {
+    background-color: var(--sidebar-active);
+  }
+
+  .dropdown {
+    background-color: var(--dropdown-background);
+    border: 1px solid var(--dropdown-border);
+    color: var(--dropdown-text);
+    transition-property: var(--transition-colors);
+    transition-duration: var(--transition-duration);
+    transition-timing-function: var(--transition-timing);
+  }
+
+  .dropdown-item {
+    color: var(--dropdown-text);
+    transition-property: var(--transition-colors);
+    transition-duration: var(--transition-duration);
+    transition-timing-function: var(--transition-timing);
+  }
+
+  .dropdown-item:hover {
+    background-color: var(--dropdown-hover);
+  }
+
+  .notification {
+    background-color: var(--notification-background);
+    border: 1px solid var(--notification-border);
+    color: var(--notification-text);
+    transition-property: var(--transition-colors);
+    transition-duration: var(--transition-duration);
+    transition-timing-function: var(--transition-timing);
+  }
+
+  .notification:hover {
+    background-color: var(--notification-hover);
+  }
+
+  .badge {
+    background-color: var(--badge-background);
+    color: var(--badge-text);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .gradient-text {
+    background: linear-gradient(to right, var(--gradient-from), var(--gradient-to));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .gradient-bg {
+    background: linear-gradient(to right, var(--gradient-from), var(--gradient-to));
+    color: var(--gradient-text);
   }
 
   .input {
