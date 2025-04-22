@@ -3,8 +3,10 @@ import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import Providers from "@/components/Providers";
 import AuthDebugger from "@/components/AuthDebugger";
-
+import { Inter } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/lib/AuthProvider";
+import DynamicIsland from "@/components/DynamicIsland";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,6 +21,8 @@ const geistMono = Geist_Mono({
   display: "swap",
   preload: true,
 });
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Tuning Portal",
@@ -124,10 +128,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
-          {children}
-          <AuthDebugger />
-        </Providers>
+        <AuthProvider>
+          <DynamicIsland variant="landing" />
+          <Providers>
+            {children}
+            <AuthDebugger />
+          </Providers>
+        </AuthProvider>
       </body>
     </html>
   );
