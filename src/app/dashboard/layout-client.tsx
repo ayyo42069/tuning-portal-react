@@ -14,6 +14,10 @@ import {
   Menu,
   X,
   LogOut,
+  User,
+  HelpCircle,
+  Search,
+  ChevronDown,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
@@ -36,7 +40,9 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
   const { user, logout, isLoading } = useAuth();
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -76,16 +82,6 @@ export default function DashboardLayout({
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
-    
-    if (sidebarRef.current) {
-      if (sidebarOpen) {
-        sidebarRef.current.classList.add("sidebar-hidden");
-        sidebarRef.current.classList.remove("sidebar-visible");
-      } else {
-        sidebarRef.current.classList.remove("sidebar-hidden");
-        sidebarRef.current.classList.add("sidebar-visible");
-      }
-    }
   };
 
   return (
@@ -93,173 +89,190 @@ export default function DashboardLayout({
       {/* Debug component */}
       <DashboardDebug />
       
-      <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-800 dark:from-blue-950 dark:to-blue-900 relative overflow-hidden">
-        {/* SVG Pattern Background */}
-        <div className="absolute inset-0 z-0 opacity-10">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: "url('/patterns/hexagons.svg')",
-              backgroundSize: "30px",
-              filter: "blur(0.5px)",
-            }}
-          ></div>
-        </div>
-
-        {/* Circuit board pattern overlay */}
-        <div className="absolute inset-0 z-0 opacity-5">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: "url('/patterns/circuit-board.svg')",
-              backgroundSize: "300px",
-            }}
-          ></div>
-        </div>
-
-        {/* Header */}
-        <header className="relative z-10 bg-transparent flex justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 border border-white/20 dark:border-gray-700/30 backdrop-blur-md">
-          {/* Left side - Logo and Tuning Portal text */}
-          <div className="flex items-center space-x-2">
-            <img src="/images/logo.png" alt="Logo" className="h-12 w-12" />
-            <span className="text-xl font-semibold text-purple-400">Tuning Portal</span>
-          </div>
-
-          {/* Right side - Controls */}
-          <div className="flex items-center space-x-4">
-            <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 px-3 py-1.5 rounded-lg flex items-center hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300">
-              <CreditCard className="h-4 w-4 text-blue-200 mr-1.5" />
-              <span className="text-sm font-medium text-blue-200">
-                {user?.credits || 0} Credits
-              </span>
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Left side - Logo and Menu */}
+            <div className="flex items-center">
+              <button
+                onClick={toggleSidebar}
+                className="p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Toggle menu"
+              >
+                <Menu className="h-6 w-6" />
+              </button>
+              <Link href="/dashboard" className="ml-4 flex items-center">
+                <img src="/images/logo.png" alt="Tuning Portal Logo" className="h-8 w-8" />
+                <span className="ml-2 text-xl font-semibold text-gray-900 dark:text-white">Tuning Portal</span>
+              </Link>
             </div>
-            <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 p-2 rounded-lg hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300">
-              <NotificationBell />
+
+            {/* Center - Search */}
+            <div className="flex-1 max-w-2xl mx-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="w-full px-4 py-2 pl-10 text-sm bg-gray-100 dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              </div>
             </div>
-            <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 p-2 rounded-lg hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300">
-              <ThemeToggle />
-            </div>
-            <button
-              onClick={handleLogout}
-              className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 p-2 rounded-lg hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300"
-              aria-label="Logout"
-            >
-              <LogOut className="w-5 h-5 text-blue-200" />
-            </button>
-          </div>
-        </header>
 
-        {/* Animated elements */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <motion.div
-            initial={{ x: -100, opacity: 0.2 }}
-            animate={{ x: 0, opacity: 0.15 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-            className="absolute w-[600px] h-[600px] rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 -top-64 -left-64 will-change-transform"
-          />
-          <motion.div
-            initial={{ x: 100, opacity: 0.2 }}
-            animate={{ x: 0, opacity: 0.15 }}
-            transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
-            className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 top-1/3 -right-64 will-change-transform"
-          />
-          <motion.div
-            initial={{ y: 100, opacity: 0.2 }}
-            animate={{ y: 0, opacity: 0.15 }}
-            transition={{ duration: 1.5, ease: "easeOut", delay: 0.4 }}
-            className="absolute w-[400px] h-[400px] rounded-full bg-gradient-to-r from-purple-500 to-pink-500 -bottom-32 left-1/3 will-change-transform"
-          />
-        </div>
-
-        <div className="relative z-10 flex">
-          {/* Mobile menu button */}
-          <div className="md:hidden fixed top-4 left-4 z-50">
-            <button
-              onClick={toggleSidebar}
-              className="p-2 rounded-md bg-white dark:bg-gray-800 shadow-md"
-              aria-label="Toggle menu"
-            >
-              {sidebarOpen ? (
-                <X className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-              ) : (
-                <Menu className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-              )}
-            </button>
-          </div>
-
-          {/* Sidebar */}
-          <div
-            ref={sidebarRef}
-            id="sidebar"
-            className={`${
-              sidebarOpen ? "translate-x-0" : "-translate-x-full"
-            } md:translate-x-0 fixed md:static z-40 w-72 min-h-screen bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 shadow-lg transition-transform duration-300 ease-in-out`}
-          >
-            <div className="flex flex-col h-full">
-              {/* User info */}
-              <div className="p-6 border-b border-white/10 dark:border-gray-700/30">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold">
+            {/* Right side - Controls */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg">
+                <CreditCard className="h-4 w-4 text-blue-500" />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                  {user?.credits || 0} Credits
+                </span>
+              </div>
+              
+              <button
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Notifications"
+              >
+                <NotificationBell />
+              </button>
+              
+              <button
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Toggle theme"
+              >
+                <ThemeToggle />
+              </button>
+              
+              <div className="relative">
+                <button
+                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label="User menu"
+                >
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold">
                     {user?.username?.charAt(0).toUpperCase() || "U"}
                   </div>
-                  <div className="ml-4">
-                    <h3 className="text-white font-medium">Hello, {user?.username || "User"}</h3>
-                    <p className={`text-sm ${user?.role === "admin" ? "text-red-500" : "text-green-500"} bg-white/10 dark:bg-gray-800/20 backdrop-blur-md px-2 py-1 rounded-lg`}>{user?.role}</p>
-                  </div>
+                  <ChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                </button>
+                
+                {/* Dropdown menu */}
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1">
+                  <Link
+                    href="/dashboard/profile"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </Link>
+                  <Link
+                    href="/dashboard/help"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <HelpCircle className="h-4 w-4 mr-2" />
+                    Help & Support
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </header>
 
-              {/* Navigation */}
-              <nav className="flex-1 space-y-1 p-4">
-                <Link
-                  href="/dashboard"
-                  className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-                  onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-                >
-                  <Home className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-                  Dashboard
-                </Link>
-                <Link
-                  href="/dashboard/tuning-history"
-                  className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-                  onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-                >
-                  <History className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-                  Tuning History
-                </Link>
-                <Link
-                  href="/dashboard/credits"
-                  className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-                  onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-                >
-                  <CreditCard className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-                  Credits
-                </Link>
-                {user?.role === "admin" && (
-                  <>
-                    <Link
-                      href="/admin"
-                      className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-                      onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-                    >
-                      <Settings className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-                      Admin Panel
-                    </Link>
-                    {/* Opening Hours moved under admin panel */}
-                    <div className="px-4 py-3">
-                      <OpeningHours />
-                    </div>
-                  </>
-                )}
-              </nav>
+      {/* Main content */}
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        <aside
+          ref={sidebarRef}
+          id="sidebar"
+          className={`fixed md:static z-40 w-64 min-h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transform transition-transform duration-300 ease-in-out ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          }`}
+        >
+          {/* User info */}
+          <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+            <div className="flex items-center">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl">
+                {user?.username?.charAt(0).toUpperCase() || "U"}
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {user?.username || "User"}
+                </h3>
+                <p className={`text-sm ${
+                  user?.role === "admin" ? "text-red-500" : "text-green-500"
+                }`}>
+                  {user?.role}
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Main content */}
-          <div className="flex-1 p-4 md:p-8 overflow-auto">
-            {children}
-          </div>
-        </div>
+          {/* Navigation */}
+          <nav className="p-4 space-y-2">
+            <Link
+              href="/dashboard"
+              className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+                pathname === "/dashboard"
+                  ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                  : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+            >
+              <Home className="h-5 w-5 mr-3" />
+              Dashboard
+            </Link>
+            <Link
+              href="/dashboard/tuning-history"
+              className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+                pathname === "/dashboard/tuning-history"
+                  ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                  : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+            >
+              <History className="h-5 w-5 mr-3" />
+              Tuning History
+            </Link>
+            <Link
+              href="/dashboard/credits"
+              className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+                pathname === "/dashboard/credits"
+                  ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                  : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+            >
+              <CreditCard className="h-5 w-5 mr-3" />
+              Credits
+            </Link>
+            {user?.role === "admin" && (
+              <>
+                <Link
+                  href="/admin"
+                  className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+                    pathname.startsWith("/admin")
+                      ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                      : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
+                >
+                  <Settings className="h-5 w-5 mr-3" />
+                  Admin Panel
+                </Link>
+                <div className="px-4 py-3">
+                  <OpeningHours />
+                </div>
+              </>
+            )}
+          </nav>
+        </aside>
+
+        {/* Main content area */}
+        <main className="flex-1 p-6 md:p-8 overflow-auto">
+          {children}
+        </main>
       </div>
       
       {/* Floating ticket button */}
