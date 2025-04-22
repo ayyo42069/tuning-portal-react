@@ -24,7 +24,7 @@
   --transition-timing: ease-in-out;
 }
 
-@custom-variant dark (&:where(.dark, .dark *)) {
+@custom-variant dark {
   --background: #0a0a0a;
   --foreground: #ededed;
   --card-background: #1f2937;
