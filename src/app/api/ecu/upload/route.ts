@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { executeQuery, executeTransaction } from "@/lib/db";
+import { executeQuery, withTransaction } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import { join } from "path";
 import { v4 as uuidv4 } from "uuid";
 import { existsSync } from "fs";
-import { mkdir } from "fs/promises";
+import { mkdir, writeFile } from "fs/promises";
 import multer from "multer";
 import { Readable } from "stream";
 
@@ -113,7 +113,6 @@ export async function POST(request: NextRequest) {
       );
     };
     mockReq.unpipe = function () {
-      // Convert IArguments to an array and cast to the expected type
       const args = Array.from(arguments) as unknown as [NodeJS.WritableStream?];
       return stream.unpipe.apply(stream, args);
     };
@@ -156,7 +155,6 @@ export async function POST(request: NextRequest) {
       }
 
       // Calculate total credit cost
-      // Using FIND_IN_SET for proper handling of multiple IDs
       let totalCreditCost = 0;
 
       // If there are tuning options selected
@@ -173,13 +171,6 @@ export async function POST(request: NextRequest) {
           }
         }
       }
-
-      // Log the calculation for debugging
-      console.log(
-        `Calculated credit cost for options ${JSON.stringify(
-          data.tuningOptions
-        )}: ${totalCreditCost}`
-      );
 
       // Ensure minimum cost of 1 credit
       if (totalCreditCost <= 0) {
@@ -203,12 +194,10 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Start transaction
-      await executeTransaction("START TRANSACTION");
-
-      try {
+      // Use transaction helper for database operations
+      await withTransaction(async (connection) => {
         // Insert file record into database
-        const result = await executeQuery<any>(
+        const [result] = await connection.execute<any>(
           "INSERT INTO ecu_files (user_id, manufacturer_id, model_id, production_year, original_filename, stored_filename, file_size, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
           [
             user.id,
@@ -226,61 +215,34 @@ export async function POST(request: NextRequest) {
 
         // Insert tuning options
         for (const optionId of data.tuningOptions) {
-          await executeQuery(
+          await connection.execute(
             "INSERT INTO ecu_file_tuning_options (ecu_file_id, tuning_option_id) VALUES (?, ?)",
             [fileId, optionId]
           );
         }
 
         // Deduct credits from user's account
-        await executeQuery(
+        await connection.execute(
           "UPDATE user_credits SET credits = credits - ? WHERE user_id = ?",
           [totalCreditCost, user.id]
         );
 
-        // Record credit transaction with detailed information
-        await executeQuery(
+        // Record credit transaction
+        await connection.execute(
           "INSERT INTO credit_transactions (user_id, amount, transaction_type, stripe_payment_id) VALUES (?, ?, ?, ?)",
           [user.id, -totalCreditCost, "usage", `ecu_file_${fileId}`]
         );
+      });
 
-        // Log the credit transaction for debugging
-        console.log(
-          `Deducted ${totalCreditCost} credits from user ${user.id} for ECU file ${fileId}`
-        );
-        console.log(
-          `Selected tuning options: ${JSON.stringify(data.tuningOptions)}`
-        );
-
-        // Verify the credit deduction was successful
-        const [verifyCredits] = await executeQuery<any>(
-          "SELECT credits FROM user_credits WHERE user_id = ?",
-          [user.id]
-        );
-        console.log(
-          `User ${user.id} now has ${
-            verifyCredits?.credits || 0
-          } credits remaining`
-        );
-
-        // Commit transaction
-        await executeTransaction("COMMIT");
-
-        return NextResponse.json(
-          {
-            success: true,
-            fileId,
-            creditCost: totalCreditCost,
-            remainingCredits: availableCredits - totalCreditCost,
-            message: "File uploaded successfully",
-          },
-          { status: 201 }
-        );
-      } catch (error) {
-        // Rollback on error
-        await executeTransaction("ROLLBACK");
-        throw error;
-      }
+      return NextResponse.json(
+        {
+          success: true,
+          creditCost: totalCreditCost,
+          remainingCredits: availableCredits - totalCreditCost,
+          message: "File uploaded successfully",
+        },
+        { status: 201 }
+      );
     } catch (multerError: any) {
       return NextResponse.json(
         { error: multerError.message || "File upload failed" },
