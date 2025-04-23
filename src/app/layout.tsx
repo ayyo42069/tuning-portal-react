@@ -128,13 +128,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <DynamicIslandWrapper />
-          <Providers>
+        <Providers>
+          <AuthProvider>
+            <DynamicIslandWrapper />
             {children}
             <AuthDebugger />
-          </Providers>
-        </AuthProvider>
+          </AuthProvider>
+        </Providers>
       </body>
     </html>
   );
