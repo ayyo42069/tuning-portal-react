@@ -18,7 +18,7 @@ import {
   HelpCircle,
   Search,
   ChevronDown,
-  BellAlertIcon
+  BadgeAlertIcon
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
@@ -430,7 +430,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                             pathname === "/dashboard/feedback" ? "bg-white/10 dark:bg-gray-800/10" : "hover:bg-white/5 dark:hover:bg-gray-800/5"
                           }`}
                         >
-                          <BellAlertIcon className="h-5 w-5 mr-3" />
+                          <BadgeAlertIcon className="h-5 w-5 mr-3" />
                           Feedback History
                         </Link>
                         {user?.role === "admin" && (
