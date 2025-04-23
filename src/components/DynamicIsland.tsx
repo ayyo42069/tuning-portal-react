@@ -21,7 +21,7 @@ import {
   BadgeAlertIcon
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
-import NotificationBell from "@/components/NotificationBell";
+
 import { useAuth } from "@/lib/AuthProvider";
 import { useNotifications as useNotificationsQuery } from "@/lib/hooks/useDataFetching";
 import { useNotifications } from "@/lib/NotificationProvider";
