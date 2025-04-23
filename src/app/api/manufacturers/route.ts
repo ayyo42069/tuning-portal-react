@@ -15,12 +15,39 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
+    // Check if we have any manufacturers
+    const [count] = await executeQuery<any[]>(
+      'SELECT COUNT(*) as count FROM manufacturers'
+    );
+    console.log('Manufacturer count:', count[0].count);
+
+    // If no manufacturers exist, insert some test data
+    if (count[0].count === 0) {
+      console.log('No manufacturers found, inserting test data...');
+      await executeQuery(
+        `INSERT INTO manufacturers (name) VALUES 
+        ('BMW'),
+        ('Mercedes-Benz'),
+        ('Audi'),
+        ('Volkswagen'),
+        ('Porsche'),
+        ('Toyota'),
+        ('Honda'),
+        ('Nissan'),
+        ('Ford'),
+        ('Chevrolet')`
+      );
+      console.log('Test data inserted successfully');
+    }
+
     // Get all manufacturers
     const [manufacturers] = await executeQuery<any[]>(
       'SELECT id, name FROM manufacturers ORDER BY name'
     );
+    console.log('Retrieved manufacturers:', manufacturers);
 
     if (!manufacturers || !Array.isArray(manufacturers)) {
+      console.error('Invalid manufacturers data:', manufacturers);
       return NextResponse.json([], { status: 200 });
     }
 

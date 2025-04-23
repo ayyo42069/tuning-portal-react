@@ -54,8 +54,14 @@ export default function EcuUploadForm({ onClose }: EcuUploadFormProps) {
   useEffect(() => {
     setIsLoadingManufacturers(true);
     fetch('/api/manufacturers')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then(data => {
+        console.log('Manufacturers data:', data); // Debug log
         if (Array.isArray(data)) {
           setManufacturers(data);
         } else {
