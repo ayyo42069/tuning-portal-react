@@ -14,6 +14,12 @@ const dbConfig = {
   namedPlaceholders: false, // Use positional placeholders (?) instead of named ones
   enableKeepAlive: true, // Keep connections alive.
   keepAliveInitialDelay: 10000, // 10 seconds initial delay
+  // Add these options to handle transactions properly
+  multipleStatements: true,
+  typeCast: true,
+  dateStrings: true,
+  // Disable prepared statements for transaction commands
+  prepare: false
 };
 
 // Create a connection pool
@@ -82,7 +88,7 @@ export async function executeQuery<T>(
     console.log(`Processed parameters:`, processedParams);
     
     // Execute the query with parameters
-    const [results] = await connection.execute(query, processedParams);
+    const [results] = await connection.query(query, processedParams);
 
     // Enhanced logging for security queries
     if (query.includes("security_events")) {
