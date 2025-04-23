@@ -218,7 +218,7 @@ export default function NotificationBell() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="fixed top-16 right-4 w-80 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-xl overflow-hidden z-50 max-h-[28rem] flex flex-col border border-white/20 dark:border-gray-700/30"
+              className="fixed top-16 right-4 w-80 bg-white/10 dark:bg-gray-900/20 backdrop-blur-md rounded-2xl shadow-xl overflow-hidden z-50 max-h-[28rem] flex flex-col border border-white/20 dark:border-gray-700/30"
             >
               <div className="p-4 border-b border-white/20 dark:border-gray-700/30 flex justify-between items-center bg-gradient-to-r from-blue-600/10 to-purple-600/10 dark:from-blue-900/30 dark:to-purple-900/30">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
