@@ -18,10 +18,23 @@ import {
   HelpCircle,
   Search,
   ChevronDown,
+  BellAlertIcon
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 import { useAuth } from "@/lib/AuthProvider";
+import { useNotifications as useNotificationsQuery } from "@/lib/hooks/useDataFetching";
+import { useNotifications } from "@/lib/NotificationProvider";
+import { 
+  BellIcon, 
+  DocumentTextIcon, 
+  ChatBubbleLeftRightIcon, 
+  CurrencyDollarIcon, 
+  InformationCircleIcon,
+  CheckCircleIcon,
+  XMarkIcon
+} from "@heroicons/react/24/outline";
+import { useFeedback } from "@/lib/FeedbackProvider";
 
 interface DynamicIslandProps {
   variant?: "dashboard" | "landing";
@@ -31,12 +44,20 @@ interface DynamicIslandProps {
 export default function DynamicIsland({ variant = "dashboard", children }: DynamicIslandProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { data: notifications, unreadCount, markAsRead, markAllAsRead } = useNotificationsQuery();
+  const legacyNotifications = useNotifications();
+  const { showFeedback } = useFeedback();
+
+  const notificationData = notifications || legacyNotifications.notifications;
+  const notificationCount = unreadCount || legacyNotifications.unreadCount;
 
   // Reset expanded state on pathname change
   useEffect(() => {
     setIsExpanded(false);
+    setShowNotifications(false);
   }, [pathname]);
 
   // Handle scroll for glassmorphic effect
@@ -51,8 +72,79 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
   const handleLogout = async () => {
     try {
       await logout();
+      showFeedback({
+        type: "success",
+        message: "Logged out successfully",
+        duration: 3000
+      });
     } catch (error) {
       console.error("Logout error:", error);
+      showFeedback({
+        type: "error",
+        message: "Failed to logout. Please try again.",
+        duration: 3000
+      });
+    }
+  };
+
+  const handleNotificationClick = async (notification: any) => {
+    try {
+      await markAsRead(notification.id);
+      showFeedback({
+        type: "success",
+        message: "Notification marked as read",
+        duration: 2000
+      });
+      setShowNotifications(false);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      showFeedback({
+        type: "error",
+        message: "Failed to mark notification as read",
+        duration: 3000
+      });
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllAsRead();
+      showFeedback({
+        type: "success",
+        message: "All notifications marked as read",
+        duration: 2000
+      });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      showFeedback({
+        type: "error",
+        message: "Failed to mark all notifications as read",
+        duration: 3000
+      });
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return "just now";
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case "file_status":
+        return <DocumentTextIcon className="h-5 w-5 text-blue-500" />;
+      case "admin_message":
+        return <ChatBubbleLeftRightIcon className="h-5 w-5 text-purple-500" />;
+      case "credit_transaction":
+        return <CurrencyDollarIcon className="h-5 w-5 text-green-500" />;
+      default:
+        return <InformationCircleIcon className="h-5 w-5 text-gray-500" />;
     }
   };
 
@@ -89,7 +181,10 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
           {/* Left side - Menu button */}
           <motion.button
             layout
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={() => {
+              setIsExpanded(!isExpanded);
+              setShowNotifications(false);
+            }}
             className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -104,7 +199,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                 transition={{ duration: 0.2 }}
               >
                 {isExpanded ? (
-                  <X className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  <XMarkIcon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
                 ) : (
                   <Menu className="h-5 w-5 text-gray-700 dark:text-gray-300" />
                 )}
@@ -145,9 +240,28 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                     {user?.credits || 0} Credits
                   </span>
                 </motion.div>
-                <motion.div layout>
-                  <NotificationBell />
-                </motion.div>
+                <motion.button
+                  layout
+                  onClick={() => {
+                    setIsExpanded(true);
+                    setShowNotifications(true);
+                  }}
+                  className="relative p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <BellIcon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  {notificationCount > 0 && (
+                    <motion.span
+                      className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg shadow-red-500/20 border border-white/20"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                    >
+                      {notificationCount > 9 ? "9+" : notificationCount}
+                    </motion.span>
+                  )}
+                </motion.button>
               </>
             )}
             <motion.div layout>
@@ -157,7 +271,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
         </motion.div>
 
         {/* Expanded Content */}
-        <AnimatePresence mode="sync">
+        <AnimatePresence>
           {isExpanded && (
             <motion.div
               layout
@@ -174,7 +288,82 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                 transition={{ ...spring, delay: 0.1 }}
                 className="p-4"
               >
-                {variant === "dashboard" ? (
+                {showNotifications ? (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        Notifications
+                      </h3>
+                      {notificationCount > 0 && (
+                        <button
+                          onClick={handleMarkAllAsRead}
+                          className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 px-2 py-1 rounded-md hover:bg-white/10 dark:hover:bg-blue-900/30 transition-colors duration-200"
+                        >
+                          Mark all as read
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-[28rem] overflow-y-auto">
+                      {notificationData.length === 0 ? (
+                        <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                          No notifications
+                        </div>
+                      ) : (
+                        <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                          {notificationData.map((notification: any) => (
+                            <motion.li
+                              key={notification.id}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -20 }}
+                              transition={{ duration: 0.2 }}
+                              className={`p-4 hover:bg-gray-50/80 dark:hover:bg-gray-700/80 cursor-pointer transition-colors duration-200 ${
+                                !notification.isRead
+                                  ? "bg-blue-50/80 dark:bg-blue-900/30 border-l-4 border-blue-500"
+                                  : "border-l-4 border-transparent"
+                              }`}
+                              onClick={() => handleNotificationClick(notification)}
+                            >
+                              <div className="flex items-start">
+                                <div className="flex-shrink-0 mr-3 mt-1">
+                                  {getNotificationIcon(notification.type)}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    {notification.title}
+                                  </p>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                    {notification.message}
+                                  </p>
+                                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                    {formatTimeAgo(notification.createdAt)}
+                                  </p>
+                                </div>
+                                {!notification.isRead && (
+                                  <div className="ml-2 flex-shrink-0">
+                                    <span className="inline-block h-2 w-2 rounded-full bg-blue-500"></span>
+                                  </div>
+                                )}
+                              </div>
+                            </motion.li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                    <div className="text-center">
+                      <Link
+                        href="/dashboard/notifications"
+                        className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 px-2 py-1 rounded-md hover:bg-white/10 dark:hover:bg-blue-900/30 transition-colors duration-200 inline-block"
+                        onClick={() => {
+                          setIsExpanded(false);
+                          setShowNotifications(false);
+                        }}
+                      >
+                        View all notifications
+                      </Link>
+                    </div>
+                  </div>
+                ) : variant === "dashboard" ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* User Profile */}
                     <motion.div 
@@ -234,6 +423,15 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                         >
                           <CreditCard className="h-5 w-5 mr-3" />
                           Credits
+                        </Link>
+                        <Link
+                          href="/dashboard/feedback"
+                          className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                            pathname === "/dashboard/feedback" ? "bg-white/10 dark:bg-gray-800/10" : "hover:bg-white/5 dark:hover:bg-gray-800/5"
+                          }`}
+                        >
+                          <BellAlertIcon className="h-5 w-5 mr-3" />
+                          Feedback History
                         </Link>
                         {user?.role === "admin" && (
                           <Link

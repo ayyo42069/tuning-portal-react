@@ -11,6 +11,14 @@ interface FeedbackRecord {
   user_name: string;
 }
 
+interface FeedbackEvent {
+  type: "success" | "error" | "info" | "warning";
+  message: string;
+  userId?: number;
+  action?: string;
+  metadata?: Record<string, any>;
+}
+
 // Helper function to get user ID from request
 function getUserIdFromRequest(req: NextRequest): string | null {
   // In a real application, you would get the user ID from the session or token
@@ -22,45 +30,34 @@ function getUserIdFromRequest(req: NextRequest): string | null {
 // GET handler to fetch feedback for an ECU file
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const ecuFileId = searchParams.get("ecuFileId");
-    
-    if (!ecuFileId) {
-      return NextResponse.json(
-        { success: false, message: "ECU file ID is required" },
-        { status: 400 }
-      );
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("userId");
+    const type = searchParams.get("type");
+    const limit = parseInt(searchParams.get("limit") || "10");
+
+    let query = "SELECT * FROM feedback_events WHERE 1=1";
+    const params: any[] = [];
+
+    if (userId) {
+      query += " AND user_id = ?";
+      params.push(userId);
     }
-    
-    // Fetch feedback for the ECU file
-    const feedbackQuery = `
-      SELECT 
-        f.id, 
-        f.user_id, 
-        f.rating, 
-        f.comment, 
-        f.created_at,
-        u.name as user_name
-      FROM 
-        ecu_file_feedback f
-      LEFT JOIN 
-        users u ON f.user_id = u.id
-      WHERE 
-        f.ecu_file_id = ?
-      ORDER BY 
-        f.created_at DESC
-    `;
-    
-    const feedback = await executeQuery(feedbackQuery, [ecuFileId]) as FeedbackRecord[];
-    
-    return NextResponse.json({ 
-      success: true, 
-      feedback 
-    });
+
+    if (type) {
+      query += " AND type = ?";
+      params.push(type);
+    }
+
+    query += " ORDER BY created_at DESC LIMIT ?";
+    params.push(limit);
+
+    const events = await executeQuery(query, params);
+
+    return NextResponse.json({ events });
   } catch (error) {
-    console.error("Error fetching feedback:", error);
+    console.error("Error fetching feedback events:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to fetch feedback" },
+      { error: "Failed to fetch feedback events" },
       { status: 500 }
     );
   }
@@ -69,80 +66,21 @@ export async function GET(request: NextRequest) {
 // POST handler to submit feedback for an ECU file
 export async function POST(request: NextRequest) {
   try {
-    // Verify authentication
-    const token = request.cookies.get("auth_token")?.value;
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: "Authentication required" },
-        { status: 401 }
-      );
-    }
+    const body: FeedbackEvent = await request.json();
+    const { type, message, userId, action, metadata } = body;
 
-    const user = verifyToken(token);
-    if (!user) {
-      return NextResponse.json(
-        { success: false, message: "Invalid authentication token" },
-        { status: 401 }
-      );
-    }
-    
-    const { ecuFileId, rating, comment } = await request.json();
-    
-    if (!ecuFileId || !rating) {
-      return NextResponse.json(
-        { success: false, message: "ECU file ID and rating are required" },
-        { status: 400 }
-      );
-    }
-    
-    // Validate rating
-    if (rating < 1 || rating > 5) {
-      return NextResponse.json(
-        { success: false, message: "Rating must be between 1 and 5" },
-        { status: 400 }
-      );
-    }
-    
-    // Check if the user has already submitted feedback for this ECU file
-    const existingFeedbackQuery = `
-      SELECT id FROM ecu_file_feedback 
-      WHERE ecu_file_id = ? AND user_id = ?
-    `;
-    
-    const existingFeedback = await executeQuery(existingFeedbackQuery, [ecuFileId, user.id]) as { id: number }[];
-    
-    if (existingFeedback && existingFeedback.length > 0) {
-      // Update existing feedback
-      const updateQuery = `
-        UPDATE ecu_file_feedback 
-        SET rating = ?, comment = ?, updated_at = NOW() 
-        WHERE ecu_file_id = ? AND user_id = ?
-      `;
-      
-      await executeQuery(updateQuery, [rating, comment, ecuFileId, user.id]);
-      
-      return NextResponse.json({ 
-        success: true, 
-        message: "Feedback updated successfully" 
-      });
-    } else {
-      // Insert new feedback
-      const insertQuery = `
-        INSERT INTO ecu_file_feedback (ecu_file_id, user_id, rating, comment, created_at, updated_at) 
-        VALUES (?, ?, ?, ?, NOW(), NOW())
-      `;
-      
-      await executeQuery(insertQuery, [ecuFileId, user.id, rating, comment]);
-      
-      return NextResponse.json({ 
-        success: true, 
-        message: "Feedback submitted successfully" 
-      });
-    }
+    // Log the feedback event to the database
+    await executeQuery(
+      `INSERT INTO feedback_events (type, message, user_id, action, metadata, created_at)
+       VALUES (?, ?, ?, ?, ?, NOW())`,
+      [type, message, userId || null, action || null, JSON.stringify(metadata || {})]
+    );
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error submitting feedback:", error);
+    console.error("Error logging feedback:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to submit feedback" },
+      { error: "Failed to log feedback event" },
       { status: 500 }
     );
   }
