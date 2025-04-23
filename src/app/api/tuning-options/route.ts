@@ -15,10 +15,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    // Get all tuning options
-    const tuningOptions = await executeQuery<any[]>(
-      'SELECT id, name, description, credit_cost FROM tuning_options ORDER BY name'
+    // Get model ID from query params
+    const { searchParams } = new URL(request.url);
+    const modelId = searchParams.get('modelId');
+
+    if (!modelId) {
+      return NextResponse.json({ error: 'Model ID is required' }, { status: 400 });
+    }
+
+    // Get tuning options for the model
+    const [tuningOptions] = await executeQuery<any[]>(
+      `SELECT t.id, t.name, t.description, t.credit_cost 
+       FROM tuning_options t
+       INNER JOIN model_tuning_options mto ON t.id = mto.tuning_option_id
+       WHERE mto.model_id = ?
+       ORDER BY t.name`,
+      [modelId]
     );
+
+    if (!tuningOptions || !Array.isArray(tuningOptions)) {
+      return NextResponse.json([], { status: 200 });
+    }
 
     return NextResponse.json(tuningOptions);
   } catch (error) {

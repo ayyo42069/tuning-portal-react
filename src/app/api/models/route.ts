@@ -16,16 +16,22 @@ export async function GET(request: NextRequest) {
     }
 
     // Get manufacturer ID from query params
-    const manufacturerId = request.nextUrl.searchParams.get('manufacturer');
+    const { searchParams } = new URL(request.url);
+    const manufacturerId = searchParams.get('manufacturerId');
+
     if (!manufacturerId) {
       return NextResponse.json({ error: 'Manufacturer ID is required' }, { status: 400 });
     }
 
-    // Get models for the specified manufacturer
-    const models = await executeQuery<any[]>(
-      'SELECT id, name FROM vehicle_models WHERE manufacturer_id = ? ORDER BY name',
+    // Get models for the manufacturer
+    const [models] = await executeQuery<any[]>(
+      'SELECT id, name, manufacturer_id FROM vehicle_models WHERE manufacturer_id = ? ORDER BY name',
       [manufacturerId]
     );
+
+    if (!models || !Array.isArray(models)) {
+      return NextResponse.json([], { status: 200 });
+    }
 
     return NextResponse.json(models);
   } catch (error) {

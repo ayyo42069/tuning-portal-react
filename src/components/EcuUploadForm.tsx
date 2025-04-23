@@ -36,6 +36,9 @@ export default function EcuUploadForm({ onClose }: EcuUploadFormProps) {
   const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
   const [message, setMessage] = useState('');
   const [totalCredits, setTotalCredits] = useState(0);
+  const [isLoadingManufacturers, setIsLoadingManufacturers] = useState(true);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const [isLoadingTuningOptions, setIsLoadingTuningOptions] = useState(false);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
@@ -49,6 +52,7 @@ export default function EcuUploadForm({ onClose }: EcuUploadFormProps) {
 
   // Fetch manufacturers on component mount
   useEffect(() => {
+    setIsLoadingManufacturers(true);
     fetch('/api/manufacturers')
       .then(res => res.json())
       .then(data => {
@@ -62,12 +66,16 @@ export default function EcuUploadForm({ onClose }: EcuUploadFormProps) {
       .catch(error => {
         console.error('Error fetching manufacturers:', error);
         toast.error('Failed to load manufacturers');
+      })
+      .finally(() => {
+        setIsLoadingManufacturers(false);
       });
   }, []);
 
   // Fetch models when manufacturer is selected
   useEffect(() => {
     if (selectedManufacturer) {
+      setIsLoadingModels(true);
       fetch(`/api/models?manufacturerId=${selectedManufacturer}`)
         .then(res => res.json())
         .then(data => {
@@ -81,13 +89,19 @@ export default function EcuUploadForm({ onClose }: EcuUploadFormProps) {
         .catch(error => {
           console.error('Error fetching models:', error);
           toast.error('Failed to load models');
+        })
+        .finally(() => {
+          setIsLoadingModels(false);
         });
+    } else {
+      setModels([]);
     }
   }, [selectedManufacturer]);
 
   // Fetch tuning options when model is selected
   useEffect(() => {
     if (selectedModel) {
+      setIsLoadingTuningOptions(true);
       fetch(`/api/tuning-options?modelId=${selectedModel}`)
         .then(res => res.json())
         .then(data => {
@@ -101,7 +115,12 @@ export default function EcuUploadForm({ onClose }: EcuUploadFormProps) {
         .catch(error => {
           console.error('Error fetching tuning options:', error);
           toast.error('Failed to load tuning options');
+        })
+        .finally(() => {
+          setIsLoadingTuningOptions(false);
         });
+    } else {
+      setTuningOptions([]);
     }
   }, [selectedModel]);
 
@@ -180,39 +199,54 @@ export default function EcuUploadForm({ onClose }: EcuUploadFormProps) {
       </div>
 
       <div className="space-y-4">
-        <select
-          value={selectedManufacturer || ''}
-          onChange={(e) => {
-            setSelectedManufacturer(Number(e.target.value));
-            setSelectedModel(null);
-            setSelectedOptions([]);
-          }}
-          className="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-2 text-white"
-        >
-          <option value="">Select Manufacturer</option>
-          {manufacturers.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            value={selectedManufacturer || ''}
+            onChange={(e) => {
+              setSelectedManufacturer(Number(e.target.value));
+              setSelectedModel(null);
+              setSelectedOptions([]);
+            }}
+            className="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-2 text-white"
+            disabled={isLoadingManufacturers}
+          >
+            <option value="">Select Manufacturer</option>
+            {manufacturers.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            ))}
+          </select>
+          {isLoadingManufacturers && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/20 border-t-white"></div>
+            </div>
+          )}
+        </div>
 
-        <select
-          value={selectedModel || ''}
-          onChange={(e) => {
-            setSelectedModel(Number(e.target.value));
-            setSelectedOptions([]);
-          }}
-          className="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-2 text-white"
-          disabled={!selectedManufacturer}
-        >
-          <option value="">Select Model</option>
-          {models.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            value={selectedModel || ''}
+            onChange={(e) => {
+              setSelectedModel(Number(e.target.value));
+              setSelectedOptions([]);
+            }}
+            className="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-2 text-white"
+            disabled={!selectedManufacturer || isLoadingModels}
+          >
+            <option value="">Select Model</option>
+            {models.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            ))}
+          </select>
+          {isLoadingModels && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/20 border-t-white"></div>
+            </div>
+          )}
+        </div>
 
         <select
           value={selectedYear || ''}
@@ -227,7 +261,11 @@ export default function EcuUploadForm({ onClose }: EcuUploadFormProps) {
           ))}
         </select>
 
-        {tuningOptions.length > 0 && (
+        {isLoadingTuningOptions ? (
+          <div className="flex items-center justify-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-2 border-white/20 border-t-white"></div>
+          </div>
+        ) : tuningOptions.length > 0 ? (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-white/60">Tuning Options</label>
@@ -261,7 +299,9 @@ export default function EcuUploadForm({ onClose }: EcuUploadFormProps) {
               ))}
             </div>
           </div>
-        )}
+        ) : selectedModel ? (
+          <p className="text-sm text-white/60 text-center py-4">No tuning options available for this model</p>
+        ) : null}
 
         <textarea
           value={message}
