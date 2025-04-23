@@ -15,9 +15,18 @@ import {
   X,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
-import NotificationBell from "@/components/NotificationBell";
 import { useAuth } from "@/lib/AuthProvider";
 import OpeningHours from "@/components/OpeningHours";
+import { useNotifications } from "@/lib/hooks/useDataFetching";
+import { 
+  BellIcon, 
+  DocumentTextIcon, 
+  ChatBubbleLeftRightIcon, 
+  CurrencyDollarIcon, 
+  InformationCircleIcon,
+  CheckCircleIcon,
+  XMarkIcon
+} from "@heroicons/react/24/outline";
 
 export default function AdminLayoutClient({
   children,
@@ -223,7 +232,6 @@ export default function AdminLayoutClient({
                       {user?.credits || 0} Credits
                     </span>
                   </div>
-                  <NotificationBell />
                   <ThemeToggle />
                   <button
                     onClick={handleLogout}
