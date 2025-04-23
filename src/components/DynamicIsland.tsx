@@ -162,6 +162,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
       layout
       className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-4xl z-50"
       transition={spring}
+      data-dynamic-island
     >
       <motion.div
         layout
@@ -484,6 +485,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                             setShowNotifications(false);
                           }}
                           className="flex items-center w-full px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors"
+                          data-new-upload
                         >
                           <Upload className="h-5 w-5 mr-3" />
                           New Upload

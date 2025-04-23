@@ -2,9 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import ECUUploadFormWithErrorBoundary from "./components/ECUUploadFormWithErrorBoundary";
 import LoadingSpinner from "@/components/LoadingSpinner";
-// Ticket system now available via floating button
 import {
   BarChart3,
   Clock,
@@ -18,6 +16,7 @@ import {
 import { useAuth } from "@/lib/AuthProvider";
 import { useTuningFiles, useUserProfile } from "@/lib/hooks/useDataFetching";
 import OpeningHours from "@/components/OpeningHours";
+import DynamicIsland from "@/components/DynamicIsland";
 
 interface User {
   id: number;
@@ -58,7 +57,6 @@ export default function Dashboard() {
   const router = useRouter();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [showUploadForm, setShowUploadForm] = useState(false);
   const [recentFiles, setRecentFiles] = useState<TuningFile[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [timeUntilOpen, setTimeUntilOpen] = useState("");
@@ -275,6 +273,9 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Dynamic Island */}
+      <DynamicIsland variant="dashboard" />
+
       {/* Main Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Recent Activity */}
@@ -291,7 +292,15 @@ export default function Dashboard() {
                   <h2 className="text-lg font-medium text-white">Upload ECU File</h2>
                 </div>
                 <button
-                  onClick={() => setShowUploadForm(true)}
+                  onClick={() => {
+                    const dynamicIsland = document.querySelector('[data-dynamic-island]');
+                    if (dynamicIsland) {
+                      const newUploadButton = dynamicIsland.querySelector('[data-new-upload]');
+                      if (newUploadButton) {
+                        (newUploadButton as HTMLButtonElement).click();
+                      }
+                    }
+                  }}
                   className="px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500/80 rounded-lg transition-colors"
                 >
                   New Upload
@@ -302,6 +311,7 @@ export default function Dashboard() {
               </p>
             </div>
           </div>
+
           {/* Recent Files Card */}
           <div className="relative group/card">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur opacity-20 group-hover/card:opacity-30 transition duration-1000 group-hover/card:duration-200"></div>
@@ -340,8 +350,6 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-
-          
         </div>
 
         {/* Right Column - Opening Hours and Support */}
@@ -380,26 +388,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
-      {/* Upload Form Modal */}
-      {showUploadForm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full mx-4">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-medium">Upload ECU File</h3>
-              <button
-                onClick={() => setShowUploadForm(false)}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-4">
-              <ECUUploadFormWithErrorBoundary onClose={() => setShowUploadForm(false)} />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

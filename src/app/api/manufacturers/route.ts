@@ -16,9 +16,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all manufacturers
-    const manufacturers = await executeQuery<any[]>(
+    const [manufacturers] = await executeQuery<any[]>(
       'SELECT id, name FROM manufacturers ORDER BY name'
     );
+
+    if (!manufacturers || !Array.isArray(manufacturers)) {
+      return NextResponse.json([], { status: 200 });
+    }
 
     return NextResponse.json(manufacturers);
   } catch (error) {
