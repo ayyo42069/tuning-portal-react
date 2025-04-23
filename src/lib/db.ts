@@ -165,14 +165,14 @@ export async function executeTransaction<T>(
       if (typeof queries === "string") {
         // Ensure params is always an array, even if empty or undefined
         const validParams = Array.isArray(params) ? params : [];
-        [results] = await connection.execute(queries, validParams);
+        [results] = await connection.query(queries, validParams);
       } else {
         results = [];
         for (let i = 0; i < queries.length; i++) {
           // Ensure params[i] is always a valid array
           const paramsForQuery = Array.isArray(params) && i < params.length ? params[i] : [];
           const validParams = Array.isArray(paramsForQuery) ? paramsForQuery : [];
-          const [result] = await connection.execute(queries[i], validParams);
+          const [result] = await connection.query(queries[i], validParams);
           results.push(result);
         }
       }
