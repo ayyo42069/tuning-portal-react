@@ -21,6 +21,7 @@ import {
   BadgeAlertIcon
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import EcuUploadForm from "./EcuUploadForm";
 
 import { useAuth } from "@/lib/AuthProvider";
 import { useNotifications as useNotificationsQuery } from "@/lib/hooks/useDataFetching";
@@ -45,6 +46,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
   const [isExpanded, setIsExpanded] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showEcuUpload, setShowEcuUpload] = useState(false);
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { data: notifications, unreadCount, markAsRead, markAllAsRead } = useNotificationsQuery();
@@ -214,7 +216,14 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
             transition={spring}
           >
             {variant === "landing" ? (
-              children
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setShowEcuUpload(true)}
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                >
+                  Upload ECU
+                </button>
+              </div>
             ) : (
               <motion.h1
                 layout
@@ -396,6 +405,29 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
           )}
         </AnimatePresence>
       </motion.div>
+
+      {/* ECU Upload Form */}
+      <AnimatePresence>
+        {showEcuUpload && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              className="w-full max-w-md"
+            >
+              <EcuUploadForm onClose={() => setShowEcuUpload(false)} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 } 
