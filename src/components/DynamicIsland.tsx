@@ -186,6 +186,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
             onClick={() => {
               setIsExpanded(!isExpanded);
               setShowNotifications(false);
+              setShowEcuUpload(false);
             }}
             className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
             whileHover={{ scale: 1.05 }}
@@ -247,6 +248,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                   onClick={() => {
                     setIsExpanded(true);
                     setShowNotifications(true);
+                    setShowEcuUpload(false);
                   }}
                   className="relative p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
                   whileHover={{ scale: 1.05 }}
@@ -365,6 +367,24 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                       </Link>
                     </div>
                   </div>
+                ) : showEcuUpload ? (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        Upload ECU File
+                      </h3>
+                      <button
+                        onClick={() => setShowEcuUpload(false)}
+                        className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Upload your ECU file for tuning. We support most manufacturer formats.
+                    </p>
+                    <EcuUploadForm onClose={() => setShowEcuUpload(false)} />
+                  </div>
                 ) : variant === "dashboard" ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* User Profile */}
@@ -458,7 +478,11 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                     >
                       <div className="space-y-2">
                         <button
-                          onClick={() => setShowEcuUpload(true)}
+                          onClick={() => {
+                            setIsExpanded(true);
+                            setShowEcuUpload(true);
+                            setShowNotifications(false);
+                          }}
                           className="flex items-center w-full px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors"
                         >
                           <Upload className="h-5 w-5 mr-3" />
@@ -544,29 +568,6 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
           )}
         </AnimatePresence>
       </motion.div>
-
-      {/* ECU Upload Form */}
-      <AnimatePresence>
-        {showEcuUpload && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-              className="w-full max-w-md"
-            >
-              <EcuUploadForm onClose={() => setShowEcuUpload(false)} />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 } 
