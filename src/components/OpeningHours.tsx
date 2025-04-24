@@ -160,21 +160,21 @@ export default function OpeningHours() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="backdrop-blur-md bg-white/10 border border-white/20 rounded-lg p-6 shadow-lg"
+      className="backdrop-blur-md bg-white/10 dark:bg-gray-800/10 border border-white/20 dark:border-gray-800/20 rounded-lg p-6 shadow-lg"
     >
-      <h2 className="text-xl font-semibold mb-4 text-white">Opening Hours</h2>
+      <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Opening Hours</h2>
       <div className="space-y-2">
         <div className="flex justify-between items-center">
-          <span className="text-white/80">Monday - Friday</span>
-          <span className="text-white">9:00 AM - 6:00 PM</span>
+          <span className="text-gray-600 dark:text-white/80">Monday - Friday</span>
+          <span className="text-gray-900 dark:text-white">9:00 AM - 6:00 PM</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-white/80">Saturday</span>
-          <span className="text-white">10:00 AM - 4:00 PM</span>
+          <span className="text-gray-600 dark:text-white/80">Saturday</span>
+          <span className="text-gray-900 dark:text-white">10:00 AM - 4:00 PM</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-white/80">Sunday</span>
-          <span className="text-white">Closed</span>
+          <span className="text-gray-600 dark:text-white/80">Sunday</span>
+          <span className="text-gray-900 dark:text-white">Closed</span>
         </div>
       </div>
 

@@ -177,7 +177,9 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
           overflow: "hidden"
         }}
         className={`w-full h-full border border-white/20 dark:border-gray-800/20 shadow-lg ${
-          isScrolled ? "backdrop-blur-xl bg-white/10 dark:bg-gray-900/10" : "backdrop-blur-md bg-white/5 dark:bg-gray-900/5"
+          isScrolled 
+            ? "backdrop-blur-xl bg-white/10 dark:bg-gray-900/10" 
+            : "backdrop-blur-md bg-white/5 dark:bg-gray-900/5"
         }`}
         transition={spring}
       >
@@ -209,9 +211,9 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                 transition={{ duration: 0.2 }}
               >
                 {isExpanded ? (
-                  <X className="h-6 w-6 text-white" />
+                  <X className="h-6 w-6 text-gray-900 dark:text-white" />
                 ) : (
-                  <Menu className="h-6 w-6 text-white" />
+                  <Menu className="h-6 w-6 text-gray-900 dark:text-white" />
                 )}
               </motion.div>
             </AnimatePresence>
@@ -275,9 +277,8 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                 </motion.button>
               </>
             )}
-            <motion.div layout>
-              <ThemeToggle />
-            </motion.div>
+            
+            <ThemeToggle />
           </motion.div>
         </motion.div>
 
@@ -314,7 +315,8 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                         </button>
                       )}
                     </div>
-                    <div className="max-h-[28rem] overflow-y-auto">
+                    
+                    <div className="space-y-2">
                       {notificationData.length === 0 ? (
                         <div className="p-4 text-center text-gray-500 dark:text-gray-400">
                           No notifications
@@ -361,7 +363,8 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                         </ul>
                       )}
                     </div>
-                    <div className="text-center">
+                    
+                    <div className="flex justify-end">
                       <Link
                         href="/dashboard/notifications"
                         className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 px-2 py-1 rounded-md hover:bg-white/10 dark:hover:bg-blue-900/30 transition-colors duration-200 inline-block"
@@ -392,7 +395,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                     </p>
                     <EcuUploadForm onClose={() => setShowEcuUpload(false)} />
                   </div>
-                ) : variant === "dashboard" ? (
+                ) : (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* User Profile */}
                     <motion.div 
@@ -419,7 +422,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                     </motion.div>
 
                     {/* Navigation */}
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ ...spring, delay: 0.3 }}
@@ -432,8 +435,8 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                             pathname === "/dashboard" ? "bg-white/10 dark:bg-gray-800/10" : "hover:bg-white/5 dark:hover:bg-gray-800/5"
                           }`}
                         >
-                          <Home className="h-5 w-5 mr-3" />
-                          Dashboard
+                          <Home className="h-5 w-5 mr-3 text-gray-700 dark:text-gray-300" />
+                          <span className="text-gray-900 dark:text-white">Dashboard</span>
                         </Link>
                         <Link
                           href="/dashboard/tuning-history"
@@ -441,8 +444,8 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                             pathname === "/dashboard/tuning-history" ? "bg-white/10 dark:bg-gray-800/10" : "hover:bg-white/5 dark:hover:bg-gray-800/5"
                           }`}
                         >
-                          <History className="h-5 w-5 mr-3" />
-                          Tuning History
+                          <History className="h-5 w-5 mr-3 text-gray-700 dark:text-gray-300" />
+                          <span className="text-gray-900 dark:text-white">Tuning History</span>
                         </Link>
                         <Link
                           href="/dashboard/credits"
@@ -450,8 +453,8 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                             pathname === "/dashboard/credits" ? "bg-white/10 dark:bg-gray-800/10" : "hover:bg-white/5 dark:hover:bg-gray-800/5"
                           }`}
                         >
-                          <CreditCard className="h-5 w-5 mr-3" />
-                          Credits
+                          <CreditCard className="h-5 w-5 mr-3 text-gray-700 dark:text-gray-300" />
+                          <span className="text-gray-900 dark:text-white">Credits</span>
                         </Link>
                         <Link
                           href="/dashboard/feedback"
@@ -459,8 +462,8 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                             pathname === "/dashboard/feedback" ? "bg-white/10 dark:bg-gray-800/10" : "hover:bg-white/5 dark:hover:bg-gray-800/5"
                           }`}
                         >
-                          <BadgeAlertIcon className="h-5 w-5 mr-3" />
-                          Feedback History
+                          <BadgeAlertIcon className="h-5 w-5 mr-3 text-gray-700 dark:text-gray-300" />
+                          <span className="text-gray-900 dark:text-white">Feedback History</span>
                         </Link>
                         {user?.role === "admin" && (
                           <Link
@@ -469,15 +472,15 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                               pathname.startsWith("/admin") ? "bg-white/10 dark:bg-gray-800/10" : "hover:bg-white/5 dark:hover:bg-gray-800/5"
                             }`}
                           >
-                            <Settings className="h-5 w-5 mr-3" />
-                            Admin Panel
+                            <Settings className="h-5 w-5 mr-3 text-gray-700 dark:text-gray-300" />
+                            <span className="text-gray-900 dark:text-white">Admin Panel</span>
                           </Link>
                         )}
                       </nav>
                     </motion.div>
 
                     {/* Quick Actions */}
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ ...spring, delay: 0.4 }}
@@ -503,65 +506,8 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                           href="/help"
                           className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
                         >
-                          <HelpCircle className="h-5 w-5 mr-3" />
-                          Help & Support
-                        </Link>
-                      </div>
-                    </motion.div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Landing Page Navigation */}
-                    <motion.div 
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ ...spring, delay: 0.2 }}
-                      className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10"
-                    >
-                      <nav className="space-y-2">
-                        <Link
-                          href="/#features"
-                          className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
-                        >
-                          <Search className="h-5 w-5 mr-3 text-blue-500" />
-                          Features
-                        </Link>
-                        <Link
-                          href="/#pricing"
-                          className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
-                        >
-                          <CreditCard className="h-5 w-5 mr-3 text-green-500" />
-                          Pricing
-                        </Link>
-                        <Link
-                          href="/dashboard"
-                          className="flex items-center px-4 py-2 rounded-lg hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
-                        >
-                          <Home className="h-5 w-5 mr-3 text-purple-500" />
-                          Dashboard
-                        </Link>
-                      </nav>
-                    </motion.div>
-
-                    {/* Auth Actions */}
-                    <motion.div 
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ ...spring, delay: 0.3 }}
-                      className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10"
-                    >
-                      <div className="space-y-2">
-                        <Link
-                          href="/auth/login"
-                          className="flex items-center justify-center px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:opacity-90 transition-opacity"
-                        >
-                          Login
-                        </Link>
-                        <Link
-                          href="/auth/register"
-                          className="flex items-center justify-center px-4 py-2 rounded-lg border border-white/20 dark:border-gray-800/20 hover:bg-white/5 dark:hover:bg-gray-800/5 transition-colors"
-                        >
-                          Register
+                          <HelpCircle className="h-5 w-5 mr-3 text-gray-700 dark:text-gray-300" />
+                          <span className="text-gray-900 dark:text-white">Help & Support</span>
                         </Link>
                       </div>
                     </motion.div>

@@ -303,7 +303,7 @@ export default function Dashboard() {
                   <div className="p-2 bg-indigo-500/10 rounded-lg">
                     <Upload className="w-5 h-5 text-indigo-500/80" />
                   </div>
-                  <h2 className="text-lg font-medium text-white">Upload ECU File</h2>
+                  <h2 className="text-lg font-medium text-gray-900 dark:text-white">Upload ECU File</h2>
                 </div>
                 <button
                   onClick={handleNewUpload}
@@ -312,7 +312,7 @@ export default function Dashboard() {
                   New Upload
                 </button>
               </div>
-              <p className="text-sm text-blue-100/80">
+              <p className="text-sm text-gray-600 dark:text-blue-100/80">
                 Upload your ECU file for tuning. We support most manufacturer formats.
               </p>
             </div>
@@ -327,7 +327,7 @@ export default function Dashboard() {
                   <div className="p-2 bg-blue-500/10 rounded-lg">
                     <BarChart3 className="w-5 h-5 text-blue-500/80" />
                   </div>
-                  <h2 className="text-lg font-medium text-white">Recent Files</h2>
+                  <h2 className="text-lg font-medium text-gray-900 dark:text-white">Recent Files</h2>
                 </div>
               </div>
 
@@ -340,8 +340,8 @@ export default function Dashboard() {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="font-medium text-white">{file.file_name}</h3>
-                        <p className="text-sm text-blue-100/80">{file.vehicle_info}</p>
+                        <h3 className="font-medium text-gray-900 dark:text-white">{file.file_name}</h3>
+                        <p className="text-sm text-gray-600 dark:text-blue-100/80">{file.vehicle_info}</p>
                       </div>
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(
@@ -372,20 +372,20 @@ export default function Dashboard() {
                   <MessageSquare className="w-5 h-5 text-purple-500/80" />
                 </div>
                 <div>
-                  <h4 className="font-medium text-white">Need Help?</h4>
-                  <p className="text-sm text-blue-100/80 mt-1">
+                  <h4 className="font-medium text-gray-900 dark:text-white">Need Help?</h4>
+                  <p className="text-sm text-gray-600 dark:text-blue-100/80 mt-1">
                     Our support team is here to help with your tuning needs.
                   </p>
                 </div>
               </div>
               <div className="mt-4 flex items-center justify-between">
-                <span className="text-xs text-purple-400/80">24/7 Support</span>
+                <span className="text-xs text-purple-600 dark:text-purple-400/80">24/7 Support</span>
                 <button
                   onClick={() => router.push('/support')}
                   className="relative group/btn"
                 >
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg blur opacity-20 group-hover/btn:opacity-30 transition duration-1000 group-hover/btn:duration-200"></div>
-                  <div className="relative px-3 py-1.5 bg-purple-500/10 text-purple-500/80 text-sm font-medium rounded-lg hover:bg-purple-500/20 transition-colors">
+                  <div className="relative px-3 py-1.5 bg-purple-500/10 text-purple-600 dark:text-purple-500/80 text-sm font-medium rounded-lg hover:bg-purple-500/20 transition-colors">
                     Open Ticket
                   </div>
                 </button>
