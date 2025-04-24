@@ -342,9 +342,9 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                   <EcuUploadForm onClose={() => setShowEcuUpload(false)} />
                 </div>
               ) : (
-                <div className="p-4">
-                  {/* User Profile */}
-                  <div className="mb-4 p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10">
+                <div className="p-4 space-y-4">
+                  {/* User Profile Section */}
+                  <div className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10">
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl">
                         {user?.username?.charAt(0).toUpperCase() || "U"}
@@ -362,53 +362,91 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                     </div>
                   </div>
 
-                  {/* Navigation */}
-                  <nav className="space-y-2">
-                    <Link
-                      href="/dashboard"
-                      className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
-                    >
-                      <Home className="h-5 w-5 text-gray-900 dark:text-white" />
-                      <span className="text-gray-900 dark:text-white">Dashboard</span>
-                    </Link>
-                    <Link
-                      href="/dashboard/history"
-                      className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
-                    >
-                      <History className="h-5 w-5 text-gray-900 dark:text-white" />
-                      <span className="text-gray-900 dark:text-white">History</span>
-                    </Link>
-                    <Link
-                      href="/dashboard/credits"
-                      className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
-                    >
-                      <CreditCard className="h-5 w-5 text-gray-900 dark:text-white" />
-                      <span className="text-gray-900 dark:text-white">Credits</span>
-                    </Link>
-                    <Link
-                      href="/dashboard/settings"
-                      className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
-                    >
-                      <Settings className="h-5 w-5 text-gray-900 dark:text-white" />
-                      <span className="text-gray-900 dark:text-white">Settings</span>
-                    </Link>
-                    {user?.role === "admin" && (
+                  {/* Quick Actions Section */}
+                  <div className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10">
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Quick Actions</h3>
+                    <div className="space-y-2">
+                      <button
+                        onClick={handleNewUpload}
+                        className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors w-full"
+                      >
+                        <Upload className="h-5 w-5 text-gray-900 dark:text-white" />
+                        <span className="text-gray-900 dark:text-white">New Upload</span>
+                      </button>
                       <Link
-                        href="/admin"
+                        href="/dashboard/credits"
+                        className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
+                      >
+                        <CreditCard className="h-5 w-5 text-gray-900 dark:text-white" />
+                        <span className="text-gray-900 dark:text-white">Buy Credits</span>
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Navigation Section */}
+                  <div className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10">
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Navigation</h3>
+                    <nav className="space-y-2">
+                      <Link
+                        href="/dashboard"
+                        className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
+                      >
+                        <Home className="h-5 w-5 text-gray-900 dark:text-white" />
+                        <span className="text-gray-900 dark:text-white">Dashboard</span>
+                      </Link>
+                      <Link
+                        href="/dashboard/history"
+                        className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
+                      >
+                        <History className="h-5 w-5 text-gray-900 dark:text-white" />
+                        <span className="text-gray-900 dark:text-white">History</span>
+                      </Link>
+                      <Link
+                        href="/dashboard/settings"
                         className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
                       >
                         <Settings className="h-5 w-5 text-gray-900 dark:text-white" />
-                        <span className="text-gray-900 dark:text-white">Admin Panel</span>
+                        <span className="text-gray-900 dark:text-white">Settings</span>
                       </Link>
-                    )}
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors w-full"
-                    >
-                      <LogOut className="h-5 w-5 text-gray-900 dark:text-white" />
-                      <span className="text-gray-900 dark:text-white">Logout</span>
-                    </button>
-                  </nav>
+                      {user?.role === "admin" && (
+                        <Link
+                          href="/admin"
+                          className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
+                        >
+                          <Settings className="h-5 w-5 text-gray-900 dark:text-white" />
+                          <span className="text-gray-900 dark:text-white">Admin Panel</span>
+                        </Link>
+                      )}
+                    </nav>
+                  </div>
+
+                  {/* Account Section */}
+                  <div className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10">
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Account</h3>
+                    <div className="space-y-2">
+                      <Link
+                        href="/dashboard/profile"
+                        className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
+                      >
+                        <User className="h-5 w-5 text-gray-900 dark:text-white" />
+                        <span className="text-gray-900 dark:text-white">Profile</span>
+                      </Link>
+                      <Link
+                        href="/help"
+                        className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
+                      >
+                        <HelpCircle className="h-5 w-5 text-gray-900 dark:text-white" />
+                        <span className="text-gray-900 dark:text-white">Help & Support</span>
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors w-full"
+                      >
+                        <LogOut className="h-5 w-5 text-gray-900 dark:text-white" />
+                        <span className="text-gray-900 dark:text-white">Logout</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </motion.div>
