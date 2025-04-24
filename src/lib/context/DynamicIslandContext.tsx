@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import type { DynamicIslandContext as DynamicIslandContextType } from '../types/dynamicIsland';
 import { ContextState, ContextAction } from '../types/dynamicIsland';
