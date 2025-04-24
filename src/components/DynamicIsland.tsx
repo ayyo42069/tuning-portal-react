@@ -157,6 +157,12 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
     mass: 1
   };
 
+  const handleNewUpload = () => {
+    setIsExpanded(true);
+    setShowEcuUpload(true);
+    setShowNotifications(false);
+  };
+
   return (
     <motion.div
       layout
@@ -479,11 +485,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                     >
                       <div className="space-y-2">
                         <button
-                          onClick={() => {
-                            setIsExpanded(true);
-                            setShowEcuUpload(true);
-                            setShowNotifications(false);
-                          }}
+                          onClick={handleNewUpload}
                           className="flex items-center w-full px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors"
                           data-new-upload
                         >

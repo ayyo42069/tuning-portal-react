@@ -267,6 +267,16 @@ export default function Dashboard() {
     );
   };
 
+  const handleNewUpload = () => {
+    const dynamicIsland = document.querySelector('[data-dynamic-island]');
+    if (dynamicIsland) {
+      const newUploadButton = dynamicIsland.querySelector('[data-new-upload]');
+      if (newUploadButton) {
+        (newUploadButton as HTMLButtonElement).click();
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -276,66 +286,113 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header with New Upload Button */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setShowUploadForm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-          >
-            <Upload className="w-5 h-5" />
-            New Upload
-          </motion.button>
-        </div>
+    <div className="space-y-6">
+      {/* Dynamic Island */}
+      <DynamicIsland variant="dashboard" />
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Recent Files */}
-          <div className="md:col-span-2">
-            <RecentFiles />
-          </div>
-
-          {/* Opening Hours */}
-          <div>
-            <OpeningHours />
-          </div>
-        </div>
-
-        {/* Dynamic Island Upload Form */}
-        <AnimatePresence>
-          {showUploadForm && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
-              onClick={() => setShowUploadForm(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-6 max-w-2xl w-full mx-4"
-                onClick={e => e.stopPropagation()}
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <h2 className="text-xl font-semibold text-white">Upload ECU File</h2>
-                  <button
-                    onClick={() => setShowUploadForm(false)}
-                    className="text-white/60 hover:text-white"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+      {/* Main Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Recent Activity */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* ECU Upload Card */}
+          <div className="relative group/card">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/20 to-blue-500/20 rounded-xl blur opacity-20 group-hover/card:opacity-30 transition duration-1000 group-hover/card:duration-200"></div>
+            <div className="relative bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm rounded-xl border border-white/10 dark:border-gray-800/10 p-6 hover:bg-white/10 dark:hover:bg-gray-800/10 transition-all duration-200">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-indigo-500/10 rounded-lg">
+                    <Upload className="w-5 h-5 text-indigo-500/80" />
+                  </div>
+                  <h2 className="text-lg font-medium text-white">Upload ECU File</h2>
                 </div>
-                <EcuUploadForm onClose={() => setShowUploadForm(false)} />
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <button
+                  onClick={handleNewUpload}
+                  className="px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500/80 rounded-lg transition-colors"
+                >
+                  New Upload
+                </button>
+              </div>
+              <p className="text-sm text-blue-100/80">
+                Upload your ECU file for tuning. We support most manufacturer formats.
+              </p>
+            </div>
+          </div>
+
+          {/* Recent Files Card */}
+          <div className="relative group/card">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur opacity-20 group-hover/card:opacity-30 transition duration-1000 group-hover/card:duration-200"></div>
+            <div className="relative bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm rounded-xl border border-white/10 dark:border-gray-800/10 p-6 hover:bg-white/10 dark:hover:bg-gray-800/10 transition-all duration-200">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-500/10 rounded-lg">
+                    <BarChart3 className="w-5 h-5 text-blue-500/80" />
+                  </div>
+                  <h2 className="text-lg font-medium text-white">Recent Files</h2>
+                </div>
+              </div>
+
+              {/* Recent Files List */}
+              <div className="space-y-4">
+                {recentFiles.map((file) => (
+                  <div
+                    key={file.id}
+                    className="p-4 bg-white/5 dark:bg-gray-800/5 rounded-lg border border-white/10 dark:border-gray-800/10 hover:bg-white/10 dark:hover:bg-gray-800/10 transition-all duration-200"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium text-white">{file.file_name}</h3>
+                        <p className="text-sm text-blue-100/80">{file.vehicle_info}</p>
+                      </div>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(
+                          file.status
+                        )}`}
+                      >
+                        {file.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column - Opening Hours and Support */}
+        <div className="space-y-6">
+          {/* Opening Hours */}
+          <OpeningHours />
+
+          {/* Support Card */}
+          <div className="relative group/card">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl blur opacity-20 group-hover/card:opacity-30 transition duration-1000 group-hover/card:duration-200"></div>
+            <div className="relative bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm rounded-xl border border-white/10 dark:border-gray-800/10 p-4 hover:bg-white/10 dark:hover:bg-gray-800/10 transition-all duration-200">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-purple-500/10 rounded-lg">
+                  <MessageSquare className="w-5 h-5 text-purple-500/80" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-white">Need Help?</h4>
+                  <p className="text-sm text-blue-100/80 mt-1">
+                    Our support team is here to help with your tuning needs.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <span className="text-xs text-purple-400/80">24/7 Support</span>
+                <button
+                  onClick={() => router.push('/support')}
+                  className="relative group/btn"
+                >
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg blur opacity-20 group-hover/btn:opacity-30 transition duration-1000 group-hover/btn:duration-200"></div>
+                  <div className="relative px-3 py-1.5 bg-purple-500/10 text-purple-500/80 text-sm font-medium rounded-lg hover:bg-purple-500/20 transition-colors">
+                    Open Ticket
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
