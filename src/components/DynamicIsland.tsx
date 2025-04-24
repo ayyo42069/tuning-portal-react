@@ -423,14 +423,14 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                           onClick={handleNewUpload}
                           className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors w-full"
                         >
-                          <Upload className="h-5 w-5 text-gray-900 dark:text-white" />
+                          <Upload className="h-5 w-5 text-blue-500" />
                           <span className="text-gray-900 dark:text-white">New Upload</span>
                         </button>
                         <Link
                           href="/dashboard/credits"
                           className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
                         >
-                          <CreditCard className="h-5 w-5 text-gray-900 dark:text-white" />
+                          <CreditCard className="h-5 w-5 text-green-500" />
                           <span className="text-gray-900 dark:text-white">Buy Credits</span>
                         </Link>
                       </div>
@@ -444,21 +444,21 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                           href="/dashboard"
                           className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
                         >
-                          <Home className="h-5 w-5 text-gray-900 dark:text-white" />
+                          <Home className="h-5 w-5 text-blue-500" />
                           <span className="text-gray-900 dark:text-white">Dashboard</span>
                         </Link>
                         <Link
                           href="/dashboard/history"
                           className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
                         >
-                          <History className="h-5 w-5 text-gray-900 dark:text-white" />
+                          <History className="h-5 w-5 text-purple-500" />
                           <span className="text-gray-900 dark:text-white">History</span>
                         </Link>
                         <Link
                           href="/dashboard/settings"
                           className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
                         >
-                          <Settings className="h-5 w-5 text-gray-900 dark:text-white" />
+                          <Settings className="h-5 w-5 text-yellow-500" />
                           <span className="text-gray-900 dark:text-white">Settings</span>
                         </Link>
                         {user?.role === "admin" && (
@@ -466,7 +466,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                             href="/admin"
                             className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
                           >
-                            <Settings className="h-5 w-5 text-gray-900 dark:text-white" />
+                            <Settings className="h-5 w-5 text-indigo-500" />
                             <span className="text-gray-900 dark:text-white">Admin Panel</span>
                           </Link>
                         )}
@@ -481,22 +481,22 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                           href="/dashboard/profile"
                           className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
                         >
-                          <User className="h-5 w-5 text-gray-900 dark:text-white" />
+                          <User className="h-5 w-5 text-cyan-500" />
                           <span className="text-gray-900 dark:text-white">Profile</span>
                         </Link>
                         <Link
                           href="/help"
                           className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
                         >
-                          <HelpCircle className="h-5 w-5 text-gray-900 dark:text-white" />
+                          <HelpCircle className="h-5 w-5 text-orange-500" />
                           <span className="text-gray-900 dark:text-white">Help & Support</span>
                         </Link>
                         <button
                           onClick={handleLogout}
-                          className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors w-full"
+                          className="flex items-center space-x-2 p-2 rounded-lg hover:bg-red-500/10 dark:hover:bg-red-500/10 transition-colors w-full"
                         >
-                          <LogOut className="h-5 w-5 text-gray-900 dark:text-white" />
-                          <span className="text-gray-900 dark:text-white">Logout</span>
+                          <LogOut className="h-5 w-5 text-red-500" />
+                          <span className="text-red-500">Logout</span>
                         </button>
                       </div>
                     </div>
