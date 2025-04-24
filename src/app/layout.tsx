@@ -93,7 +93,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" dir="ltr" suppressHydrationWarning>
+    <html lang="en" dir="ltr" suppressHydrationWarning className="transition-colors duration-300 ease-in-out">
       <head>
         <link rel="icon" type="image/png" sizes="32x32" href="/images/icon/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/images/icon/favicon-16x16.png" />
@@ -137,7 +137,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-200`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-all duration-300 ease-in-out`}
       >
         <Providers>
           <AuthProvider>

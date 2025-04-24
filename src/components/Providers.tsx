@@ -37,7 +37,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         attribute="class"
         defaultTheme="system"
         enableSystem
-        disableTransitionOnChange
+        disableTransitionOnChange={false}
         storageKey="tuning-portal-theme"
       >
         <NotificationProvider>

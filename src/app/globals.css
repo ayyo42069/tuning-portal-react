@@ -51,8 +51,12 @@
   }
 
   body {
-    @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-white;
+    @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300 ease-in-out;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  * {
+    @apply transition-colors duration-300 ease-in-out;
   }
 }
 
@@ -235,7 +239,7 @@
 
 /* Custom styles */
 .theme-transition {
-  @apply transition-colors duration-200;
+  @apply transition-colors duration-300 ease-in-out;
 }
 
 /* Scrollbar styles */
@@ -245,14 +249,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-gray-800;
+  @apply bg-gray-100 dark:bg-gray-800 transition-colors duration-300 ease-in-out;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  @apply bg-gray-300 dark:bg-gray-600 rounded-full transition-colors duration-300 ease-in-out;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-gray-500;
+  @apply bg-gray-400 dark:bg-gray-500 transition-colors duration-300 ease-in-out;
 }
 
