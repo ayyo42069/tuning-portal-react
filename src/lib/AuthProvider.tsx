@@ -19,6 +19,11 @@ interface User {
   isBanned?: boolean;
   banReason?: string;
   banExpiresAt?: string;
+  email_verified?: boolean;
+  last_login_date?: string;
+  registration_date?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface AuthContextType {

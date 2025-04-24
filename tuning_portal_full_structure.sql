@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: mo0kkkc4gkcgwss8o4c0000w
--- Generation Time: Apr 17, 2025 at 11:16 PM
+-- Generation Time: Apr 24, 2025 at 11:45 PM
 -- Server version: 8.4.4
 -- PHP Version: 8.3.17
 
@@ -11,15 +11,30 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
 --
 -- Database: `tuning_portal`
 --
+
+DELIMITER $$
+--
+-- Procedures
+--
+CREATE DEFINER=`root`@`%` PROCEDURE `cleanup_expired_rate_limits` ()   BEGIN
+  DELETE FROM rate_limits WHERE reset_time < NOW();
+  DELETE FROM rate_limit_logs WHERE created_at < DATE_SUB(NOW(), INTERVAL 30 DAY);
+END$$
+
+--
+-- Functions
+--
+CREATE DEFINER=`root`@`%` FUNCTION `log_user_activity` (`p_user_id` INT, `p_activity_type` VARCHAR(50), `p_ip_address` VARCHAR(45), `p_user_agent` VARCHAR(255), `p_details` JSON) RETURNS INT  BEGIN
+  INSERT INTO user_activity_logs (user_id, activity_type, ip_address, user_agent, details)
+  VALUES (p_user_id, p_activity_type, p_ip_address, p_user_agent, p_details);
+  
+  RETURN LAST_INSERT_ID();
+END$$
+
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -115,6 +130,23 @@ CREATE TABLE `email_verification_tokens` (
   `expires_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `feedback_events`
+--
+
+CREATE TABLE `feedback_events` (
+  `id` int NOT NULL,
+  `type` enum('success','error','info','warning') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `message` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `action` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `metadata` json DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -448,6 +480,15 @@ ALTER TABLE `email_verification_tokens`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `feedback_events`
+--
+ALTER TABLE `feedback_events`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_type` (`type`),
+  ADD KEY `idx_created_at` (`created_at`);
+
+--
 -- Indexes for table `manufacturers`
 --
 ALTER TABLE `manufacturers`
@@ -622,6 +663,12 @@ ALTER TABLE `email_verification_tokens`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `feedback_events`
+--
+ALTER TABLE `feedback_events`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `manufacturers`
 --
 ALTER TABLE `manufacturers`
@@ -763,6 +810,12 @@ ALTER TABLE `email_verification_tokens`
   ADD CONSTRAINT `email_verification_tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `feedback_events`
+--
+ALTER TABLE `feedback_events`
+  ADD CONSTRAINT `feedback_events_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
 -- Constraints for table `notifications`
 --
 ALTER TABLE `notifications`
@@ -840,8 +893,44 @@ ALTER TABLE `user_credits`
 --
 ALTER TABLE `vehicle_models`
   ADD CONSTRAINT `vehicle_models_ibfk_1` FOREIGN KEY (`manufacturer_id`) REFERENCES `manufacturers` (`id`) ON DELETE CASCADE;
-COMMIT;
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+DELIMITER $$
+--
+-- Events
+--
+CREATE DEFINER=`root`@`%` EVENT `cleanup_rate_limits` ON SCHEDULE EVERY 1 DAY STARTS '2025-03-14 13:17:11' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+  -- Delete expired rate limits
+  DELETE FROM rate_limits WHERE reset_time < NOW() - INTERVAL 1 DAY;
+  
+  -- Delete old rate limit logs (keep 30 days of history)
+  DELETE FROM rate_limit_logs WHERE created_at < NOW() - INTERVAL 30 DAY;
+END$$
+
+CREATE DEFINER=`root`@`%` EVENT `cleanup_security_events` ON SCHEDULE EVERY 1 DAY STARTS '2025-03-15 22:24:14' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+  -- Keep security events for 1 year
+  DELETE FROM security_events WHERE created_at < NOW() - INTERVAL 1 YEAR;
+  
+  -- Keep resolved alerts for 6 months
+  DELETE FROM security_alerts WHERE is_resolved = TRUE AND resolved_at < NOW() - INTERVAL 6 MONTH;
+  
+  -- Keep location data for 1 year
+  DELETE FROM user_access_locations WHERE created_at < NOW() - INTERVAL 1 YEAR;
+END$$
+
+CREATE DEFINER=`root`@`%` EVENT `unban_expired_users` ON SCHEDULE EVERY 1 HOUR STARTS '2025-03-19 01:12:38' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+  -- Unban users whose ban has expired
+  UPDATE users 
+  SET is_banned = FALSE, 
+      ban_reason = NULL, 
+      ban_expires_at = NULL, 
+      banned_by = NULL, 
+      banned_at = NULL 
+  WHERE is_banned = TRUE 
+    AND ban_expires_at IS NOT NULL 
+    AND ban_expires_at <= NOW();
+END$$
+
+CREATE DEFINER=`root`@`%` EVENT `cleanup_rate_limits_event` ON SCHEDULE EVERY 1 HOUR STARTS '2025-04-10 20:28:45' ON COMPLETION NOT PRESERVE ENABLE DO CALL cleanup_expired_rate_limits()$$
+
+DELIMITER ;
+COMMIT;

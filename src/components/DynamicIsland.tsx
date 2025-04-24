@@ -290,7 +290,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
             transition={spring}
           >
             <span className="text-lg font-semibold text-gray-900 dark:text-white">
-              {showEcuUpload ? "Upload ECU File" : "Dashboard"}
+              {showEcuUpload ? "Upload ECU File" : showNotifications ? "Notifications" : "Dashboard"}
             </span>
           </motion.div>
 
@@ -303,7 +303,16 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
             <ThemeToggle />
             <motion.button
               layout
-              onClick={handleNewUpload}
+              onClick={() => {
+                if (showEcuUpload) {
+                  setShowEcuUpload(false);
+                  setIsExpanded(false);
+                } else {
+                  setIsExpanded(true);
+                  setShowEcuUpload(true);
+                  setShowNotifications(false);
+                }
+              }}
               className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
             >
               <Upload className="h-6 w-6 text-gray-900 dark:text-white" />
@@ -311,9 +320,14 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
             <motion.button
               layout
               onClick={() => {
-                setIsExpanded(true);
-                setShowNotifications(true);
-                setShowEcuUpload(false);
+                if (showNotifications) {
+                  setShowNotifications(false);
+                  setIsExpanded(false);
+                } else {
+                  setIsExpanded(true);
+                  setShowNotifications(true);
+                  setShowEcuUpload(false);
+                }
               }}
               className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors relative"
             >
@@ -339,7 +353,10 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
             >
               {showEcuUpload ? (
                 <div className="p-4">
-                  <EcuUploadForm onClose={() => setShowEcuUpload(false)} />
+                  <EcuUploadForm onClose={() => {
+                    setShowEcuUpload(false);
+                    setIsExpanded(false);
+                  }} />
                 </div>
               ) : showNotifications ? (
                 <div className="p-4">
@@ -398,7 +415,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                   <div className="grid grid-cols-2 gap-4">
                     {/* User Profile Section */}
                     <div className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10">
-                      <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-4 mb-4">
                         <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl">
                           {user?.username?.charAt(0).toUpperCase() || "U"}
                         </div>
@@ -411,6 +428,35 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                           }`}>
                             {user?.role}
                           </p>
+                        </div>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-500 dark:text-gray-400">Credits</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{user?.credits || 0}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-500 dark:text-gray-400">Email</span>
+                          <div className="flex items-center space-x-2">
+                            <span className="font-medium text-gray-900 dark:text-white">{user?.email}</span>
+                            {user?.email_verified ? (
+                              <span className="text-green-500">✓</span>
+                            ) : (
+                              <span className="text-yellow-500">!</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-500 dark:text-gray-400">Last Login</span>
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {user?.last_login_date ? new Date(user.last_login_date).toLocaleDateString() : "Never"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-500 dark:text-gray-400">Member Since</span>
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {user?.registration_date ? new Date(user.registration_date).toLocaleDateString() : "N/A"}
+                          </span>
                         </div>
                       </div>
                     </div>
