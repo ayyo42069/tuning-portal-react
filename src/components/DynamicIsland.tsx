@@ -311,9 +311,9 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
             <motion.button
               layout
               onClick={() => {
-                setShowNotifications(!showNotifications);
+                setIsExpanded(true);
+                setShowNotifications(true);
                 setShowEcuUpload(false);
-                setIsExpanded(false);
               }}
               className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors relative"
             >
@@ -340,6 +340,58 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
               {showEcuUpload ? (
                 <div className="p-4">
                   <EcuUploadForm onClose={() => setShowEcuUpload(false)} />
+                </div>
+              ) : showNotifications ? (
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                    {notificationCount > 0 && (
+                      <button
+                        onClick={handleMarkAllAsRead}
+                        className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        Mark all as read
+                      </button>
+                    )}
+                  </div>
+                  {notificationData && notificationData.length > 0 ? (
+                    <div className="space-y-4">
+                      {notificationData.map((notification: any) => (
+                        <div
+                          key={notification.id}
+                          className={`p-3 rounded-lg ${
+                            notification.read
+                              ? "bg-gray-50 dark:bg-gray-800"
+                              : "bg-blue-50 dark:bg-blue-900/20"
+                          }`}
+                        >
+                          <div className="flex items-start space-x-3">
+                            {getNotificationIcon(notification.type)}
+                            <div className="flex-1">
+                              <p className="text-sm text-gray-900 dark:text-white">
+                                {notification.message}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                {formatTimeAgo(notification.created_at)}
+                              </p>
+                            </div>
+                            {!notification.read && (
+                              <button
+                                onClick={() => handleNotificationClick(notification)}
+                                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                              >
+                                <CheckCircleIcon className="h-5 w-5" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+                      No notifications
+                    </p>
+                  )}
                 </div>
               ) : (
                 <div className="p-4">
@@ -451,71 +503,6 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                   </div>
                 </div>
               )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Notifications panel */}
-        <AnimatePresence>
-          {showNotifications && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={spring}
-              className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden"
-            >
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
-                  {notificationCount > 0 && (
-                    <button
-                      onClick={handleMarkAllAsRead}
-                      className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                    >
-                      Mark all as read
-                    </button>
-                  )}
-                </div>
-                {notificationData && notificationData.length > 0 ? (
-                  <div className="space-y-4">
-                    {notificationData.map((notification: any) => (
-                      <div
-                        key={notification.id}
-                        className={`p-3 rounded-lg ${
-                          notification.read
-                            ? "bg-gray-50 dark:bg-gray-800"
-                            : "bg-blue-50 dark:bg-blue-900/20"
-                        }`}
-                      >
-                        <div className="flex items-start space-x-3">
-                          {getNotificationIcon(notification.type)}
-                          <div className="flex-1">
-                            <p className="text-sm text-gray-900 dark:text-white">
-                              {notification.message}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                              {formatTimeAgo(notification.created_at)}
-                            </p>
-                          </div>
-                          {!notification.read && (
-                            <button
-                              onClick={() => handleNotificationClick(notification)}
-                              className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-                            >
-                              <CheckCircleIcon className="h-5 w-5" />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-                    No notifications
-                  </p>
-                )}
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
