@@ -4,7 +4,6 @@ import { ThemeProvider } from "next-themes";
 import { NotificationProvider } from "@/lib/NotificationProvider";
 import { FeedbackProvider } from "@/lib/FeedbackProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "@/lib/AuthProvider";
 import { useState } from "react";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -20,15 +19,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <NotificationProvider>
-            <FeedbackProvider>
-              {children}
-            </FeedbackProvider>
-          </NotificationProvider>
-        </ThemeProvider>
-      </AuthProvider>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <NotificationProvider>
+          <FeedbackProvider>
+            {children}
+          </FeedbackProvider>
+        </NotificationProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 } 
