@@ -313,6 +313,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
               onClick={() => {
                 setShowNotifications(!showNotifications);
                 setShowEcuUpload(false);
+                setIsExpanded(false);
               }}
               className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors relative"
             >
@@ -342,6 +343,26 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                 </div>
               ) : (
                 <div className="p-4">
+                  {/* User Profile */}
+                  <div className="mb-4 p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl">
+                        {user?.username?.charAt(0).toUpperCase() || "U"}
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {user?.username || "User"}
+                        </h3>
+                        <p className={`text-sm ${
+                          user?.role === "admin" ? "text-red-500" : "text-green-500"
+                        }`}>
+                          {user?.role}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Navigation */}
                   <nav className="space-y-2">
                     <Link
                       href="/dashboard"
@@ -371,6 +392,15 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                       <Settings className="h-5 w-5 text-gray-900 dark:text-white" />
                       <span className="text-gray-900 dark:text-white">Settings</span>
                     </Link>
+                    {user?.role === "admin" && (
+                      <Link
+                        href="/admin"
+                        className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
+                      >
+                        <Settings className="h-5 w-5 text-gray-900 dark:text-white" />
+                        <span className="text-gray-900 dark:text-white">Admin Panel</span>
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors w-full"
