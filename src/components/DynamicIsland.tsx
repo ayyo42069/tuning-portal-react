@@ -37,10 +37,95 @@ import {
 } from "@heroicons/react/24/outline";
 import { useFeedback } from "@/lib/FeedbackProvider";
 
+// Animation constants
+const spring = {
+  type: "spring",
+  stiffness: 500,
+  damping: 30,
+  mass: 1
+};
+
+const hoverSpring = {
+  type: "spring",
+  stiffness: 400,
+  damping: 25,
+  mass: 0.8
+};
+
+const scaleSpring = {
+  type: "spring",
+  stiffness: 300,
+  damping: 20,
+  mass: 0.5
+};
+
 interface DynamicIslandProps {
   variant?: "dashboard" | "landing";
   children?: React.ReactNode;
 }
+
+interface CircularProgressProps {
+  progress: number;
+  size?: number;
+  strokeWidth?: number;
+  color?: string;
+}
+
+// Add CircularProgress component
+const CircularProgress = ({ progress, size = 40, strokeWidth = 4, color = "blue" }: CircularProgressProps) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const offset = circumference - (progress / 100) * circumference;
+
+  return (
+    <motion.div
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      transition={spring}
+      className="relative"
+      style={{ width: size, height: size }}
+    >
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        {/* Background circle */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          className="text-gray-200 dark:text-gray-700"
+        />
+        {/* Progress circle */}
+        <motion.circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          className={`text-${color}-500`}
+          style={{
+            strokeDasharray: circumference,
+            strokeDashoffset: offset,
+            transform: "rotate(-90deg)",
+            transformOrigin: "50% 50%"
+          }}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: offset }}
+          transition={spring}
+        />
+      </svg>
+      {/* Center text */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-xs font-medium text-gray-900 dark:text-white">
+          {Math.round(progress)}%
+        </span>
+      </div>
+    </motion.div>
+  );
+};
 
 export default function DynamicIsland({ variant = "dashboard", children }: DynamicIslandProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -148,27 +233,6 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
       default:
         return <InformationCircleIcon className="h-5 w-5 text-gray-500" />;
     }
-  };
-
-  const spring = {
-    type: "spring",
-    stiffness: 500,
-    damping: 30,
-    mass: 1
-  };
-
-  const hoverSpring = {
-    type: "spring",
-    stiffness: 400,
-    damping: 25,
-    mass: 0.8
-  };
-
-  const scaleSpring = {
-    type: "spring",
-    stiffness: 300,
-    damping: 20,
-    mass: 0.5
   };
 
   const handleNewUpload = () => {
@@ -280,31 +344,41 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
           className="h-16 relative flex items-center justify-between px-4"
           transition={spring}
         >
-          {/* Left side - Menu button */}
-          <motion.button
-            layout
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            transition={hoverSpring}
-            onClick={() => {
-              setIsExpanded(!isExpanded);
-              setShowNotifications(false);
-              setShowEcuUpload(false);
-            }}
-            className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
-          >
-            {isExpanded ? (
-              <motion.div
-                initial={{ rotate: 0 }}
-                animate={{ rotate: 180 }}
-                transition={spring}
-              >
-                <X className="h-6 w-6 text-gray-900 dark:text-white" />
-              </motion.div>
-            ) : (
-              <Menu className="h-6 w-6 text-gray-900 dark:text-white" />
-            )}
-          </motion.button>
+          {/* Left side - Menu button and Progress */}
+          <div className="flex items-center space-x-4">
+            <motion.button
+              layout
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              transition={hoverSpring}
+              onClick={() => {
+                setIsExpanded(!isExpanded);
+                setShowNotifications(false);
+                setShowEcuUpload(false);
+              }}
+              className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
+            >
+              {isExpanded ? (
+                <motion.div
+                  initial={{ rotate: 0 }}
+                  animate={{ rotate: 180 }}
+                  transition={spring}
+                >
+                  <X className="h-6 w-6 text-gray-900 dark:text-white" />
+                </motion.div>
+              ) : (
+                <Menu className="h-6 w-6 text-gray-900 dark:text-white" />
+              )}
+            </motion.button>
+            
+            {/* Progress Indicator */}
+            <CircularProgress 
+              progress={user?.credits ? (user.credits / 100) * 100 : 0} 
+              size={36} 
+              strokeWidth={3}
+              color={user?.credits && user.credits < 20 ? "red" : "blue"}
+            />
+          </div>
 
           {/* Center - Title */}
           <motion.div
