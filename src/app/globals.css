@@ -43,41 +43,7 @@
   --transition-timing: ease-in-out;
 }
 
-@custom-variant dark {
-  /* Dark mode colors - enhanced for better contrast and readability */
-  --background: #0f172a;
-  --foreground: #f8fafc;
-  --card-background: #1e293b;
-  --card-border: #334155;
-  --button-background: #334155;
-  --button-hover: #475569;
-  --button-text: #f8fafc;
-  --header-background: #1e293b;
-  --header-border: #334155;
-  --input-background: #1e293b;
-  --input-border: #475569;
-  --input-focus-border: #60a5fa;
-  --text-light: #cbd5e1;
-  --text-lighter: #94a3b8;
-  --sidebar-background: #1e293b;
-  --sidebar-border: #334155;
-  --sidebar-text: #f8fafc;
-  --sidebar-hover: #334155;
-  --sidebar-active: #475569;
-  --dropdown-background: #1e293b;
-  --dropdown-border: #334155;
-  --dropdown-text: #f8fafc;
-  --dropdown-hover: #334155;
-  --notification-background: #1e293b;
-  --notification-border: #334155;
-  --notification-text: #f8fafc;
-  --notification-hover: #334155;
-  --badge-background: #334155;
-  --badge-text: #f8fafc;
-  --gradient-from: #60a5fa;
-  --gradient-to: #a78bfa;
-  --gradient-text: #ffffff;
-}
+@custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
   :root {
@@ -85,44 +51,8 @@
   }
 
   body {
-    background-color: var(--background);
-    color: var(--foreground);
-    font-family: var(--font-sans);
-  }
-
-  [data-theme=dark] {
-    --background: #0f172a;
-    --foreground: #f8fafc;
-    --card-background: #1e293b;
-    --card-border: #334155;
-    --button-background: #334155;
-    --button-hover: #475569;
-    --button-text: #f8fafc;
-    --header-background: #1e293b;
-    --header-border: #334155;
-    --input-background: #1e293b;
-    --input-border: #475569;
-    --input-focus-border: #60a5fa;
-    --text-light: #cbd5e1;
-    --text-lighter: #94a3b8;
-    --sidebar-background: #1e293b;
-    --sidebar-border: #334155;
-    --sidebar-text: #f8fafc;
-    --sidebar-hover: #334155;
-    --sidebar-active: #475569;
-    --dropdown-background: #1e293b;
-    --dropdown-border: #334155;
-    --dropdown-text: #f8fafc;
-    --dropdown-hover: #334155;
-    --notification-background: #1e293b;
-    --notification-border: #334155;
-    --notification-text: #f8fafc;
-    --notification-hover: #334155;
-    --badge-background: #334155;
-    --badge-text: #f8fafc;
-    --gradient-from: #60a5fa;
-    --gradient-to: #a78bfa;
-    --gradient-text: #ffffff;
+    @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-white;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
@@ -297,5 +227,32 @@
     border-color: var(--input-focus-border);
     outline: none;
   }
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+.theme-transition {
+  @apply transition-colors duration-200;
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-500;
 }
 

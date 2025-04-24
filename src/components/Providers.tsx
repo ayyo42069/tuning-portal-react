@@ -4,7 +4,7 @@ import { ThemeProvider } from "next-themes";
 import { NotificationProvider } from "@/lib/NotificationProvider";
 import { FeedbackProvider } from "@/lib/FeedbackProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
@@ -17,9 +17,29 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     }
   }));
 
+  // Handle theme changes
+  useEffect(() => {
+    const handleThemeChange = (e: MediaQueryListEvent) => {
+      if (!localStorage.theme) {
+        document.documentElement.classList.toggle("dark", e.matches);
+      }
+    };
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    mediaQuery.addEventListener("change", handleThemeChange);
+
+    return () => mediaQuery.removeEventListener("change", handleThemeChange);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+        storageKey="tuning-portal-theme"
+      >
         <NotificationProvider>
           <FeedbackProvider>
             {children}

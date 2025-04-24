@@ -124,9 +124,20 @@ export default function RootLayout({
           name="viewport"
           content="width=device-width, initial-scale=1, maximum-scale=5"
         />
+        {/* Dark mode script */}
+        <Script id="dark-mode" strategy="beforeInteractive">
+          {`
+            // On page load or when changing themes, best to add inline in \`head\` to avoid FOUC
+            document.documentElement.classList.toggle(
+              "dark",
+              localStorage.theme === "dark" ||
+                (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)
+            );
+          `}
+        </Script>
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-200`}
       >
         <Providers>
           <AuthProvider>
