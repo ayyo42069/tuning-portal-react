@@ -157,6 +157,20 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
     mass: 1
   };
 
+  const hoverSpring = {
+    type: "spring",
+    stiffness: 400,
+    damping: 25,
+    mass: 0.8
+  };
+
+  const scaleSpring = {
+    type: "spring",
+    stiffness: 300,
+    damping: 20,
+    mass: 0.5
+  };
+
   const handleNewUpload = () => {
     setIsExpanded(true);
     setShowEcuUpload(true);
@@ -269,6 +283,9 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
           {/* Left side - Menu button */}
           <motion.button
             layout
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            transition={hoverSpring}
             onClick={() => {
               setIsExpanded(!isExpanded);
               setShowNotifications(false);
@@ -277,7 +294,13 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
             className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
           >
             {isExpanded ? (
-              <X className="h-6 w-6 text-gray-900 dark:text-white" />
+              <motion.div
+                initial={{ rotate: 0 }}
+                animate={{ rotate: 180 }}
+                transition={spring}
+              >
+                <X className="h-6 w-6 text-gray-900 dark:text-white" />
+              </motion.div>
             ) : (
               <Menu className="h-6 w-6 text-gray-900 dark:text-white" />
             )}
@@ -289,9 +312,16 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
             className="absolute left-1/2 -translate-x-1/2 flex items-center space-x-2"
             transition={spring}
           >
-            <span className="text-lg font-semibold text-gray-900 dark:text-white">
+            <motion.span
+              key={showEcuUpload ? "upload" : showNotifications ? "notifications" : "dashboard"}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={spring}
+              className="text-lg font-semibold text-gray-900 dark:text-white"
+            >
               {showEcuUpload ? "Upload ECU File" : showNotifications ? "Notifications" : "Dashboard"}
-            </span>
+            </motion.span>
           </motion.div>
 
           {/* Right side - Actions */}
@@ -303,6 +333,9 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
             <ThemeToggle />
             <motion.button
               layout
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              transition={hoverSpring}
               onClick={() => {
                 if (showEcuUpload) {
                   setShowEcuUpload(false);
@@ -319,6 +352,9 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
             </motion.button>
             <motion.button
               layout
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              transition={hoverSpring}
               onClick={() => {
                 if (showNotifications) {
                   setShowNotifications(false);
@@ -333,16 +369,21 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
             >
               <Bell className="h-6 w-6 text-gray-900 dark:text-white" />
               {notificationCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={scaleSpring}
+                  className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
+                >
                   {notificationCount}
-                </span>
+                </motion.span>
               )}
             </motion.button>
           </motion.div>
         </motion.div>
 
         {/* Expanded content */}
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {isExpanded && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
@@ -352,14 +393,26 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
               className="overflow-hidden"
             >
               {showEcuUpload ? (
-                <div className="p-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={spring}
+                  className="p-4"
+                >
                   <EcuUploadForm onClose={() => {
                     setShowEcuUpload(false);
                     setIsExpanded(false);
                   }} />
-                </div>
+                </motion.div>
               ) : showNotifications ? (
-                <div className="p-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={spring}
+                  className="p-4"
+                >
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
                     {notificationCount > 0 && (
@@ -409,12 +462,22 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                       No notifications
                     </p>
                   )}
-                </div>
+                </motion.div>
               ) : (
-                <div className="p-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={spring}
+                  className="p-4"
+                >
                   <div className="grid grid-cols-2 gap-4">
                     {/* User Profile Section */}
-                    <div className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10">
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      transition={hoverSpring}
+                      className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10"
+                    >
                       <div className="flex items-center space-x-4 mb-4">
                         <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl">
                           {user?.username?.charAt(0).toUpperCase() || "U"}
@@ -459,10 +522,14 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                           </span>
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
 
                     {/* Quick Actions Section */}
-                    <div className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10">
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      transition={hoverSpring}
+                      className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10"
+                    >
                       <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Quick Actions</h3>
                       <div className="space-y-2">
                         <button
@@ -480,10 +547,14 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                           <span className="text-gray-900 dark:text-white">Buy Credits</span>
                         </Link>
                       </div>
-                    </div>
+                    </motion.div>
 
                     {/* Navigation Section */}
-                    <div className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10">
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      transition={hoverSpring}
+                      className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10"
+                    >
                       <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Navigation</h3>
                       <nav className="space-y-2">
                         <Link
@@ -517,10 +588,14 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                           </Link>
                         )}
                       </nav>
-                    </div>
+                    </motion.div>
 
                     {/* Account Section */}
-                    <div className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10">
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      transition={hoverSpring}
+                      className="p-4 rounded-xl bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm border border-white/10 dark:border-gray-800/10"
+                    >
                       <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Account</h3>
                       <div className="space-y-2">
                         <Link
@@ -545,9 +620,9 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                           <span className="text-red-500">Logout</span>
                         </button>
                       </div>
-                    </div>
+                    </motion.div>
                   </div>
-                </div>
+                </motion.div>
               )}
             </motion.div>
           )}
