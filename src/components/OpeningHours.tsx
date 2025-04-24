@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Clock } from "lucide-react";
+import { motion } from 'framer-motion';
 
 type DayOfWeek =
   | "Monday"
@@ -156,23 +157,26 @@ export default function OpeningHours() {
   }) as DayOfWeek;
 
   return (
-    <div className="p-4 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/20 dark:border-gray-700/30 group hover:shadow-xl transition-all duration-300">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-lg shadow-lg shadow-blue-500/20">
-          <Clock className="w-5 h-5 text-white" />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="backdrop-blur-md bg-white/10 border border-white/20 rounded-lg p-6 shadow-lg"
+    >
+      <h2 className="text-xl font-semibold mb-4 text-white">Opening Hours</h2>
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <span className="text-white/80">Monday - Friday</span>
+          <span className="text-white">9:00 AM - 6:00 PM</span>
         </div>
-        <h3 className="text-lg font-semibold text-white">Opening Hours</h3>
+        <div className="flex justify-between items-center">
+          <span className="text-white/80">Saturday</span>
+          <span className="text-white">10:00 AM - 4:00 PM</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-white/80">Sunday</span>
+          <span className="text-white">Closed</span>
+        </div>
       </div>
-      <ul className="mt-2 space-y-1 text-blue-100/90">
-        {Object.entries(openingHours).map(([day, hours]) => (
-          <li key={day} className="flex justify-between items-center">
-            <span className="text-sm">{day.substring(0, 3)}</span>
-            <span className="text-sm">
-              {hours.open ? `${hours.open} - ${hours.close}` : "Closed"}
-            </span>
-          </li>
-        ))}
-      </ul>
 
       <div className="mt-3 pt-3 border-t border-white/10 dark:border-gray-700/30 flex items-center justify-between">
         <span className="text-sm text-blue-100/70">Status:</span>
@@ -192,6 +196,6 @@ export default function OpeningHours() {
           Opens in: {timeUntilOpen}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

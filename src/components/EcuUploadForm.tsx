@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 interface EcuUploadFormProps {
   onClose: () => void;
@@ -39,6 +41,9 @@ export default function EcuUploadForm({ onClose }: EcuUploadFormProps) {
   const [isLoadingManufacturers, setIsLoadingManufacturers] = useState(true);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [isLoadingTuningOptions, setIsLoadingTuningOptions] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const router = useRouter();
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
@@ -139,42 +144,76 @@ export default function EcuUploadForm({ onClose }: EcuUploadFormProps) {
     setTotalCredits(total);
   }, [selectedOptions, tuningOptions]);
 
-  const handleUpload = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!file || !selectedManufacturer || !selectedModel || !selectedYear || selectedOptions.length === 0) {
       toast.error('Please fill in all required fields');
       return;
     }
 
     setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('data', JSON.stringify({
-      manufacturerId: selectedManufacturer,
-      modelId: selectedModel,
-      productionYear: selectedYear,
-      tuningOptions: selectedOptions,
-      message
-    }));
+    setUploadProgress(0);
 
     try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('data', JSON.stringify({
+        manufacturerId: selectedManufacturer,
+        modelId: selectedModel,
+        productionYear: selectedYear,
+        tuningOptions: selectedOptions,
+        message
+      }));
+
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 500);
+
       const response = await fetch('/api/ecu/upload', {
         method: 'POST',
         body: formData,
       });
+
+      clearInterval(progressInterval);
+      setUploadProgress(100);
 
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Upload failed');
       }
 
-      const data = await response.json();
-      toast.success('ECU file uploaded successfully');
-      onClose();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to upload ECU file');
-      console.error('Upload error:', error);
-    } finally {
+      const result = await response.json();
+      
+      // Show success animation
+      setShowSuccess(true);
+      
+      // Reset form after success
+      setTimeout(() => {
+        setFile(null);
+        setSelectedManufacturer(null);
+        setSelectedModel(null);
+        setSelectedYear(null);
+        setSelectedOptions([]);
+        setShowSuccess(false);
+        setIsUploading(false);
+        setUploadProgress(0);
+        
+        // Close the form and show success message
+        onClose();
+        toast.success('File uploaded successfully!');
+      }, 2000);
+
+    } catch (error: any) {
       setIsUploading(false);
+      setUploadProgress(0);
+      toast.error(error instanceof Error ? error.message : 'Failed to upload file');
     }
   };
 
@@ -318,17 +357,68 @@ export default function EcuUploadForm({ onClose }: EcuUploadFormProps) {
         />
       </div>
 
-      <button
-        onClick={handleUpload}
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          >
+            <motion.div
+              initial={{ y: 50 }}
+              animate={{ y: 0 }}
+              className="bg-white p-8 rounded-lg shadow-xl text-center"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2 }}
+                className="w-16 h-16 bg-green-500 rounded-full mx-auto mb-4 flex items-center justify-center"
+              >
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </motion.div>
+              <h3 className="text-xl font-semibold mb-2">Upload Successful!</h3>
+              <p className="text-gray-600">Your ECU file has been uploaded and is being processed.</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {isUploading && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-4"
+        >
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <motion.div
+              className="bg-blue-600 h-2.5 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${uploadProgress}%` }}
+              transition={{ duration: 0.5 }}
+            />
+          </div>
+          <p className="text-sm text-gray-600 mt-2">Uploading... {uploadProgress}%</p>
+        </motion.div>
+      )}
+
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        type="submit"
         disabled={!file || !selectedManufacturer || !selectedModel || !selectedYear || selectedOptions.length === 0 || isUploading}
-        className={`w-full py-3 rounded-lg font-medium transition-colors ${
+        onClick={handleSubmit}
+        className={`w-full py-3 px-4 rounded-lg text-white font-medium ${
           !file || !selectedManufacturer || !selectedModel || !selectedYear || selectedOptions.length === 0 || isUploading
-            ? 'bg-white/20 text-white/40 cursor-not-allowed'
-            : 'bg-blue-500 hover:bg-blue-600 text-white'
+            ? 'bg-gray-400'
+            : 'bg-blue-600 hover:bg-blue-700'
         }`}
       >
-        {isUploading ? 'Uploading...' : 'Upload File'}
-      </button>
+        {isUploading ? 'Uploading...' : 'Upload ECU File'}
+      </motion.button>
     </div>
   );
 } 
