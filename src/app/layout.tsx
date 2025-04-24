@@ -7,6 +7,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/AuthProvider";
 import DynamicIslandWrapper from "@/components/DynamicIslandWrapper";
+import { DynamicIslandProvider } from "@/lib/context/DynamicIslandContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -139,13 +140,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-all duration-300 ease-in-out`}
       >
-        <Providers>
-          <AuthProvider>
-            <DynamicIslandWrapper />
-            {children}
-            <AuthDebugger />
-          </AuthProvider>
-        </Providers>
+        <DynamicIslandProvider>
+          <Providers>
+            <AuthProvider>
+              <DynamicIslandWrapper />
+              {children}
+              <AuthDebugger />
+            </AuthProvider>
+          </Providers>
+        </DynamicIslandProvider>
       </body>
     </html>
   );
