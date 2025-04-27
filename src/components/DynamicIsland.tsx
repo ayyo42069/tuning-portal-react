@@ -591,7 +591,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                           <span className="text-gray-900 dark:text-white">Dashboard</span>
                         </Link>
                         <Link
-                          href="/dashboard/files"
+                          href="/dashboard/tuning-history"
                           className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
                         >
                           <FileText className="h-5 w-5 text-purple-500" />
