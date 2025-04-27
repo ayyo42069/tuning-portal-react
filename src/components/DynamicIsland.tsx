@@ -18,7 +18,10 @@ import {
   HelpCircle,
   Search,
   ChevronDown,
-  BadgeAlertIcon
+  BadgeAlertIcon,
+  FileText,
+  MessageSquare,
+  Shield
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import EcuUploadForm from "./EcuUploadForm";
@@ -285,6 +288,9 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
               onClick={() => {
                 setIsExpanded(!isExpanded);
                 setShowNotifications(false);
+                if (showUploadForm) {
+                  closeUploadForm();
+                }
               }}
               className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
             >
@@ -336,7 +342,12 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   transition={hoverSpring}
-                  onClick={action.action}
+                  onClick={() => {
+                    action.action();
+                    if (action.label === "New Upload") {
+                      setIsExpanded(true);
+                    }
+                  }}
                   className={`p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors ${action.color}`}
                   title={action.tooltip}
                 >
@@ -349,7 +360,12 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   transition={hoverSpring}
-                  onClick={action.action}
+                  onClick={() => {
+                    action.action();
+                    if (action.label === "New Upload") {
+                      setIsExpanded(true);
+                    }
+                  }}
                   className={`p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors ${action.color}`}
                   title={action.tooltip}
                 >
@@ -369,6 +385,9 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                 } else {
                   setIsExpanded(true);
                   setShowNotifications(true);
+                  if (showUploadForm) {
+                    closeUploadForm();
+                  }
                 }
               }}
               className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors relative"
@@ -541,7 +560,12 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                         {actions.map((action, index) => (
                           <button
                             key={index}
-                            onClick={action.action}
+                            onClick={() => {
+                              action.action();
+                              if (action.label === "New Upload") {
+                                setIsExpanded(true);
+                              }
+                            }}
                             className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors w-full"
                           >
                             <span className={action.color}>{action.icon}</span>
@@ -567,25 +591,32 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                           <span className="text-gray-900 dark:text-white">Dashboard</span>
                         </Link>
                         <Link
-                          href="/dashboard/history"
+                          href="/dashboard/files"
                           className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
                         >
-                          <History className="h-5 w-5 text-purple-500" />
-                          <span className="text-gray-900 dark:text-white">History</span>
+                          <FileText className="h-5 w-5 text-purple-500" />
+                          <span className="text-gray-900 dark:text-white">My Files</span>
                         </Link>
                         <Link
-                          href="/dashboard/settings"
+                          href="/dashboard/credits"
                           className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
                         >
-                          <Settings className="h-5 w-5 text-yellow-500" />
-                          <span className="text-gray-900 dark:text-white">Settings</span>
+                          <CreditCard className="h-5 w-5 text-green-500" />
+                          <span className="text-gray-900 dark:text-white">Credits</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/feedback"
+                          className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
+                        >
+                          <MessageSquare className="h-5 w-5 text-orange-500" />
+                          <span className="text-gray-900 dark:text-white">Feedback</span>
                         </Link>
                         {user?.role === "admin" && (
                           <Link
                             href="/admin"
                             className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
                           >
-                            <Settings className="h-5 w-5 text-indigo-500" />
+                            <Shield className="h-5 w-5 text-indigo-500" />
                             <span className="text-gray-900 dark:text-white">Admin Panel</span>
                           </Link>
                         )}
@@ -606,13 +637,6 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                         >
                           <User className="h-5 w-5 text-cyan-500" />
                           <span className="text-gray-900 dark:text-white">Profile</span>
-                        </Link>
-                        <Link
-                          href="/help"
-                          className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
-                        >
-                          <HelpCircle className="h-5 w-5 text-orange-500" />
-                          <span className="text-gray-900 dark:text-white">Help & Support</span>
                         </Link>
                         <button
                           onClick={handleLogout}
