@@ -31,7 +31,7 @@ export async function GET() {
       SELECT * FROM (
         SELECT 
           id,
-          CAST('info' AS CHAR CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci) as type,
+          'info' as type,
           message,
           created_at as timestamp
         FROM notifications
@@ -43,7 +43,7 @@ export async function GET() {
       SELECT * FROM (
         SELECT 
           id,
-          CAST(type AS CHAR CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci) as type,
+          type,
           message,
           created_at as timestamp
         FROM feedback_events
