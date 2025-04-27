@@ -64,7 +64,7 @@ export async function GET(request: Request) {
         COUNT(*) as files_in_queue,
         AVG(TIMESTAMPDIFF(HOUR, created_at, NOW())) as avg_queue_time,
         (SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) / COUNT(*)) * 100 as processing_success_rate,
-        SUM(CASE WHEN priority = 2 THEN 1 ELSE 0 END) as high_priority,
+        SUM(CASE WHEN priority >= 2 THEN 1 ELSE 0 END) as high_priority,
         SUM(CASE WHEN priority = 1 THEN 1 ELSE 0 END) as medium_priority,
         SUM(CASE WHEN priority = 0 THEN 1 ELSE 0 END) as low_priority
       FROM ecu_files
