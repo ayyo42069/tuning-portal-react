@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -71,6 +71,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
   const [isExpanded, setIsExpanded] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const islandRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { data: notifications, unreadCount, markAsRead, markAllAsRead } = useNotificationsQuery();
@@ -95,6 +96,22 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Handle click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (islandRef.current && !islandRef.current.contains(event.target as Node)) {
+        setIsExpanded(false);
+        setShowNotifications(false);
+        closeUploadForm();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [closeUploadForm]);
 
   const handleLogout = async () => {
     try {
@@ -123,6 +140,12 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
         duration: 2000
       });
       setShowNotifications(false);
+
+      // Handle file-related notifications
+      if (notification.type === "file_status" && notification.reference_id) {
+        // Navigate to the file details page
+        window.location.href = `/dashboard/tuning-file/${notification.reference_id}`;
+      }
     } catch (error) {
       console.error("Error marking notification as read:", error);
       showFeedback({
@@ -254,6 +277,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
   // Dashboard variant
   return (
     <motion.div
+      ref={islandRef}
       layout
       className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-4xl z-50"
       transition={spring}
@@ -470,14 +494,26 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                                 {formatTimeAgo(notification.created_at)}
                               </p>
                             </div>
-                            {!notification.read && (
-                              <button
-                                onClick={() => handleNotificationClick(notification)}
-                                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-                              >
-                                <CheckCircleIcon className="h-5 w-5" />
-                              </button>
-                            )}
+                            <div className="flex items-center space-x-2">
+                              {!notification.read && (
+                                <button
+                                  onClick={() => handleNotificationClick(notification)}
+                                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                                  title="Mark as read"
+                                >
+                                  <CheckCircleIcon className="h-5 w-5" />
+                                </button>
+                              )}
+                              {notification.type === "file_status" && notification.reference_id && (
+                                <button
+                                  onClick={() => handleNotificationClick(notification)}
+                                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                                  title="View details"
+                                >
+                                  <FileText className="h-5 w-5" />
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}

@@ -30,7 +30,7 @@ export async function GET() {
     const activitiesResult = await db.query(`
       (SELECT 
         id,
-        'info' as type,
+        'info' as type COLLATE utf8mb4_general_ci,
         message,
         created_at as timestamp
       FROM notifications
@@ -40,7 +40,7 @@ export async function GET() {
       UNION ALL
       (SELECT 
         id,
-        type,
+        type COLLATE utf8mb4_general_ci,
         message,
         created_at as timestamp
       FROM feedback_events
