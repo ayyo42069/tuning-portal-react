@@ -368,11 +368,12 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
+               {/* Statistics and Activity Card */}
+          <StatisticsAndActivityCard />
             </div>
           </div>
         </div>
-                  {/* Statistics and Activity Card */}
-          <StatisticsAndActivityCard />
+                 
         {/* Right Column - Opening Hours and Support */}
         <div className="space-y-6">
           {/* Opening Hours */}
