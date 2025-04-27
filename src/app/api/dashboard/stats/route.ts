@@ -1,20 +1,33 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
+interface FileStats {
+  total_files: number;
+  completed_files: number;
+  avg_process_time: number;
+}
+
+interface Activity {
+  id: number;
+  type: string;
+  message: string;
+  timestamp: Date;
+}
+
 export async function GET() {
   try {
     // Get total files and success rate
-    const [fileStats] = await db.query(`
+    const fileStatsResult = await db.query(`
       SELECT 
         COUNT(*) as total_files,
         SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_files,
         AVG(TIMESTAMPDIFF(HOUR, created_at, updated_at)) as avg_process_time
       FROM ecu_files
       WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-    `);
+    `) as [FileStats[], any];
 
     // Get recent activities from notifications and feedback events
-    const [activities] = await db.query(`
+    const activitiesResult = await db.query(`
       (SELECT 
         id,
         'info' as type,
@@ -36,16 +49,18 @@ export async function GET() {
       LIMIT 5)
       ORDER BY timestamp DESC
       LIMIT 5
-    `);
+    `) as [Activity[], any];
 
-    const stats = fileStats[0];
-    const successRate = stats.completed_files / stats.total_files * 100;
+    const fileStats = fileStatsResult[0][0];
+    const activities = activitiesResult[0];
+
+    const successRate = fileStats.completed_files / fileStats.total_files * 100;
 
     return NextResponse.json({
-      totalFiles: stats.total_files,
+      totalFiles: fileStats.total_files,
       successRate: Math.round(successRate),
-      avgProcessTime: Math.round(stats.avg_process_time),
-      activities: activities.map((activity: any) => ({
+      avgProcessTime: Math.round(fileStats.avg_process_time),
+      activities: activities.map((activity) => ({
         id: activity.id,
         type: activity.type,
         message: activity.message,
