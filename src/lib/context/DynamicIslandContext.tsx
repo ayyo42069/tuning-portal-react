@@ -94,7 +94,8 @@ export function DynamicIslandProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ContextState>({
     currentPage: 'dashboard',
     userCredits: 0,
-    isProcessing: false
+    isProcessing: false,
+    showUploadForm: false
   });
 
   const pathname = usePathname();
@@ -135,7 +136,7 @@ export function DynamicIslandProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      router.push('/dashboard/upload');
+      updateState({ showUploadForm: true });
       showFeedback({
         type: 'info',
         message: 'Opening upload form...',
@@ -144,7 +145,11 @@ export function DynamicIslandProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       handleError(error, showFeedback);
     }
-  }, [router, showFeedback, user, state.userCredits]);
+  }, [user, state.userCredits, showFeedback, updateState]);
+
+  const handleCloseUploadForm = useCallback(() => {
+    updateState({ showUploadForm: false });
+  }, [updateState]);
 
   const handleFileDownload = useCallback((fileId: string) => {
     try {
@@ -417,7 +422,9 @@ export function DynamicIslandProvider({ children }: { children: ReactNode }) {
   const value = {
     state,
     setState: updateState,
-    actions: getContextActions()
+    actions: getContextActions(),
+    showUploadForm: state.showUploadForm,
+    closeUploadForm: handleCloseUploadForm
   };
 
   return (

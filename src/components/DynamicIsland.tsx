@@ -68,13 +68,12 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
   const [isExpanded, setIsExpanded] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showEcuUpload, setShowEcuUpload] = useState(false);
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { data: notifications, unreadCount, markAsRead, markAllAsRead } = useNotificationsQuery();
   const legacyNotifications = useNotifications();
   const { showFeedback } = useFeedback();
-  const { state, actions } = useDynamicIsland();
+  const { state, actions, showUploadForm, closeUploadForm } = useDynamicIsland();
 
   const notificationData = notifications || legacyNotifications.notifications;
   const notificationCount = unreadCount || legacyNotifications.unreadCount;
@@ -171,12 +170,6 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
       default:
         return <InformationCircleIcon className="h-5 w-5 text-gray-500" />;
     }
-  };
-
-  const handleNewUpload = () => {
-    setIsExpanded(true);
-    setShowEcuUpload(true);
-    setShowNotifications(false);
   };
 
   // Landing page variant
@@ -292,7 +285,6 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
               onClick={() => {
                 setIsExpanded(!isExpanded);
                 setShowNotifications(false);
-                setShowEcuUpload(false);
               }}
               className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
             >
@@ -317,14 +309,14 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
             transition={spring}
           >
             <motion.span
-              key={showEcuUpload ? "upload" : showNotifications ? "notifications" : "dashboard"}
+              key={showUploadForm ? "upload" : showNotifications ? "notifications" : "dashboard"}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={spring}
               className="text-lg font-semibold text-gray-900 dark:text-white"
             >
-              {showEcuUpload ? "Upload ECU File" : showNotifications ? "Notifications" : "Dashboard"}
+              {showUploadForm ? "Upload ECU File" : showNotifications ? "Notifications" : "Dashboard"}
             </motion.span>
           </motion.div>
 
@@ -377,7 +369,6 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                 } else {
                   setIsExpanded(true);
                   setShowNotifications(true);
-                  setShowEcuUpload(false);
                 }
               }}
               className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors relative"
@@ -407,7 +398,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
               transition={spring}
               className="overflow-hidden"
             >
-              {showEcuUpload ? (
+              {showUploadForm ? (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -416,7 +407,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                   className="p-4"
                 >
                   <EcuUploadForm onClose={() => {
-                    setShowEcuUpload(false);
+                    closeUploadForm();
                     setIsExpanded(false);
                   }} />
                 </motion.div>

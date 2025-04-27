@@ -20,10 +20,13 @@ export interface ContextState {
   userCredits: number;
   isProcessing: boolean;
   lastAction?: string;
+  showUploadForm: boolean;
 }
 
 export interface DynamicIslandContext {
   state: ContextState;
   setState: (state: Partial<ContextState>) => void;
   actions: ContextAction[];
+  showUploadForm: boolean;
+  closeUploadForm: () => void;
 } 
