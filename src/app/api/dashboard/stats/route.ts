@@ -28,25 +28,29 @@ export async function GET() {
 
     // Get recent activities from notifications and feedback events
     const activitiesResult = await db.query(`
-      (SELECT 
-        id,
-        'info' as type COLLATE utf8mb4_general_ci,
-        message,
-        created_at as timestamp
-      FROM notifications
-      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
-      ORDER BY created_at DESC
-      LIMIT 5)
+      SELECT * FROM (
+        SELECT 
+          id,
+          'info' as type,
+          message,
+          created_at as timestamp
+        FROM notifications
+        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        ORDER BY created_at DESC
+        LIMIT 5
+      ) AS notifications
       UNION ALL
-      (SELECT 
-        id,
-        type COLLATE utf8mb4_general_ci,
-        message,
-        created_at as timestamp
-      FROM feedback_events
-      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
-      ORDER BY created_at DESC
-      LIMIT 5)
+      SELECT * FROM (
+        SELECT 
+          id,
+          type,
+          message,
+          created_at as timestamp
+        FROM feedback_events
+        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        ORDER BY created_at DESC
+        LIMIT 5
+      ) AS feedback_events
       ORDER BY timestamp DESC
       LIMIT 5
     `) as [Activity[], any];

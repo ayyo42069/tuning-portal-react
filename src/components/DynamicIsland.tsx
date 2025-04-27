@@ -39,6 +39,7 @@ import {
   XMarkIcon
 } from "@heroicons/react/24/outline";
 import { useFeedback } from "@/lib/FeedbackProvider";
+import { useRouter } from "next/navigation";
 
 // Animation constants
 const spring = {
@@ -78,6 +79,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
   const legacyNotifications = useNotifications();
   const { showFeedback } = useFeedback();
   const { state, actions, showUploadForm, closeUploadForm } = useDynamicIsland();
+  const router = useRouter();
 
   const notificationData = notifications || legacyNotifications.notifications;
   const notificationCount = unreadCount || legacyNotifications.unreadCount;
@@ -133,24 +135,26 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
 
   const handleNotificationClick = async (notification: any) => {
     try {
-      await markAsRead(notification.id);
-      showFeedback({
-        type: "success",
-        message: "Notification marked as read",
-        duration: 2000
-      });
-      setShowNotifications(false);
+      // Only mark as read if it's unread
+      if (!notification.is_read) {
+        await markAsRead(notification.id);
+        showFeedback({
+          type: "success",
+          message: "Notification marked as read",
+          duration: 2000
+        });
+      }
 
       // Handle file-related notifications
       if (notification.type === "file_status" && notification.reference_id) {
-        // Navigate to the file details page
-        window.location.href = `/dashboard/tuning-file/${notification.reference_id}`;
+        // Use router for navigation
+        router.push(`/dashboard/tuning-file/${notification.reference_id}`);
       }
     } catch (error) {
-      console.error("Error marking notification as read:", error);
+      console.error("Error handling notification:", error);
       showFeedback({
         type: "error",
-        message: "Failed to mark notification as read",
+        message: "Failed to process notification",
         duration: 3000
       });
     }
@@ -479,7 +483,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                         <div
                           key={notification.id}
                           className={`p-3 rounded-lg ${
-                            notification.read
+                            notification.is_read
                               ? "bg-gray-50 dark:bg-gray-800"
                               : "bg-blue-50 dark:bg-blue-900/20"
                           }`}
@@ -495,7 +499,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                               </p>
                             </div>
                             <div className="flex items-center space-x-2">
-                              {!notification.read && (
+                              {!notification.is_read && (
                                 <button
                                   onClick={() => handleNotificationClick(notification)}
                                   className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
