@@ -3,11 +3,12 @@ import { useQueryErrorResetBoundary } from '@tanstack/react-query';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 
 interface QueryErrorBoundaryProps {
-  children: React.ReactNode;
+  children: React.ReactNode | ((props: { reportError: (error: Error) => void }) => React.ReactNode);
   fallback?: React.ReactNode;
+  message?: string;
 }
 
-export default function QueryErrorBoundary({ children, fallback }: QueryErrorBoundaryProps) {
+export default function QueryErrorBoundary({ children, fallback, message }: QueryErrorBoundaryProps) {
   const { reset } = useQueryErrorResetBoundary();
 
   return (
@@ -33,7 +34,7 @@ export default function QueryErrorBoundary({ children, fallback }: QueryErrorBou
             <h3 className="text-lg font-medium">Something went wrong</h3>
           </div>
           <p className="mt-2 text-sm text-red-700 dark:text-red-300">
-            {error.message}
+            {message || error.message}
           </p>
           <button
             onClick={resetErrorBoundary}
@@ -44,7 +45,9 @@ export default function QueryErrorBoundary({ children, fallback }: QueryErrorBou
         </div>
       )}
     >
-      {children}
+      {typeof children === 'function' 
+        ? children({ reportError: (error: Error) => console.error(error) })
+        : children}
     </ErrorBoundary>
   );
 } 

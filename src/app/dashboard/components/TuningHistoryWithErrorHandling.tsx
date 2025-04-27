@@ -14,8 +14,6 @@ import { FileText, Calendar, CheckCircle, XCircle, Loader2 } from "lucide-react"
 export default function TuningHistoryWithErrorHandling() {
   return (
     <QueryErrorBoundary 
-      queryKey={[queryKeys.tuningFiles]}
-      title="Tuning History Error"
       message="We couldn't load your tuning history. Please try again or contact support if this persists."
     >
       {({ reportError }) => <TuningHistoryContent reportError={reportError} />}
