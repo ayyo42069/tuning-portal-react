@@ -53,7 +53,7 @@ export async function GET(request: Request) {
     // Get credit statistics
     const creditStats = await executeQuery<CreditStats[]>(
       `SELECT 
-        (SELECT credits FROM user_credits WHERE user_id = ${userId}) as total_credits,
+        COALESCE((SELECT SUM(credits) FROM user_credits WHERE user_id = ${userId}), 0) as total_credits,
         (SELECT COUNT(*) FROM credit_transactions WHERE user_id = ${userId} AND transaction_type = 'usage') as credits_used,
         (SELECT COUNT(*) FROM credit_transactions WHERE user_id = ${userId} AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)) as recent_transactions`
     );
