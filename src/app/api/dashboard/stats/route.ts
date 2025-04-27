@@ -18,9 +18,9 @@ interface ProcessingStats {
   files_in_queue: number;
   avg_queue_time: number;
   processing_success_rate: number;
-  high_priority: number;
-  medium_priority: number;
-  low_priority: number;
+  high_priority_count: number;
+  medium_priority_count: number;
+  low_priority_count: number;
 }
 
 interface Activity {
@@ -64,9 +64,9 @@ export async function GET(request: Request) {
         COUNT(*) as files_in_queue,
         AVG(TIMESTAMPDIFF(HOUR, created_at, NOW())) as avg_queue_time,
         (SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) / COUNT(*)) * 100 as processing_success_rate,
-        SUM(CASE WHEN priority >= 2 THEN 1 ELSE 0 END) as high_priority,
-        SUM(CASE WHEN priority = 1 THEN 1 ELSE 0 END) as medium_priority,
-        SUM(CASE WHEN priority = 0 THEN 1 ELSE 0 END) as low_priority
+        SUM(CASE WHEN priority >= 2 THEN 1 ELSE 0 END) as high_priority_count,
+        SUM(CASE WHEN priority = 1 THEN 1 ELSE 0 END) as medium_priority_count,
+        SUM(CASE WHEN priority = 0 THEN 1 ELSE 0 END) as low_priority_count
       FROM ecu_files
       WHERE status IN ('pending', 'processing')`
     );
@@ -122,9 +122,9 @@ export async function GET(request: Request) {
         avgQueueTime: Math.round(processing.avg_queue_time),
         successRate: Math.round(processing.processing_success_rate),
         priorityDistribution: {
-          high: processing.high_priority,
-          medium: processing.medium_priority,
-          low: processing.low_priority
+          high: processing.high_priority_count,
+          medium: processing.medium_priority_count,
+          low: processing.low_priority_count
         }
       },
       activities: activities.map((activity) => ({
