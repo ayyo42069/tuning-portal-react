@@ -26,34 +26,36 @@ export async function GET() {
       WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)`
     );
 
-    // Get recent activities from notifications and feedback events
-    const activities = await executeQuery<Activity[]>(
-      `SELECT * FROM (
-        SELECT 
-          id,
-          'info' as type,
-          message,
-          created_at as timestamp
-        FROM notifications
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
-        ORDER BY created_at DESC
-        LIMIT 5
-      ) AS notifications
-      UNION ALL
-      SELECT * FROM (
-        SELECT 
-          id,
-          type,
-          message,
-          created_at as timestamp
-        FROM feedback_events
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
-        ORDER BY created_at DESC
-        LIMIT 5
-      ) AS feedback_events
-      ORDER BY timestamp DESC
+    // Get notifications
+    const notifications = await executeQuery<Activity[]>(
+      `SELECT 
+        id,
+        'info' as type,
+        message,
+        created_at as timestamp
+      FROM notifications
+      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+      ORDER BY created_at DESC
       LIMIT 5`
     );
+
+    // Get feedback events
+    const feedbackEvents = await executeQuery<Activity[]>(
+      `SELECT 
+        id,
+        type,
+        message,
+        created_at as timestamp
+      FROM feedback_events
+      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+      ORDER BY created_at DESC
+      LIMIT 5`
+    );
+
+    // Combine and sort activities
+    const activities = [...notifications, ...feedbackEvents]
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, 5);
 
     const stats = fileStats[0];
     const successRate = stats.completed_files / stats.total_files * 100;
