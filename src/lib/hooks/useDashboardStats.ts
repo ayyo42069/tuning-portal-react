@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/lib/AuthProvider";
 
 interface Activity {
   id: number;
@@ -29,15 +30,22 @@ export interface DashboardStats {
 }
 
 export function useDashboardStats() {
+  const { user } = useAuth();
+
   return useQuery<DashboardStats>({
     queryKey: ["dashboardStats"],
     queryFn: async () => {
-      const response = await fetch("/api/dashboard/stats");
+      const response = await fetch("/api/dashboard/stats", {
+        headers: {
+          "x-user-id": user?.id?.toString() || "",
+        },
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch dashboard stats");
       }
       return response.json();
     },
     refetchInterval: 30000, // Refetch every 30 seconds
+    enabled: !!user?.id, // Only run the query if we have a user ID
   });
 } 
