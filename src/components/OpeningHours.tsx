@@ -157,45 +157,52 @@ export default function OpeningHours() {
   }) as DayOfWeek;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="backdrop-blur-md bg-white/10 dark:bg-gray-800/10 border border-white/20 dark:border-gray-800/20 rounded-lg p-6 shadow-lg"
-    >
-      <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Opening Hours</h2>
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600 dark:text-white/80">Monday - Friday</span>
-          <span className="text-gray-900 dark:text-white">9:00 AM - 6:00 PM</span>
+    <div className="relative group/card">
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl blur opacity-20 group-hover/card:opacity-30 transition duration-1000 group-hover/card:duration-200"></div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm rounded-xl border border-white/10 dark:border-gray-800/10 p-6 hover:bg-white/10 dark:hover:bg-gray-800/10 transition-all duration-200"
+      >
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-green-500/10 rounded-lg">
+            <Clock className="w-5 h-5 text-green-500/80" />
+          </div>
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white">Opening Hours</h2>
         </div>
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600 dark:text-white/80">Saturday</span>
-          <span className="text-gray-900 dark:text-white">10:00 AM - 4:00 PM</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600 dark:text-white/80">Sunday</span>
-          <span className="text-gray-900 dark:text-white">Closed</span>
-        </div>
-      </div>
 
-      <div className="mt-3 pt-3 border-t border-white/10 dark:border-gray-700/30 flex items-center justify-between">
-        <span className="text-sm text-blue-100/70">Status:</span>
-        <span
-          className={`px-2 py-0.5 rounded-full text-sm ${
-            isCurrentlyOpen()
-              ? "bg-green-500/20 text-green-300"
-              : "bg-red-500/20 text-red-300"
-          }`}
-        >
-          {isCurrentlyOpen() ? "Open" : "Closed"}
-        </span>
-      </div>
-
-      {!isCurrentlyOpen() && (
-        <div className="mt-2 text-sm text-center text-blue-300">
-          Opens in: {timeUntilOpen}
+        <div className="space-y-3">
+          {Object.entries(openingHours).map(([day, hours]) => (
+            <div key={day} className="flex justify-between items-center">
+              <span className="text-sm text-gray-600 dark:text-blue-100/80">{day}</span>
+              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                {hours.open ? `${hours.open} - ${hours.close}` : 'Closed'}
+              </span>
+            </div>
+          ))}
         </div>
-      )}
-    </motion.div>
+
+        <div className="mt-4 pt-4 border-t border-white/10 dark:border-gray-700/30">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600 dark:text-blue-100/80">Current Status:</span>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-medium ${
+                isCurrentlyOpen()
+                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                  : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+              }`}
+            >
+              {isCurrentlyOpen() ? "Open" : "Closed"}
+            </span>
+          </div>
+
+          {!isCurrentlyOpen() && (
+            <div className="mt-2 text-sm text-center text-blue-600 dark:text-blue-400">
+              Opens in: {timeUntilOpen}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </div>
   );
 }

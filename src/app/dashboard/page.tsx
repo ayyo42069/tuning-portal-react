@@ -12,6 +12,7 @@ import {
   CreditCard,
   X,
   BookOpen,
+  Eye,
 } from "lucide-react";
 import { useAuth } from "@/lib/AuthProvider";
 import { useTuningFiles, useUserProfile } from "@/lib/hooks/useDataFetching";
@@ -20,6 +21,8 @@ import DynamicIsland from "@/components/DynamicIsland";
 import { motion, AnimatePresence } from 'framer-motion';
 import EcuUploadForm from '@/components/EcuUploadForm';
 import RecentFiles from '@/components/RecentFiles';
+import Link from "next/link";
+import StatisticsAndActivityCard from "@/components/StatisticsAndActivityCard";
 
 interface User {
   id: number;
@@ -318,6 +321,9 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* Statistics and Activity Card */}
+          <StatisticsAndActivityCard />
+
           {/* Recent Files Card */}
           <div className="relative group/card">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur opacity-20 group-hover/card:opacity-30 transition duration-1000 group-hover/card:duration-200"></div>
@@ -343,13 +349,22 @@ export default function Dashboard() {
                         <h3 className="font-medium text-gray-900 dark:text-white">{file.file_name}</h3>
                         <p className="text-sm text-gray-600 dark:text-blue-100/80">{file.vehicle_info}</p>
                       </div>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(
-                          file.status
-                        )}`}
-                      >
-                        {file.status}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(
+                            file.status
+                          )}`}
+                        >
+                          {file.status}
+                        </span>
+                        <Link
+                          href={`/dashboard/tuning-file/${file.id}`}
+                          className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
+                        >
+                          <Eye className="h-4 w-4 mr-1.5" />
+                          View Details
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 ))}
