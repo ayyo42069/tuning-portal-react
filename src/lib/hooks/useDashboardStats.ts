@@ -1,15 +1,31 @@
 import { useQuery } from "@tanstack/react-query";
 
-interface DashboardStats {
+interface Activity {
+  id: number;
+  type: "success" | "error" | "info" | "warning";
+  message: string;
+  timestamp: string;
+}
+
+interface CreditStats {
+  total: number;
+  used: number;
+  remaining: number;
+}
+
+interface ProcessingStats {
+  inQueue: number;
+  avgQueueTime: number;
+  successRate: number;
+}
+
+export interface DashboardStats {
   totalFiles: number;
   successRate: number;
   avgProcessTime: number;
-  activities: Array<{
-    id: number;
-    type: "success" | "error" | "info" | "warning";
-    message: string;
-    timestamp: string;
-  }>;
+  activities: Activity[];
+  credits: CreditStats;
+  processing: ProcessingStats;
 }
 
 export function useDashboardStats() {

@@ -2,7 +2,20 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { BarChart3, Activity, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { 
+  BarChart3, 
+  Activity, 
+  Clock, 
+  CheckCircle, 
+  XCircle, 
+  AlertCircle,
+  CreditCard,
+  FileText,
+  AlertTriangle,
+  ArrowUp,
+  ArrowDown,
+  ArrowRight
+} from "lucide-react";
 import { useDashboardStats } from "@/lib/hooks/useDashboardStats";
 
 interface StatItem {
@@ -10,6 +23,7 @@ interface StatItem {
   value: string | number;
   icon: React.ReactNode;
   trend?: "up" | "down" | "neutral";
+  color?: string;
 }
 
 interface ActivityItem {
@@ -61,11 +75,11 @@ export default function StatisticsAndActivityCard() {
     );
   }
 
-  const statItems: StatItem[] = [
+  const fileStats: StatItem[] = [
     {
       label: "Total Files",
       value: stats?.totalFiles || 0,
-      icon: <BarChart3 className="w-5 h-5 text-blue-500/80" />,
+      icon: <FileText className="w-5 h-5 text-blue-500/80" />,
       trend: "up"
     },
     {
@@ -79,6 +93,48 @@ export default function StatisticsAndActivityCard() {
       value: `${stats?.avgProcessTime || 0}h`,
       icon: <Clock className="w-5 h-5 text-purple-500/80" />,
       trend: "down"
+    }
+  ];
+
+  const creditStats: StatItem[] = [
+    {
+      label: "Total Credits",
+      value: stats?.credits.total || 0,
+      icon: <CreditCard className="w-5 h-5 text-green-500/80" />,
+      color: "text-green-500"
+    },
+    {
+      label: "Credits Used",
+      value: stats?.credits.used || 0,
+      icon: <ArrowDown className="w-5 h-5 text-red-500/80" />,
+      color: "text-red-500"
+    },
+    {
+      label: "Credits Remaining",
+      value: stats?.credits.remaining || 0,
+      icon: <ArrowUp className="w-5 h-5 text-blue-500/80" />,
+      color: "text-blue-500"
+    }
+  ];
+
+  const processingStats: StatItem[] = [
+    {
+      label: "Files in Queue",
+      value: stats?.processing.inQueue || 0,
+      icon: <AlertTriangle className="w-5 h-5 text-yellow-500/80" />,
+      color: "text-yellow-500"
+    },
+    {
+      label: "Avg. Queue Time",
+      value: `${stats?.processing.avgQueueTime || 0}h`,
+      icon: <Clock className="w-5 h-5 text-purple-500/80" />,
+      color: "text-purple-500"
+    },
+    {
+      label: "Processing Success",
+      value: `${stats?.processing.successRate || 0}%`,
+      icon: <CheckCircle className="w-5 h-5 text-green-500/80" />,
+      color: "text-green-500"
     }
   ];
 
@@ -98,31 +154,76 @@ export default function StatisticsAndActivityCard() {
           <h2 className="text-lg font-medium text-gray-900 dark:text-white">Statistics & Activity</h2>
         </div>
 
-        {/* Statistics Grid */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          {statItems.map((stat, index) => (
-            <div
-              key={index}
-              className="p-4 bg-white/5 dark:bg-gray-800/5 rounded-lg border border-white/10 dark:border-gray-800/10"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                {stat.icon}
-                <span className="text-sm text-gray-600 dark:text-blue-100/80">{stat.label}</span>
+        {/* File Statistics */}
+        <div className="mb-6">
+          <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">File Statistics</h3>
+          <div className="grid grid-cols-3 gap-4">
+            {fileStats.map((stat, index) => (
+              <div
+                key={index}
+                className="p-4 bg-white/5 dark:bg-gray-800/5 rounded-lg border border-white/10 dark:border-gray-800/10"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  {stat.icon}
+                  <span className="text-sm text-gray-600 dark:text-blue-100/80">{stat.label}</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-xl font-semibold text-gray-900 dark:text-white">{stat.value}</span>
+                  {stat.trend && (
+                    <span className={`text-xs ${
+                      stat.trend === "up" ? "text-green-500" : 
+                      stat.trend === "down" ? "text-red-500" : 
+                      "text-gray-500"
+                    }`}>
+                      {stat.trend === "up" ? "↑" : stat.trend === "down" ? "↓" : "→"}
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-xl font-semibold text-gray-900 dark:text-white">{stat.value}</span>
-                {stat.trend && (
-                  <span className={`text-xs ${
-                    stat.trend === "up" ? "text-green-500" : 
-                    stat.trend === "down" ? "text-red-500" : 
-                    "text-gray-500"
-                  }`}>
-                    {stat.trend === "up" ? "↑" : stat.trend === "down" ? "↓" : "→"}
-                  </span>
-                )}
+            ))}
+          </div>
+        </div>
+
+        {/* Credit Statistics */}
+        <div className="mb-6">
+          <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Credit Statistics</h3>
+          <div className="grid grid-cols-3 gap-4">
+            {creditStats.map((stat, index) => (
+              <div
+                key={index}
+                className="p-4 bg-white/5 dark:bg-gray-800/5 rounded-lg border border-white/10 dark:border-gray-800/10"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  {stat.icon}
+                  <span className="text-sm text-gray-600 dark:text-blue-100/80">{stat.label}</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className={`text-xl font-semibold ${stat.color}`}>{stat.value}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
+
+        {/* Processing Statistics */}
+        <div className="mb-6">
+          <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Processing Statistics</h3>
+          <div className="grid grid-cols-3 gap-4">
+            {processingStats.map((stat, index) => (
+              <div
+                key={index}
+                className="p-4 bg-white/5 dark:bg-gray-800/5 rounded-lg border border-white/10 dark:border-gray-800/10"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  {stat.icon}
+                  <span className="text-sm text-gray-600 dark:text-blue-100/80">{stat.label}</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className={`text-xl font-semibold ${stat.color}`}>{stat.value}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Activity Feed */}
