@@ -6,6 +6,7 @@ import { AlertCircle } from "lucide-react";
 interface Props {
   children: ReactNode;
   onRetry?: () => void;
+  fallback?: ReactNode;
 }
 
 interface State {
@@ -36,6 +37,9 @@ class RetryableErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
       return (
         <div className="min-h-screen flex items-center justify-center p-4">
           <div className="max-w-md w-full bg-white/5 dark:bg-gray-800/5 backdrop-blur-sm shadow-xl rounded-xl border border-white/10 dark:border-gray-700/30 p-6">
