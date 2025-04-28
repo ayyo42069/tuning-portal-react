@@ -64,7 +64,7 @@ const scaleSpring = {
 };
 
 interface DynamicIslandProps {
-  variant?: "dashboard" | "landing";
+  variant?: "dashboard" | "landing" | "auth";
   children?: React.ReactNode;
 }
 
@@ -201,6 +201,66 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
         return <InformationCircleIcon className="h-5 w-5 text-gray-500" />;
     }
   };
+
+  // Auth variant
+  if (variant === "auth") {
+    return (
+      <motion.div
+        layout
+        className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-4xl z-50"
+        transition={spring}
+        data-dynamic-island
+      >
+        <motion.div
+          layout
+          style={{
+            borderRadius: isExpanded ? "24px" : "9999px",
+            overflow: "hidden"
+          }}
+          className={`w-full h-full border border-white/20 dark:border-gray-800/20 shadow-lg ${
+            isScrolled 
+              ? "backdrop-blur-xl bg-white/10 dark:bg-gray-900/10" 
+              : "backdrop-blur-md bg-white/5 dark:bg-gray-900/5"
+          }`}
+          transition={spring}
+        >
+          {/* Header - Always visible */}
+          <motion.div
+            layout
+            className="h-16 relative flex items-center justify-between px-4"
+            transition={spring}
+          >
+            {/* Left side - Logo */}
+            <Link href="/" className="flex items-center space-x-2">
+              <span className="text-xl font-bold text-white">Tuning Portal</span>
+            </Link>
+
+            {/* Right side - Navigation */}
+            <div className="flex items-center space-x-4">
+              <Link
+                href="/about"
+                className="text-white/70 hover:text-white transition-colors"
+              >
+                About
+              </Link>
+              <Link
+                href="/privacy"
+                className="text-white/70 hover:text-white transition-colors"
+              >
+                Privacy
+              </Link>
+              <Link
+                href="/terms"
+                className="text-white/70 hover:text-white transition-colors"
+              >
+                Terms
+              </Link>
+            </div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    );
+  }
 
   // Landing page variant
   if (variant === "landing") {

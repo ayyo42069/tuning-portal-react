@@ -14,6 +14,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useAuth } from "@/lib/AuthProvider";
+import DynamicIsland from "@/components/DynamicIsland";
 
 export default function Login() {
   const router = useRouter();
@@ -45,15 +46,11 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // First try to use the AuthProvider's login function
       const loginSuccess = await login(formData.username, formData.password);
 
       if (loginSuccess) {
-        // Redirect to dashboard on successful login
         router.push("/dashboard");
       } else {
-        // If login failed but no error was set, it might be a verification issue
-        // We'll make a direct API call to check for verification requirements
         const response = await fetch("/api/auth/login", {
           method: "POST",
           headers: {
@@ -67,7 +64,7 @@ export default function Login() {
         if (response.status === 403 && data.emailVerificationRequired) {
           setShowVerificationAlert(true);
           setUnverifiedEmail(data.email);
-          setError(""); // Clear general error when showing the verification alert
+          setError("");
         } else {
           throw new Error(data.error || "Login failed");
         }
@@ -109,68 +106,43 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-b from-blue-900 to-blue-800 dark:from-blue-950 dark:to-blue-900 py-12 px-4 sm:px-6 lg:px-8">
-      {/* SVG Pattern Background */}
-      <div className="absolute inset-0 z-0 opacity-10">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "url('/patterns/hexagons.svg')",
-            backgroundSize: "30px",
-            filter: "blur(0.5px)",
-          }}
-        ></div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Dynamic Island */}
+      <DynamicIsland variant="auth" />
 
-      {/* Circuit board pattern overlay */}
-      <div className="absolute inset-0 z-0 opacity-5">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "url('/patterns/circuit-board.svg')",
-            backgroundSize: "300px",
-          }}
-        ></div>
-      </div>
-
-      {/* Animated elements */}
+      {/* Animated background elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
         <motion.div
           initial={{ x: -100, opacity: 0.2 }}
           animate={{ x: 0, opacity: 0.15 }}
           transition={{ duration: 1.5, ease: "easeOut" }}
-          className="absolute w-[600px] h-[600px] rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 -top-64 -left-64 will-change-transform"
+          className="absolute w-[600px] h-[600px] rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 -top-64 -left-64 will-change-transform filter blur-3xl"
         />
         <motion.div
           initial={{ x: 100, opacity: 0.2 }}
           animate={{ x: 0, opacity: 0.15 }}
           transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
-          className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 top-1/3 -right-64 will-change-transform"
+          className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 top-1/3 -right-64 will-change-transform filter blur-3xl"
         />
         <motion.div
           initial={{ y: 100, opacity: 0.2 }}
           animate={{ y: 0, opacity: 0.15 }}
           transition={{ duration: 1.5, ease: "easeOut", delay: 0.4 }}
-          className="absolute w-[400px] h-[400px] rounded-full bg-gradient-to-r from-purple-500 to-pink-500 -bottom-32 left-1/3 will-change-transform"
+          className="absolute w-[400px] h-[400px] rounded-full bg-gradient-to-r from-purple-500 to-pink-500 -bottom-32 left-1/3 will-change-transform filter blur-3xl"
         />
       </div>
 
-      <div className="max-w-md w-full space-y-8 relative z-10 bg-white/10 dark:bg-gray-900/20 backdrop-blur-sm p-8 rounded-xl border border-white/20 shadow-xl">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-md w-full space-y-8 relative z-10 bg-white/5 dark:bg-gray-900/20 backdrop-blur-sm p-8 rounded-xl border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-white/30 hover:bg-white/15 dark:hover:bg-gray-900/30"
+      >
         <div>
-          <div className="w-16 h-16 mx-auto rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:shadow-cyan-500/20 transition-all duration-300 mb-4">
-            <svg
-              className="w-10 h-10 text-white"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
-            </svg>
+          <div className="w-16 h-16 mx-auto rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 mb-4">
+            <LogIn className="w-8 h-8 text-white" />
           </div>
-          <h2 className="mt-4 text-center text-3xl font-extrabold text-white">
+          <h2 className="mt-4 text-center text-3xl font-extrabold text-white bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-100">
             Sign in to your account
           </h2>
           <p className="mt-2 text-center text-sm text-white/70">
@@ -185,41 +157,48 @@ export default function Login() {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
+          <div className="rounded-md shadow-sm space-y-4">
             <div>
-              <label htmlFor="username" className="sr-only">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-white/80 mb-1"
+              >
                 Username
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-blue-400" />
+                  <User className="h-5 w-5 text-white/60" />
                 </div>
                 <input
                   id="username"
                   name="username"
                   type="text"
                   required
-                  className="appearance-none relative block w-full pl-10 px-4 py-3 border border-white/20 bg-white/10 backdrop-blur-sm placeholder-white/60 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent focus:z-10 sm:text-sm transition-all duration-200"
+                  className="appearance-none relative block w-full pl-10 px-4 py-3 border border-white/20 bg-white/10 backdrop-blur-sm placeholder-white/60 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/70 focus:border-transparent focus:z-10 focus:shadow-[0_0_10px_rgba(6,182,212,0.3)] sm:text-sm transition-all duration-200"
                   placeholder="Username"
                   value={formData.username}
                   onChange={handleChange}
                 />
               </div>
             </div>
+
             <div>
-              <label htmlFor="password" className="sr-only">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-white/80 mb-1"
+              >
                 Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-blue-400" />
+                  <Lock className="h-5 w-5 text-white/60" />
                 </div>
                 <input
                   id="password"
                   name="password"
                   type="password"
                   required
-                  className="appearance-none relative block w-full pl-10 px-4 py-3 border border-white/20 bg-white/10 backdrop-blur-sm placeholder-white/60 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent focus:z-10 sm:text-sm transition-all duration-200"
+                  className="appearance-none relative block w-full pl-10 px-4 py-3 border border-white/20 bg-white/10 backdrop-blur-sm placeholder-white/60 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/70 focus:border-transparent focus:z-10 focus:shadow-[0_0_10px_rgba(6,182,212,0.3)] sm:text-sm transition-all duration-200"
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
@@ -229,15 +208,9 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className="rounded-lg bg-red-500/10 backdrop-blur-sm border border-red-500/20 p-4 mb-4 shadow-lg">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <AlertCircle className="h-5 w-5 text-red-400" />
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-red-300">{error}</p>
-                </div>
-              </div>
+            <div className="text-red-500 text-sm text-center flex items-center justify-center">
+              <AlertCircle className="h-4 w-4 mr-1" />
+              {error}
             </div>
           )}
 
@@ -325,7 +298,7 @@ export default function Login() {
             Back to Home
           </Link>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
