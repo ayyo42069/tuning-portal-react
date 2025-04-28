@@ -1,5 +1,3 @@
-"use client";
-
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -7,9 +5,6 @@ import Providers from "@/components/Providers";
 import AuthDebugger from "@/components/AuthDebugger";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/lib/AuthProvider";
-import { FeedbackProvider } from "@/contexts/FeedbackContext";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,9 +21,6 @@ const geistMono = Geist_Mono({
 });
 
 const inter = Inter({ subsets: ["latin"] });
-
-// Create a client
-const queryClient = new QueryClient();
 
 export const metadata: Metadata = {
   title: "Tuning Portal",
@@ -145,13 +137,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-all duration-300 ease-in-out`}
       >
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <FeedbackProvider>
-              {children}
-            </FeedbackProvider>
-          </AuthProvider>
-        </QueryClientProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
