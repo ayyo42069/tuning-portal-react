@@ -66,7 +66,7 @@ export default function BannedAccount() {
 
   // Redirect if user is not banned
   useEffect(() => {
-    if (user && !user.isBanned) {
+    if (user && !user.is_banned) {
       router.push("/dashboard");
     }
   }, [user, router]);
@@ -83,24 +83,39 @@ export default function BannedAccount() {
 
         <div className="space-y-4 text-center">
           <p className="text-gray-600 dark:text-gray-400">
-            Your account has been banned from accessing the platform.
+            {user?.ban_reason ? (
+              <>
+                Reason: {user.ban_reason}
+                <br />
+                {user.ban_expires_at ? (
+                  <>
+                    Your ban will expire on:{" "}
+                    {new Date(user.ban_expires_at).toLocaleString()}
+                  </>
+                ) : (
+                  "This is a permanent ban."
+                )}
+              </>
+            ) : (
+              "Your account has been banned from the platform."
+            )}
           </p>
 
           {user && (
             <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
               <p className="font-medium text-red-800 dark:text-red-200">
-                Reason: {user.banReason || "Violation of terms of service"}
+                Reason: {user.ban_reason || "Violation of terms of service"}
               </p>
 
               <div className="mt-2 flex items-center justify-center text-sm text-red-700 dark:text-red-300">
                 <Calendar className="h-4 w-4 mr-1" />
-                Ban expires: {formatExpiryDate(user.banExpiresAt)}
+                Ban expires: {formatExpiryDate(user.ban_expires_at)}
               </div>
 
-              {user.banExpiresAt &&
-                new Date(user.banExpiresAt) > new Date() && (
+              {user.ban_expires_at &&
+                new Date(user.ban_expires_at) > new Date() && (
                   <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-                    {getTimeRemaining(user.banExpiresAt)}
+                    {getTimeRemaining(user.ban_expires_at)}
                   </p>
                 )}
             </div>

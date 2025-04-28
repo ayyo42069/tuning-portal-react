@@ -17,6 +17,9 @@ export interface User {
   registration_date?: string;
   created_at?: string;
   updated_at?: string;
+  is_banned?: boolean;
+  ban_reason?: string | null;
+  ban_expires_at?: string | null;
 }
 
 /**
