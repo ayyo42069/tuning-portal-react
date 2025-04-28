@@ -31,7 +31,7 @@ import EcuUploadForm from "./EcuUploadForm";
 import { useDynamicIsland } from "@/lib/context/DynamicIslandContext";
 import { useAuth } from "@/lib/AuthProvider";
 import { useNotifications as useNotificationsQuery } from "@/lib/hooks/useDataFetching";
-import { useFeedback } from "@/lib/FeedbackProvider";
+import { useFeedback } from "@/contexts/FeedbackContext";
 import { useRouter } from "next/navigation";
 import { 
   BellIcon, 
@@ -106,10 +106,7 @@ export default function DynamicIsland({
     setLocalIsExpanded(false);
     setShowNotifications(false);
     if (pathname === "/dashboard") {
-      showFeedback({
-        type: "info",
-        message: "Welcome to your dashboard!"
-      });
+      showFeedback("Welcome to your dashboard", "info");
     }
   }, [pathname, showFeedback]);
 
@@ -141,63 +138,34 @@ export default function DynamicIsland({
   const handleLogout = async () => {
     try {
       await logout();
-      showFeedback({
-        type: "success",
-        message: "Logged out successfully",
-        duration: 3000
-      });
+      showFeedback("Successfully logged out", "success");
+      router.push("/auth/login");
     } catch (error) {
-      console.error("Logout error:", error);
-      showFeedback({
-        type: "error",
-        message: "Failed to logout. Please try again.",
-        duration: 3000
-      });
+      showFeedback("Failed to log out", "error");
     }
   };
 
   const handleNotificationClick = async (notification: any) => {
     try {
-      // Only mark as read if it's unread
-      if (!notification.is_read) {
-        await markAsRead(notification.id);
-        showFeedback({
-          type: "success",
-          message: "Notification marked as read",
-          duration: 2000
-        });
-      }
-
-      // Handle file-related notifications
-      if (notification.type === "file_status" && notification.reference_id) {
-        // Use router for navigation
-        router.push(`/dashboard/tuning-file/${notification.reference_id}`);
+      // Mark as read
+      await markAsRead(notification.id);
+      showFeedback("Notification marked as read", "success");
+      
+      // Navigate to the relevant page
+      if (notification.link) {
+        router.push(notification.link);
       }
     } catch (error) {
-      console.error("Error handling notification:", error);
-      showFeedback({
-        type: "error",
-        message: "Failed to process notification",
-        duration: 3000
-      });
+      showFeedback("Failed to mark notification as read", "error");
     }
   };
 
   const handleMarkAllAsRead = async () => {
     try {
       await markAllAsRead();
-      showFeedback({
-        type: "success",
-        message: "All notifications marked as read",
-        duration: 2000
-      });
+      showFeedback("All notifications marked as read", "success");
     } catch (error) {
-      console.error("Error marking all notifications as read:", error);
-      showFeedback({
-        type: "error",
-        message: "Failed to mark all notifications as read",
-        duration: 3000
-      });
+      showFeedback("Failed to mark all notifications as read", "error");
     }
   };
 

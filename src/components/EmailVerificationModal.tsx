@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/lib/AuthProvider";
-import { useFeedback } from "@/lib/FeedbackProvider";
+import { useFeedback } from "@/contexts/FeedbackContext";
 import { useRouter } from "next/navigation";
 
 interface EmailVerificationModalProps {

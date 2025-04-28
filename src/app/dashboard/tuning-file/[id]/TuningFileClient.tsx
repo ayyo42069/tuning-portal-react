@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Download, MessageSquare, ThumbsUp, ThumbsDown } from 'lucide-react';
-import { useFeedback } from '@/lib/FeedbackProvider';
+import { useAuth } from '@/lib/AuthProvider';
+import { useFeedback } from '@/contexts/FeedbackContext';
 import ECUFileDetailedProgress from '@/components/ECUFileDetailedProgress';
 import ECUFileComments from '@/components/ECUFileComments';
 
@@ -62,11 +63,7 @@ export default function TuningFileClient({ tuningFile }: TuningFileClientProps) 
   };
 
   const handleFeedback = (type: 'positive' | 'negative') => {
-    showFeedbackToast({
-      type: 'success',
-      message: `Thank you for your ${type} feedback!`,
-      duration: 3000,
-    });
+    showFeedbackToast(`Thank you for your ${type} feedback!`, 'success');
     setShowFeedback(false);
   };
 

@@ -21,6 +21,10 @@ export interface ContextState {
   isProcessing: boolean;
   lastAction?: string;
   showUploadForm: boolean;
+  currentFilter?: string;
+  currentSort?: string;
+  searchQuery?: string;
+  previewFileId?: string;
 }
 
 export interface DynamicIslandContext {
