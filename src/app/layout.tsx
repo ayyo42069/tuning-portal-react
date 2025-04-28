@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import Providers from "@/app/providers";
-import { Inter } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,13 +17,19 @@ const geistMono = Geist_Mono({
   preload: true,
 });
 
-const inter = Inter({ subsets: ["latin"] });
-
 export const metadata: Metadata = {
-  title: "Tuning Portal",
+  title: {
+    default: "Tuning Portal",
+    template: "%s | Tuning Portal",
+  },
   description: "Professional automotive tuning services at tuning-portal.eu",
-  keywords:
-    "car tuning, automotive tuning, ECU remapping, performance tuning, chip tuning",
+  keywords: [
+    "car tuning",
+    "automotive tuning",
+    "ECU remapping",
+    "performance tuning",
+    "chip tuning",
+  ],
   authors: [{ name: "Tuning Portal Team" }],
   creator: "Tuning Portal",
   publisher: "Tuning Portal",
@@ -44,8 +48,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Tuning Portal - Professional Automotive Tuning Services",
-    description:
-      "Expert automotive tuning services for optimal vehicle performance",
+    description: "Expert automotive tuning services for optimal vehicle performance",
     url: "https://tuning-portal.eu",
     siteName: "Tuning Portal",
     locale: "en_US",
@@ -62,25 +65,14 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Tuning Portal - Professional Automotive Tuning Services",
-    description:
-      "Expert automotive tuning services for optimal vehicle performance",
+    description: "Expert automotive tuning services for optimal vehicle performance",
     creator: "@tuningportal",
     images: ["https://tuning-portal.eu/images/twitter-image.jpg"],
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  verification: {
-    google: "google-site-verification-code",
-    yandex: "yandex-verification-code",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
   },
 };
 
@@ -90,55 +82,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" dir="ltr" suppressHydrationWarning className="transition-colors duration-300 ease-in-out">
-      <head>
-        <link rel="icon" type="image/png" sizes="32x32" href="/images/icon/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/images/icon/favicon-16x16.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/images/icon/apple-touch-icon.png" />
-        <link rel="manifest" href="/images/icon/site.webmanifest" />
-        <link rel="icon" href="/images/icon/favicon.ico" />
-        
-        {/* Google Analytics */}
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=G-6VFG6B4CMY`}
-          strategy="lazyOnload"
-        />
-        <Script id="google-analytics" strategy="lazyOnload">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-6VFG6B4CMY');
-          `}
-        </Script>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=5"
-        />
-        {/* Dark mode script */}
-        <Script id="dark-mode" strategy="beforeInteractive">
-          {`
-            // On page load or when changing themes, best to add inline in \`head\` to avoid FOUC
-            document.documentElement.classList.toggle(
-              "dark",
-              localStorage.theme === "dark" ||
-                (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)
-            );
-          `}
-        </Script>
-      </head>
+    <html lang="en" dir="ltr" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-all duration-300 ease-in-out`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300 ease-in-out`}
       >
-        <Providers>
-          {children}
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
