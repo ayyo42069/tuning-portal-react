@@ -370,9 +370,10 @@ export default function Dashboard() {
               </div>
           
             </div>
-                 {/* Statistics and Activity Card */}
-          <StatisticsAndActivityCard />
+           
           </div>
+                {/* Statistics and Activity Card */}
+                <StatisticsAndActivityCard />
         </div>
                  
         {/* Right Column - Opening Hours and Support */}
