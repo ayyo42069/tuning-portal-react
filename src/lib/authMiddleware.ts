@@ -8,6 +8,7 @@ interface UserDB extends User {
   is_banned: boolean;
   ban_reason: string | null;
   ban_expires_at: string | null;
+  email_verified: boolean;
 }
 
 interface AuthResult {
@@ -53,7 +54,8 @@ export async function authenticateUser(request: NextRequest): Promise<AuthResult
     const user = await getRow<UserDB>(
       `SELECT u.id, u.username, u.email, u.role, u.created_at, 
               COALESCE(uc.credits, 0) as credits,
-              u.is_banned, u.ban_reason, u.ban_expires_at
+              u.is_banned, u.ban_reason, u.ban_expires_at,
+              u.email_verified
        FROM users u 
        LEFT JOIN user_credits uc ON u.id = uc.user_id 
        WHERE u.id = ?`,
@@ -94,7 +96,8 @@ export async function authenticateUser(request: NextRequest): Promise<AuthResult
         credits: user.credits,
         is_banned: user.is_banned,
         ban_reason: user.ban_reason,
-        ban_expires_at: user.ban_expires_at
+        ban_expires_at: user.ban_expires_at,
+        email_verified: user.email_verified
       }
     };
   } catch (error) {
