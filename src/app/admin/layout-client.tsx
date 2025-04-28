@@ -35,7 +35,7 @@ export default function AdminLayoutClient({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout, loading } = useAuth();
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
@@ -49,7 +49,7 @@ export default function AdminLayoutClient({
 
   useEffect(() => {
     // Check if user is admin, redirect if not
-    if (!isLoading && !user) {
+    if (!loading && !user) {
       router.push("/auth/login");
       return;
     }
@@ -58,7 +58,7 @@ export default function AdminLayoutClient({
       router.push("/dashboard");
       return;
     }
-  }, [user, isLoading, router]);
+  }, [user, loading, router]);
 
   // Close sidebar when clicking outside on mobile
   useEffect(() => {

@@ -16,9 +16,14 @@ interface User {
   username: string;
   email: string;
   role: "user" | "admin";
+  credits?: number;
   email_verified: boolean;
   is_banned: boolean;
   ban_expires_at?: string;
+  last_login_date?: string;
+  registration_date?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface AuthContextType {
