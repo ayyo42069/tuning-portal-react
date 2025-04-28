@@ -6,16 +6,23 @@ import { useFeedback } from "@/contexts/FeedbackContext";
 
 interface User {
   id: string;
+  username: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
+  emailVerified: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (identifier: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string, fullName: string) => Promise<void>;
+  register: (data: {
+    username: string;
+    email: string;
+    password: string;
+    fullName: string;
+  }) => Promise<void>;
+  verifyEmail: (code: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -34,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const response = await fetch("/api/auth/me");
         if (response.ok) {
           const data = await response.json();
-          setUser(data.user);
+          setUser(data);
         }
       } catch (error) {
         console.error("Auth check failed:", error);
@@ -69,12 +76,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (username: string, email: string, password: string, fullName: string) => {
+  const register = async (data: {
+    username: string;
+    email: string;
+    password: string;
+    fullName: string;
+  }) => {
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password, fullName }),
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
@@ -82,13 +94,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(error.message || "Registration failed");
       }
 
-      const data = await response.json();
-      setUser(data.user);
       showFeedback("Registration successful!", "success");
-      router.push("/dashboard");
     } catch (error) {
       showFeedback(error instanceof Error ? error.message : "Registration failed", "error");
       throw error;
+    }
+  };
+
+  const verifyEmail = async (code: string) => {
+    const response = await fetch("/api/auth/verify-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Email verification failed");
     }
   };
 
@@ -105,7 +127,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        register,
+        verifyEmail,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

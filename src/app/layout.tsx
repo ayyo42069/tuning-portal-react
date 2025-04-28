@@ -6,6 +6,8 @@ import AuthDebugger from "@/components/AuthDebugger";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/AuthProvider";
+import { FeedbackProvider } from "@/lib/FeedbackProvider";
+import { AuthDynamicIslandProvider } from "@/contexts/AuthDynamicIslandContext";
 import DynamicIslandWrapper from "@/components/DynamicIslandWrapper";
 import { DynamicIslandProvider } from "@/lib/context/DynamicIslandContext";
 
@@ -142,11 +144,15 @@ export default function RootLayout({
       >
         <Providers>
           <AuthProvider>
-            <DynamicIslandProvider>
-              <DynamicIslandWrapper />
-              {children}
-              <AuthDebugger />
-            </DynamicIslandProvider>
+            <FeedbackProvider>
+              <AuthDynamicIslandProvider>
+                <DynamicIslandProvider>
+                  <DynamicIslandWrapper />
+                  {children}
+                  <AuthDebugger />
+                </DynamicIslandProvider>
+              </AuthDynamicIslandProvider>
+            </FeedbackProvider>
           </AuthProvider>
         </Providers>
       </body>

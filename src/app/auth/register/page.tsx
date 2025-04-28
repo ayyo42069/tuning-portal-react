@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/contexts/AuthContext";
-import { useFeedback } from "@/contexts/FeedbackContext";
-import { User, Mail, Lock, AlertCircle, Loader2, Eye, EyeOff, Check } from "lucide-react";
+import { useAuth } from "@/lib/AuthProvider";
+import { useFeedback } from "@/lib/FeedbackProvider";
+import { useAuthDynamicIsland } from "@/contexts/AuthDynamicIslandContext";
 import DynamicIsland from "@/components/DynamicIsland";
+import EmailVerificationModal from "@/components/EmailVerificationModal";
+import { User, Mail, Lock, AlertCircle, Loader2, Eye, EyeOff, Check } from "lucide-react";
 
 const validateEmail = (email: string) => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -24,12 +26,14 @@ export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
   const { showFeedback } = useFeedback();
+  const { state, setStatus, setProgress, setMessage, setValidationErrors, reset } = useAuthDynamicIsland();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
-    fullName: "",
+    firstName: "",
+    lastName: "",
     acceptTerms: false
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -40,9 +44,15 @@ export default function RegisterPage() {
     email: false,
     password: false,
     confirmPassword: false,
-    fullName: false,
+    firstName: false,
+    lastName: false,
     acceptTerms: false
   });
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+
+  useEffect(() => {
+    reset();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -73,10 +83,15 @@ export default function RegisterPage() {
         ...prev,
         confirmPassword: value === formData.password
       }));
-    } else if (name === 'fullName') {
+    } else if (name === 'firstName') {
       setValidationState(prev => ({
         ...prev,
-        fullName: value.length >= 2
+        firstName: value.length >= 2
+      }));
+    } else if (name === 'lastName') {
+      setValidationState(prev => ({
+        ...prev,
+        lastName: value.length >= 2
       }));
     } else if (name === 'acceptTerms') {
       setValidationState(prev => ({
@@ -89,13 +104,37 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setStatus("loading");
+    setProgress(0);
+
+    if (!validateForm()) {
+      setStatus("error");
+      setMessage("Please fix the validation errors");
+      return;
+    }
 
     try {
-      await register(formData.username, formData.email, formData.password, formData.fullName);
-      showFeedback("Registration successful! Please check your email for verification.", "success");
-      router.push("/auth/login");
+      setProgress(30);
+      setMessage("Creating your account...");
+      
+      await register({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        fullName: `${formData.firstName} ${formData.lastName}`.trim(),
+      });
+      
+      setProgress(100);
+      setStatus("success");
+      setMessage("Account created successfully! Please verify your email.");
+      setShowVerificationModal(true);
     } catch (error) {
-      showFeedback("Registration failed. Please try again.", "error");
+      setStatus("error");
+      setMessage(error instanceof Error ? error.message : "Registration failed");
+      showFeedback({
+        type: "error",
+        message: error instanceof Error ? error.message : "Registration failed"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -107,13 +146,45 @@ export default function RegisterPage() {
     return (validFields / totalFields) * 100;
   };
 
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    let isValid = true;
+
+    if (!formData.username) {
+      errors.username = "Username is required";
+      isValid = false;
+    } else if (formData.username.length < 3) {
+      errors.username = "Username must be at least 3 characters long";
+      isValid = false;
+    }
+
+    if (!formData.email) {
+      errors.email = "Email is required";
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = "Please enter a valid email address";
+      isValid = false;
+    }
+
+    if (!formData.password) {
+      errors.password = "Password is required";
+      isValid = false;
+    } else if (formData.password.length < 8) {
+      errors.password = "Password must be at least 8 characters long";
+      isValid = false;
+    }
+
+    setValidationErrors(errors);
+    return isValid;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center justify-center p-4 relative overflow-hidden">
       <DynamicIsland
         variant="auth"
-        status={isLoading ? "loading" : "idle"}
-        progress={getProgress()}
-        message={isLoading ? "Creating your account..." : "Create a new account"}
+        status={state.status}
+        progress={state.progress}
+        message={state.message}
         onExpand={() => setIsExpanded(!isExpanded)}
         isExpanded={isExpanded}
       />
@@ -207,12 +278,26 @@ export default function RegisterPage() {
             <div className="relative">
               <input
                 type="text"
-                name="fullName"
-                value={formData.fullName}
+                name="firstName"
+                value={formData.firstName}
                 onChange={handleInputChange}
-                placeholder="Full Name"
+                placeholder="First Name"
                 className={`w-full px-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all
-                  ${validationState.fullName ? 'border-green-500 focus:ring-green-500' : 'border-gray-600 focus:ring-blue-500'}`}
+                  ${validationState.firstName ? 'border-green-500 focus:ring-green-500' : 'border-gray-600 focus:ring-blue-500'}`}
+                required
+              />
+              <User className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+            </div>
+
+            <div className="relative">
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleInputChange}
+                placeholder="Last Name"
+                className={`w-full px-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all
+                  ${validationState.lastName ? 'border-green-500 focus:ring-green-500' : 'border-gray-600 focus:ring-blue-500'}`}
                 required
               />
               <User className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -272,6 +357,13 @@ export default function RegisterPage() {
           </p>
         </div>
       </motion.div>
+
+      {showVerificationModal && (
+        <EmailVerificationModal
+          email={formData.email}
+          onClose={() => setShowVerificationModal(false)}
+        />
+      )}
     </div>
   );
 }
