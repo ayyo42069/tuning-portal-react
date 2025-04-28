@@ -27,6 +27,7 @@ export default function RegisterPage() {
     confirmPassword: "",
     firstName: "",
     lastName: "",
+    acceptTerms: false,
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -34,15 +35,50 @@ export default function RegisterPage() {
   const { showFeedback } = useFeedback();
   const router = useRouter();
 
+  const getPasswordStrength = (password: string) => {
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+    return strength;
+  };
+
+  const getStrengthColor = (strength: number) => {
+    switch (strength) {
+      case 0:
+      case 1:
+        return "bg-red-500";
+      case 2:
+      case 3:
+        return "bg-yellow-500";
+      case 4:
+      case 5:
+        return "bg-green-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
+
+    if (!formData.acceptTerms) {
+      setError("Please accept the terms and conditions");
+      setIsLoading(false);
+      return;
+    }
 
     // Validate email
     if (!validateEmail(formData.email)) {
@@ -53,7 +89,9 @@ export default function RegisterPage() {
 
     // Validate password
     if (!validatePassword(formData.password)) {
-      setError("Password must be at least 8 characters long and include uppercase, lowercase, number, and special character");
+      setError(
+        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
+      );
       setIsLoading(false);
       return;
     }
@@ -74,8 +112,9 @@ export default function RegisterPage() {
       showFeedback("Registration successful! Welcome to Tuning Portal.", "success");
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
-      showFeedback("Registration failed. Please try again.", "error");
+      const errorMessage = err instanceof Error ? err.message : "Registration failed";
+      setError(errorMessage);
+      showFeedback(`Registration failed: ${errorMessage}`, "error");
     } finally {
       setIsLoading(false);
     }
@@ -217,23 +256,65 @@ export default function RegisterPage() {
             </div>
           </div>
 
+          {/* Password strength indicator */}
+          {formData.password && (
+            <div className="mt-2">
+              <div className="text-sm text-white/70 mb-1">Password Strength</div>
+              <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className={`h-full transition-all ${
+                    getStrengthColor(getPasswordStrength(formData.password))
+                  }`}
+                  style={{
+                    width: `${(getPasswordStrength(formData.password) / 5) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Terms and conditions checkbox */}
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="acceptTerms"
+              name="acceptTerms"
+              checked={formData.acceptTerms}
+              onChange={handleChange}
+              className="w-4 h-4 rounded border-white/10 bg-white/5 text-blue-500 focus:ring-blue-500/50"
+            />
+            <label htmlFor="acceptTerms" className="text-sm text-white/70">
+              I accept the{" "}
+              <Link href="/terms" className="text-blue-400 hover:text-blue-300">
+                terms and conditions
+              </Link>
+            </label>
+          </div>
+
+          {/* Error message */}
           {error && (
-            <div className="text-red-500 text-sm text-center flex items-center justify-center">
-              <AlertCircle className="h-4 w-4 mr-1" />
-              {error}
+            <div className="flex items-center space-x-2 text-red-400 text-sm">
+              <AlertCircle className="h-4 w-4" />
+              <span>{error}</span>
             </div>
           )}
 
           <button
             type="submit"
-            disabled={isLoading}
-            className="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            disabled={isLoading || !formData.acceptTerms}
+            className={`w-full py-2 px-4 rounded-lg font-medium transition-all
+              ${
+                isLoading || !formData.acceptTerms
+                  ? "bg-gray-500/50 cursor-not-allowed"
+                  : "bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+              }
+              text-white shadow-lg`}
           >
             {isLoading ? (
-              <>
-                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                Creating Account...
-              </>
+              <div className="flex items-center justify-center space-x-2">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>Registering...</span>
+              </div>
             ) : (
               "Create Account"
             )}
