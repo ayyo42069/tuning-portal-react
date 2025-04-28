@@ -29,7 +29,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  loading: boolean;
+  isLoading: boolean;
   error: string | null;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -47,7 +47,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setError("Failed to refresh user data. Please try again.");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -90,14 +90,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         // Skip auth check on auth routes
         if (pathname.startsWith("/auth/")) {
-          setLoading(false);
+          setIsLoading(false);
           return;
         }
 
         await refreshUserData();
       } catch (error) {
         console.error("Initial auth check failed:", error);
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -204,7 +204,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        loading,
+        isLoading,
         error,
         login,
         logout,
