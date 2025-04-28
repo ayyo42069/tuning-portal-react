@@ -12,6 +12,7 @@ import { User, Mail, Lock, AlertCircle, Loader2, LogIn } from "lucide-react";
 export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: "",
+    username: "",
     password: "",
   });
   const [error, setError] = useState("");
@@ -31,7 +32,8 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await login(formData.email, formData.password);
+      const loginIdentifier = formData.email || formData.username;
+      await login(loginIdentifier, formData.password);
       showFeedback("Login successful! Welcome back.", "success");
       router.push("/dashboard");
     } catch (err) {
@@ -74,21 +76,21 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-white/70 mb-1">
-              Email
+              Email or Username
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Mail className="h-5 w-5 text-white/60" />
               </div>
               <input
-                type="email"
+                type="text"
                 id="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
                 required
                 className="w-full pl-10 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                placeholder="you@example.com"
+                placeholder="you@example.com or username"
               />
             </div>
           </div>

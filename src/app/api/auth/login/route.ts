@@ -8,7 +8,7 @@ import {
 import { logAuthSuccess, logAuthFailure } from "@/lib/securityMiddleware";
 
 interface LoginRequest {
-  username: string;
+  identifier: string;
   password: string;
 }
 
@@ -27,12 +27,12 @@ interface User {
 export async function POST(request: NextRequest) {
   try {
     const body: LoginRequest = await request.json();
-    const { username, password } = body;
+    const { identifier, password } = body;
 
     // Validate input
-    if (!username || !password) {
+    if (!identifier || !password) {
       return NextResponse.json(
-        { error: "Username and password are required" },
+        { error: "Identifier and password are required" },
         { status: 400 }
       );
     }
@@ -41,15 +41,15 @@ export async function POST(request: NextRequest) {
     const user = await getRow<User>(
       `SELECT u.*, u.is_banned, u.ban_reason, u.ban_expires_at 
        FROM users u 
-       WHERE u.username = ?`,
-      [username]
+       WHERE u.email = ? OR u.username = ?`,
+      [identifier, identifier]
     );
 
     if (!user) {
       // Log failed login attempt
-      await logAuthFailure(username, request, "User not found");
+      await logAuthFailure(identifier, request, "User not found");
       return NextResponse.json(
-        { error: "Invalid username or password" },
+        { error: "Invalid credentials" },
         { status: 401 }
       );
     }
@@ -58,9 +58,9 @@ export async function POST(request: NextRequest) {
     const isPasswordValid = await compare(password, user.password);
     if (!isPasswordValid) {
       // Log failed login attempt due to invalid password
-      await logAuthFailure(username, request, "Invalid password");
+      await logAuthFailure(identifier, request, "Invalid password");
       return NextResponse.json(
-        { error: "Invalid username or password" },
+        { error: "Invalid credentials" },
         { status: 401 }
       );
     }
