@@ -19,6 +19,7 @@ interface User {
   credits?: number;
   email_verified: boolean;
   is_banned: boolean;
+  ban_reason?: string | null;
   ban_expires_at?: string;
   last_login_date?: string;
   registration_date?: string;
