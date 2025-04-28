@@ -31,6 +31,12 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   login: (username: string, password: string) => Promise<boolean>;
+  register: (data: {
+    username: string;
+    email: string;
+    password: string;
+    fullName: string;
+  }) => Promise<boolean>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -200,6 +206,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const register = async (data: {
+    username: string;
+    email: string;
+    password: string;
+    fullName: string;
+  }) => {
+    try {
+      console.log("[Auth] Attempting registration...");
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+
+      console.log(`[Auth] Register response: ${response.status}`);
+      const result = await response.json();
+      console.log("[Auth] Register result:", result);
+
+      if (result.success) {
+        console.log("[Auth] Registration successful");
+        setLoading(false);
+        setError(null);
+        return true;
+      } else {
+        console.log("[Auth] Registration failed:", result.error);
+        setError(result.error || "Registration failed");
+        setLoading(false);
+        return false;
+      }
+    } catch (error) {
+      console.error("[Auth] Registration error:", error);
+      setError("An error occurred during registration");
+      setLoading(false);
+      return false;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -207,6 +256,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading: loading,
         error,
         login,
+        register,
         logout,
         refreshUser: refreshUserData,
       }}
