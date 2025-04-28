@@ -43,6 +43,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useFeedback } from "@/lib/FeedbackProvider";
 import { useRouter } from "next/navigation";
+import { useAuthDynamicIsland } from "@/contexts/AuthDynamicIslandContext";
 
 // Animation constants
 const spring = {
@@ -77,7 +78,7 @@ interface DynamicIslandProps {
 }
 
 export default function DynamicIsland({
-  variant = "dashboard",
+  variant = "default",
   status = "idle",
   progress = 0,
   message = "",
@@ -97,6 +98,7 @@ export default function DynamicIsland({
   const { showFeedback } = useFeedback();
   const { state, actions, showUploadForm, closeUploadForm } = useDynamicIsland();
   const router = useRouter();
+  const { state: authState } = useAuthDynamicIsland();
 
   // Update local state when prop changes
   useEffect(() => {
@@ -248,6 +250,19 @@ export default function DynamicIsland({
         return "bg-red-500";
       default:
         return "bg-blue-500";
+    }
+  };
+
+  const getStatusColor = () => {
+    switch (status) {
+      case "success":
+        return "bg-green-500";
+      case "error":
+        return "bg-red-500";
+      case "loading":
+        return "bg-blue-500";
+      default:
+        return "bg-gray-500";
     }
   };
 

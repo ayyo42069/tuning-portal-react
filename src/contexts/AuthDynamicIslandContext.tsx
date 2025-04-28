@@ -6,7 +6,7 @@ interface AuthDynamicIslandState {
   status: "idle" | "loading" | "success" | "error";
   progress: number;
   message: string;
-  validationErrors: Record<string, string>;
+  validationErrors: string[];
 }
 
 interface AuthDynamicIslandContextType {
@@ -14,40 +14,43 @@ interface AuthDynamicIslandContextType {
   setStatus: (status: AuthDynamicIslandState["status"]) => void;
   setProgress: (progress: number) => void;
   setMessage: (message: string) => void;
-  setValidationErrors: (errors: Record<string, string>) => void;
+  setValidationErrors: (errors: string[]) => void;
   reset: () => void;
 }
-
-const initialState: AuthDynamicIslandState = {
-  status: "idle",
-  progress: 0,
-  message: "",
-  validationErrors: {},
-};
 
 const AuthDynamicIslandContext = createContext<AuthDynamicIslandContextType | undefined>(undefined);
 
 export function AuthDynamicIslandProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthDynamicIslandState>(initialState);
+  const [state, setState] = useState<AuthDynamicIslandState>({
+    status: "idle",
+    progress: 0,
+    message: "",
+    validationErrors: [],
+  });
 
   const setStatus = (status: AuthDynamicIslandState["status"]) => {
-    setState(prev => ({ ...prev, status }));
+    setState((prev) => ({ ...prev, status }));
   };
 
   const setProgress = (progress: number) => {
-    setState(prev => ({ ...prev, progress }));
+    setState((prev) => ({ ...prev, progress }));
   };
 
   const setMessage = (message: string) => {
-    setState(prev => ({ ...prev, message }));
+    setState((prev) => ({ ...prev, message }));
   };
 
-  const setValidationErrors = (errors: Record<string, string>) => {
-    setState(prev => ({ ...prev, validationErrors: errors }));
+  const setValidationErrors = (validationErrors: string[]) => {
+    setState((prev) => ({ ...prev, validationErrors }));
   };
 
   const reset = () => {
-    setState(initialState);
+    setState({
+      status: "idle",
+      progress: 0,
+      message: "",
+      validationErrors: [],
+    });
   };
 
   return (

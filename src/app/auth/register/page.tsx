@@ -34,7 +34,8 @@ export default function RegisterPage() {
     confirmPassword: "",
     firstName: "",
     lastName: "",
-    acceptTerms: false
+    acceptTerms: false,
+    fullName: ""
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -117,17 +118,21 @@ export default function RegisterPage() {
       setProgress(30);
       setMessage("Creating your account...");
       
-      await register({
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-        fullName: `${formData.firstName} ${formData.lastName}`.trim(),
-      });
+      const success = await register(formData);
       
-      setProgress(100);
-      setStatus("success");
-      setMessage("Account created successfully! Please verify your email.");
-      setShowVerificationModal(true);
+      if (success) {
+        setProgress(100);
+        setStatus("success");
+        setMessage("Account created successfully! Please verify your email.");
+        setShowVerificationModal(true);
+      } else {
+        setStatus("error");
+        setMessage("Registration failed. Please try again.");
+        showFeedback({
+          type: "error",
+          message: "Registration failed. Please try again."
+        });
+      }
     } catch (error) {
       setStatus("error");
       setMessage(error instanceof Error ? error.message : "Registration failed");
@@ -147,35 +152,27 @@ export default function RegisterPage() {
   };
 
   const validateForm = () => {
-    const errors: Record<string, string> = {};
-    let isValid = true;
-
+    const errors: string[] = [];
     if (!formData.username) {
-      errors.username = "Username is required";
-      isValid = false;
+      errors.push("Username is required");
     } else if (formData.username.length < 3) {
-      errors.username = "Username must be at least 3 characters long";
-      isValid = false;
+      errors.push("Username must be at least 3 characters long");
     }
-
     if (!formData.email) {
-      errors.email = "Email is required";
-      isValid = false;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = "Please enter a valid email address";
-      isValid = false;
+      errors.push("Email is required");
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.push("Email is invalid");
     }
-
     if (!formData.password) {
-      errors.password = "Password is required";
-      isValid = false;
+      errors.push("Password is required");
     } else if (formData.password.length < 8) {
-      errors.password = "Password must be at least 8 characters long";
-      isValid = false;
+      errors.push("Password must be at least 8 characters");
     }
-
+    if (!formData.fullName) {
+      errors.push("Full name is required");
+    }
     setValidationErrors(errors);
-    return isValid;
+    return errors.length === 0;
   };
 
   return (

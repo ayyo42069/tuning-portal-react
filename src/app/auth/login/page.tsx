@@ -3,56 +3,37 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthProvider";
-import { useFeedback } from "@/lib/FeedbackProvider";
 import { useAuthDynamicIsland } from "@/contexts/AuthDynamicIslandContext";
 import DynamicIsland from "@/components/DynamicIsland";
-import Link from "next/link";
-
-interface FormData {
-  email: string;
-  username: string;
-  password: string;
-}
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
-  const { showFeedback } = useFeedback();
   const { state, setStatus, setProgress, setMessage, setValidationErrors, reset } = useAuthDynamicIsland();
-  const [formData, setFormData] = useState<FormData>({
-    email: "",
-    username: "",
+  const [formData, setFormData] = useState({
+    identifier: "",
     password: "",
   });
 
   useEffect(() => {
-    // Reset Dynamic Island state when component mounts
     reset();
   }, []);
 
   const validateForm = () => {
-    const errors: Record<string, string> = {};
-    let isValid = true;
-
-    if (!formData.email && !formData.username) {
-      errors.identifier = "Email or username is required";
-      isValid = false;
+    const errors: string[] = [];
+    if (!formData.identifier) {
+      errors.push("Email or username is required");
     }
-
     if (!formData.password) {
-      errors.password = "Password is required";
-      isValid = false;
+      errors.push("Password is required");
     }
-
     setValidationErrors(errors);
-    return isValid;
+    return errors.length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus("loading");
-    setProgress(0);
-
+    
     if (!validateForm()) {
       setStatus("error");
       setMessage("Please fix the validation errors");
@@ -60,47 +41,45 @@ export default function LoginPage() {
     }
 
     try {
-      setProgress(30);
+      setStatus("loading");
+      setProgress(0);
       setMessage("Authenticating...");
+
+      const success = await login(formData.identifier, formData.password);
       
-      const loginIdentifier = formData.email || formData.username;
-      await login(loginIdentifier, formData.password);
-      
-      setProgress(100);
-      setStatus("success");
-      setMessage("Login successful!");
-      
-      setTimeout(() => {
+      if (success) {
+        setProgress(100);
+        setStatus("success");
+        setMessage("Login successful! Redirecting...");
         router.push("/dashboard");
-      }, 1000);
+      } else {
+        setStatus("error");
+        setMessage("Invalid credentials");
+      }
     } catch (error) {
       setStatus("error");
-      setMessage(error instanceof Error ? error.message : "Login failed");
-      showFeedback({
-        type: "error",
-        message: error instanceof Error ? error.message : "Login failed"
-      });
+      setMessage("An error occurred during login");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <DynamicIsland
         variant="auth"
         status={state.status}
         progress={state.progress}
         message={state.message}
       />
-      <div className="max-w-md w-full space-y-8 p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
+      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Sign in to your account
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
             <div>
-              <label htmlFor="identifier" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="identifier" className="sr-only">
                 Email or Username
               </label>
               <input
@@ -108,28 +87,14 @@ export default function LoginPage() {
                 name="identifier"
                 type="text"
                 required
-                className={`appearance-none relative block w-full px-3 py-2 border ${
-                  state.validationErrors.identifier
-                    ? "border-red-500"
-                    : "border-gray-300 dark:border-gray-600"
-                } placeholder-gray-500 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-700`}
-                placeholder="Enter your email or username"
-                value={formData.email || formData.username}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value.includes("@")) {
-                    setFormData({ ...formData, email: value, username: "" });
-                  } else {
-                    setFormData({ ...formData, username: value, email: "" });
-                  }
-                }}
+                className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Email or Username"
+                value={formData.identifier}
+                onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
               />
-              {state.validationErrors.identifier && (
-                <p className="mt-1 text-sm text-red-500">{state.validationErrors.identifier}</p>
-              )}
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="password" className="sr-only">
                 Password
               </label>
               <input
@@ -137,37 +102,27 @@ export default function LoginPage() {
                 name="password"
                 type="password"
                 required
-                className={`appearance-none relative block w-full px-3 py-2 border ${
-                  state.validationErrors.password
-                    ? "border-red-500"
-                    : "border-gray-300 dark:border-gray-600"
-                } placeholder-gray-500 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-700`}
-                placeholder="Enter your password"
+                className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
-              {state.validationErrors.password && (
-                <p className="mt-1 text-sm text-red-500">{state.validationErrors.password}</p>
-              )}
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <Link
-                href="/auth/forgot-password"
-                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
-              >
-                Forgot your password?
-              </Link>
+          {state.validationErrors.length > 0 && (
+            <div className="text-red-500 text-sm">
+              {state.validationErrors.map((error, index) => (
+                <p key={index}>{error}</p>
+              ))}
             </div>
-          </div>
+          )}
 
           <div>
             <button
               type="submit"
               disabled={state.status === "loading"}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {state.status === "loading" ? (
                 <span className="absolute left-0 inset-y-0 flex items-center pl-3">
@@ -197,17 +152,6 @@ export default function LoginPage() {
             </button>
           </div>
         </form>
-        <div className="text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Don't have an account?{" "}
-            <Link
-              href="/auth/register"
-              className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              Sign up
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
   );

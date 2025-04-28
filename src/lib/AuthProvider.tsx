@@ -136,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ identifier: username, password }),
         credentials: "include",
       });
 
@@ -146,6 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (data.success) {
         console.log("[Auth] Login successful");
+        // Update user state with the returned user data
         setUser(data.user);
         setLoading(false);
         setError(null);
