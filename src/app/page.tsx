@@ -7,7 +7,7 @@ import { ClientFeatures } from "@/components/landing/ClientFeatures";
 import { ClientFooter } from "@/components/landing/ClientFooter";
 import DynamicIsland from "@/components/DynamicIsland";
 
-export default function Home() {
+function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Dynamic Island */}
@@ -23,4 +23,8 @@ export default function Home() {
       <CookieConsent />
     </div>
   );
+}
+
+export default function Home() {
+  return <LandingPage />;
 }

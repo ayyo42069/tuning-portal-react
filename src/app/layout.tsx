@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
-import Providers from "@/components/Providers";
-import AuthDebugger from "@/components/AuthDebugger";
+import Providers from "@/app/providers";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
