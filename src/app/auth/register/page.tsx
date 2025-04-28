@@ -23,6 +23,7 @@ const validatePassword = (password: string) => {
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
     email: "",
+    username: "",
     password: "",
     confirmPassword: "",
     firstName: "",
@@ -87,6 +88,13 @@ export default function RegisterPage() {
       return;
     }
 
+    // Validate username
+    if (!formData.username || formData.username.length < 3) {
+      setError("Username must be at least 3 characters long");
+      setIsLoading(false);
+      return;
+    }
+
     // Validate password
     if (!validatePassword(formData.password)) {
       setError(
@@ -104,10 +112,10 @@ export default function RegisterPage() {
 
     try {
       await register(
+        formData.username,
         formData.email,
         formData.password,
-        formData.firstName,
-        formData.lastName
+        `${formData.firstName} ${formData.lastName}`
       );
       showFeedback("Registration successful! Welcome to Tuning Portal.", "success");
       router.push("/dashboard");
@@ -190,6 +198,27 @@ export default function RegisterPage() {
                   placeholder="Doe"
                 />
               </div>
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-white/70 mb-1">
+              Username
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <User className="h-5 w-5 text-white/60" />
+              </div>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                required
+                className="w-full pl-10 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                placeholder="johndoe"
+              />
             </div>
           </div>
 
