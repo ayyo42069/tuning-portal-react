@@ -37,6 +37,7 @@ interface AuthContextType {
     password: string;
     fullName: string;
   }) => Promise<boolean>;
+  verifyEmail: (code: string) => Promise<boolean>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -249,6 +250,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const verifyEmail = async (code: string) => {
+    try {
+      console.log("[Auth] Verifying email...");
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch("/api/auth/verify-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code }),
+        credentials: "include",
+      });
+
+      console.log(`[Auth] Verify email response: ${response.status}`);
+      const result = await response.json();
+      console.log("[Auth] Verify email result:", result);
+
+      if (result.success) {
+        console.log("[Auth] Email verification successful");
+        setLoading(false);
+        setError(null);
+        return true;
+      } else {
+        console.log("[Auth] Email verification failed:", result.error);
+        setError(result.error || "Email verification failed");
+        setLoading(false);
+        return false;
+      }
+    } catch (error) {
+      console.error("[Auth] Email verification error:", error);
+      setError("An error occurred during email verification");
+      setLoading(false);
+      return false;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -257,6 +296,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         error,
         login,
         register,
+        verifyEmail,
         logout,
         refreshUser: refreshUserData,
       }}
