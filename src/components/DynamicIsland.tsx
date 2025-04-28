@@ -31,7 +31,8 @@ import EcuUploadForm from "./EcuUploadForm";
 import { useDynamicIsland } from "@/lib/context/DynamicIslandContext";
 import { useAuth } from "@/lib/AuthProvider";
 import { useNotifications as useNotificationsQuery } from "@/lib/hooks/useDataFetching";
-import { useNotifications } from "@/lib/NotificationProvider";
+import { useFeedback } from "@/lib/FeedbackProvider";
+import { useRouter } from "next/navigation";
 import { 
   BellIcon, 
   DocumentTextIcon, 
@@ -41,8 +42,6 @@ import {
   CheckCircleIcon,
   XMarkIcon
 } from "@heroicons/react/24/outline";
-import { useFeedback } from "@/lib/FeedbackProvider";
-import { useRouter } from "next/navigation";
 
 // Animation constants
 const spring = {
@@ -93,7 +92,6 @@ export default function DynamicIsland({
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { data: notifications, unreadCount, markAsRead, markAllAsRead } = useNotificationsQuery();
-  const legacyNotifications = useNotifications();
   const { showFeedback } = useFeedback();
   const { state, actions, showUploadForm, closeUploadForm } = useDynamicIsland();
   const router = useRouter();
