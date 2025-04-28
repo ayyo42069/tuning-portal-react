@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFeedback } from "@/contexts/FeedbackContext";
+import { User, Mail, Lock, AlertCircle, Loader2, Eye, EyeOff, Check } from "lucide-react";
 import DynamicIsland from "@/components/DynamicIsland";
-import { User, Mail, Lock, AlertCircle, Loader2 } from "lucide-react";
 
 const validateEmail = (email: string) => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -21,117 +21,103 @@ const validatePassword = (password: string) => {
 };
 
 export default function RegisterPage() {
-  const [formData, setFormData] = useState({
-    email: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-    firstName: "",
-    lastName: "",
-    acceptTerms: false,
-  });
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   const { register } = useAuth();
   const { showFeedback } = useFeedback();
-  const router = useRouter();
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    fullName: "",
+    acceptTerms: false
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [validationState, setValidationState] = useState({
+    username: false,
+    email: false,
+    password: false,
+    confirmPassword: false,
+    fullName: false,
+    acceptTerms: false
+  });
 
-  const getPasswordStrength = (password: string) => {
-    let strength = 0;
-    if (password.length >= 8) strength++;
-    if (/[A-Z]/.test(password)) strength++;
-    if (/[a-z]/.test(password)) strength++;
-    if (/[0-9]/.test(password)) strength++;
-    if (/[^A-Za-z0-9]/.test(password)) strength++;
-    return strength;
-  };
-
-  const getStrengthColor = (strength: number) => {
-    switch (strength) {
-      case 0:
-      case 1:
-        return "bg-red-500";
-      case 2:
-      case 3:
-        return "bg-yellow-500";
-      case 4:
-      case 5:
-        return "bg-green-500";
-      default:
-        return "bg-gray-500";
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === 'checkbox' ? checked : value
     }));
+
+    // Update validation state
+    if (name === 'username') {
+      setValidationState(prev => ({
+        ...prev,
+        username: value.length >= 3
+      }));
+    } else if (name === 'email') {
+      setValidationState(prev => ({
+        ...prev,
+        email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+      }));
+    } else if (name === 'password') {
+      setValidationState(prev => ({
+        ...prev,
+        password: value.length >= 8,
+        confirmPassword: value === formData.confirmPassword
+      }));
+    } else if (name === 'confirmPassword') {
+      setValidationState(prev => ({
+        ...prev,
+        confirmPassword: value === formData.password
+      }));
+    } else if (name === 'fullName') {
+      setValidationState(prev => ({
+        ...prev,
+        fullName: value.length >= 2
+      }));
+    } else if (name === 'acceptTerms') {
+      setValidationState(prev => ({
+        ...prev,
+        acceptTerms: checked
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setIsLoading(true);
 
-    if (!formData.acceptTerms) {
-      setError("Please accept the terms and conditions");
-      setIsLoading(false);
-      return;
-    }
-
-    // Validate email
-    if (!validateEmail(formData.email)) {
-      setError("Please enter a valid email address");
-      setIsLoading(false);
-      return;
-    }
-
-    // Validate username
-    if (!formData.username || formData.username.length < 3) {
-      setError("Username must be at least 3 characters long");
-      setIsLoading(false);
-      return;
-    }
-
-    // Validate password
-    if (!validatePassword(formData.password)) {
-      setError(
-        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
-      );
-      setIsLoading(false);
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      await register(
-        formData.username,
-        formData.email,
-        formData.password,
-        `${formData.firstName} ${formData.lastName}`
-      );
-      showFeedback("Registration successful! Welcome to Tuning Portal.", "success");
-      router.push("/dashboard");
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Registration failed";
-      setError(errorMessage);
-      showFeedback(`Registration failed: ${errorMessage}`, "error");
+      await register(formData.username, formData.email, formData.password, formData.fullName);
+      showFeedback("Registration successful! Please check your email for verification.", "success");
+      router.push("/auth/login");
+    } catch (error) {
+      showFeedback("Registration failed. Please try again.", "error");
     } finally {
       setIsLoading(false);
     }
   };
 
+  const getProgress = () => {
+    const totalFields = Object.keys(validationState).length;
+    const validFields = Object.values(validationState).filter(Boolean).length;
+    return (validFields / totalFields) * 100;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      <DynamicIsland variant="auth" />
-      
+      <DynamicIsland
+        variant="auth"
+        status={isLoading ? "loading" : "idle"}
+        progress={getProgress()}
+        message={isLoading ? "Creating your account..." : "Create a new account"}
+        onExpand={() => setIsExpanded(!isExpanded)}
+        isExpanded={isExpanded}
+      />
+
       {/* Animated background elements */}
       <motion.div
         className="absolute inset-0 overflow-hidden"
@@ -144,205 +130,129 @@ export default function RegisterPage() {
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md bg-gray-800/50 backdrop-blur-md rounded-2xl shadow-xl p-8 relative z-10"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md bg-white/5 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/10"
       >
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-lg mb-4">
-            <User className="w-8 h-8 text-white" />
-          </div>
           <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
-          <p className="text-white/70">Join Tuning Portal to start tuning your vehicle</p>
+          <p className="text-gray-400">Join our community today</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-white/70 mb-1">
-                First Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-white/60" />
-                </div>
-                <input
-                  type="text"
-                  id="firstName"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-10 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                  placeholder="John"
-                />
-              </div>
-            </div>
-            <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-white/70 mb-1">
-                Last Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-white/60" />
-                </div>
-                <input
-                  type="text"
-                  id="lastName"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-10 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                  placeholder="Doe"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-white/70 mb-1">
-              Username
-            </label>
+          <div className="space-y-4">
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <User className="h-5 w-5 text-white/60" />
-              </div>
               <input
                 type="text"
-                id="username"
                 name="username"
                 value={formData.username}
-                onChange={handleChange}
+                onChange={handleInputChange}
+                placeholder="Username"
+                className={`w-full px-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all
+                  ${validationState.username ? 'border-green-500 focus:ring-green-500' : 'border-gray-600 focus:ring-blue-500'}`}
                 required
-                className="w-full pl-10 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                placeholder="johndoe"
               />
+              <User className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             </div>
-          </div>
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-white/70 mb-1">
-              Email
-            </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail className="h-5 w-5 text-white/60" />
-              </div>
               <input
                 type="email"
-                id="email"
                 name="email"
                 value={formData.email}
-                onChange={handleChange}
+                onChange={handleInputChange}
+                placeholder="Email"
+                className={`w-full px-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all
+                  ${validationState.email ? 'border-green-500 focus:ring-green-500' : 'border-gray-600 focus:ring-blue-500'}`}
                 required
-                className="w-full pl-10 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                placeholder="you@example.com"
               />
+              <Mail className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             </div>
-          </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-white/70 mb-1">
-              Password
-            </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-white/60" />
-              </div>
               <input
-                type="password"
-                id="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
-                onChange={handleChange}
+                onChange={handleInputChange}
+                placeholder="Password"
+                className={`w-full px-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all
+                  ${validationState.password ? 'border-green-500 focus:ring-green-500' : 'border-gray-600 focus:ring-blue-500'}`}
                 required
-                className="w-full pl-10 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                placeholder="••••••••"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
             </div>
-          </div>
 
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-white/70 mb-1">
-              Confirm Password
-            </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-white/60" />
-              </div>
               <input
-                type="password"
-                id="confirmPassword"
+                type={showPassword ? "text" : "password"}
                 name="confirmPassword"
                 value={formData.confirmPassword}
-                onChange={handleChange}
+                onChange={handleInputChange}
+                placeholder="Confirm Password"
+                className={`w-full px-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all
+                  ${validationState.confirmPassword ? 'border-green-500 focus:ring-green-500' : 'border-gray-600 focus:ring-blue-500'}`}
                 required
-                className="w-full pl-10 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                placeholder="••••••••"
               />
+              <Check className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+            </div>
+
+            <div className="relative">
+              <input
+                type="text"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleInputChange}
+                placeholder="Full Name"
+                className={`w-full px-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all
+                  ${validationState.fullName ? 'border-green-500 focus:ring-green-500' : 'border-gray-600 focus:ring-blue-500'}`}
+                required
+              />
+              <User className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             </div>
           </div>
 
-          {/* Password strength indicator */}
-          {formData.password && (
-            <div className="mt-2">
-              <div className="text-sm text-white/70 mb-1">Password Strength</div>
-              <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
-                <div
-                  className={`h-full transition-all ${
-                    getStrengthColor(getPasswordStrength(formData.password))
-                  }`}
-                  style={{
-                    width: `${(getPasswordStrength(formData.password) / 5) * 100}%`,
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Terms and conditions checkbox */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center">
             <input
               type="checkbox"
-              id="acceptTerms"
               name="acceptTerms"
               checked={formData.acceptTerms}
-              onChange={handleChange}
-              className="w-4 h-4 rounded border-white/10 bg-white/5 text-blue-500 focus:ring-blue-500/50"
+              onChange={handleInputChange}
+              className="w-4 h-4 rounded border-gray-600 bg-gray-700/50 text-blue-500 focus:ring-blue-500"
+              required
             />
-            <label htmlFor="acceptTerms" className="text-sm text-white/70">
-              I accept the{" "}
-              <Link href="/terms" className="text-blue-400 hover:text-blue-300">
-                terms and conditions
+            <label className="ml-2 text-sm text-gray-400">
+              I agree to the{" "}
+              <Link href="/terms" className="text-blue-500 hover:text-blue-400">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="text-blue-500 hover:text-blue-400">
+                Privacy Policy
               </Link>
             </label>
           </div>
 
-          {/* Error message */}
-          {error && (
-            <div className="flex items-center space-x-2 text-red-400 text-sm">
-              <AlertCircle className="h-4 w-4" />
-              <span>{error}</span>
-            </div>
-          )}
-
           <button
             type="submit"
-            disabled={isLoading || !formData.acceptTerms}
-            className={`w-full py-2 px-4 rounded-lg font-medium transition-all
-              ${
-                isLoading || !formData.acceptTerms
-                  ? "bg-gray-500/50 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
-              }
-              text-white shadow-lg`}
+            disabled={isLoading || !Object.values(validationState).every(Boolean)}
+            className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-all
+              ${isLoading || !Object.values(validationState).every(Boolean)
+                ? 'bg-blue-600/50 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-500'
+              }`}
           >
             {isLoading ? (
-              <div className="flex items-center justify-center space-x-2">
-                <Loader2 className="h-5 w-5 animate-spin" />
-                <span>Registering...</span>
+              <div className="flex items-center justify-center">
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Creating account...
               </div>
             ) : (
               "Create Account"
@@ -351,11 +261,11 @@ export default function RegisterPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-white/70">
+          <p className="text-gray-400">
             Already have an account?{" "}
             <Link
               href="/auth/login"
-              className="text-blue-400 hover:text-blue-300 transition-colors"
+              className="text-blue-500 hover:text-blue-400 transition-colors"
             >
               Sign in
             </Link>

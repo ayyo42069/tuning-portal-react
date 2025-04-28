@@ -21,7 +21,10 @@ import {
   BadgeAlertIcon,
   FileText,
   MessageSquare,
-  Shield
+  Shield,
+  Check,
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import EcuUploadForm from "./EcuUploadForm";
@@ -64,14 +67,28 @@ const scaleSpring = {
 };
 
 interface DynamicIslandProps {
-  variant?: "dashboard" | "landing" | "auth";
+  variant?: "dashboard" | "landing" | "auth" | "default";
+  status?: "idle" | "loading" | "success" | "error";
+  progress?: number;
+  message?: string;
   children?: React.ReactNode;
+  onExpand?: () => void;
+  isExpanded?: boolean;
 }
 
-export default function DynamicIsland({ variant = "dashboard", children }: DynamicIslandProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+export default function DynamicIsland({
+  variant = "dashboard",
+  status = "idle",
+  progress = 0,
+  message = "",
+  children,
+  onExpand,
+  isExpanded = false
+}: DynamicIslandProps) {
+  const [isHovered, setIsHovered] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [localIsExpanded, setLocalIsExpanded] = useState(isExpanded);
   const islandRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const { user, logout } = useAuth();
@@ -81,14 +98,22 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
   const { state, actions, showUploadForm, closeUploadForm } = useDynamicIsland();
   const router = useRouter();
 
-  const notificationData = notifications || legacyNotifications.notifications;
-  const notificationCount = unreadCount || legacyNotifications.unreadCount;
+  // Update local state when prop changes
+  useEffect(() => {
+    setLocalIsExpanded(isExpanded);
+  }, [isExpanded]);
 
   // Reset expanded state on pathname change
   useEffect(() => {
-    setIsExpanded(false);
+    setLocalIsExpanded(false);
     setShowNotifications(false);
-  }, [pathname]);
+    if (pathname === "/dashboard") {
+      showFeedback({
+        type: "info",
+        message: "Welcome to your dashboard!"
+      });
+    }
+  }, [pathname, showFeedback]);
 
   // Handle scroll for glassmorphic effect
   useEffect(() => {
@@ -103,7 +128,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (islandRef.current && !islandRef.current.contains(event.target as Node)) {
-        setIsExpanded(false);
+        setLocalIsExpanded(false);
         setShowNotifications(false);
         closeUploadForm();
       }
@@ -202,6 +227,30 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
     }
   };
 
+  const getStatusIcon = () => {
+    switch (status) {
+      case "loading":
+        return <Loader2 className="w-4 h-4 animate-spin" />;
+      case "success":
+        return <Check className="w-4 h-4 text-green-500" />;
+      case "error":
+        return <AlertCircle className="w-4 h-4 text-red-500" />;
+      default:
+        return <User className="w-4 h-4" />;
+    }
+  };
+
+  const getProgressColor = () => {
+    switch (status) {
+      case "success":
+        return "bg-green-500";
+      case "error":
+        return "bg-red-500";
+      default:
+        return "bg-blue-500";
+    }
+  };
+
   // Auth variant
   if (variant === "auth") {
     return (
@@ -214,7 +263,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
         <motion.div
           layout
           style={{
-            borderRadius: isExpanded ? "24px" : "9999px",
+            borderRadius: localIsExpanded ? "24px" : "9999px",
             overflow: "hidden"
           }}
           className={`w-full h-full border border-white/20 dark:border-gray-800/20 shadow-lg ${
@@ -274,7 +323,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
         <motion.div
           layout
           style={{
-            borderRadius: isExpanded ? "24px" : "9999px",
+            borderRadius: localIsExpanded ? "24px" : "9999px",
             overflow: "hidden"
           }}
           className={`w-full h-full border border-white/20 dark:border-gray-800/20 shadow-lg ${
@@ -350,7 +399,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
       <motion.div
         layout
         style={{
-          borderRadius: isExpanded ? "24px" : "9999px",
+          borderRadius: localIsExpanded ? "24px" : "9999px",
           overflow: "hidden"
         }}
         className={`w-full h-full border border-white/20 dark:border-gray-800/20 shadow-lg ${
@@ -374,7 +423,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
               whileTap={{ scale: 0.95 }}
               transition={hoverSpring}
               onClick={() => {
-                setIsExpanded(!isExpanded);
+                setLocalIsExpanded(!localIsExpanded);
                 setShowNotifications(false);
                 if (showUploadForm) {
                   closeUploadForm();
@@ -382,7 +431,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
               }}
               className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors"
             >
-              {isExpanded ? (
+              {localIsExpanded ? (
                 <motion.div
                   initial={{ rotate: 0 }}
                   animate={{ rotate: 180 }}
@@ -433,7 +482,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                   onClick={() => {
                     action.action();
                     if (action.label === "New Upload") {
-                      setIsExpanded(true);
+                      setLocalIsExpanded(true);
                     }
                   }}
                   className={`p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors ${action.color}`}
@@ -451,7 +500,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                   onClick={() => {
                     action.action();
                     if (action.label === "New Upload") {
-                      setIsExpanded(true);
+                      setLocalIsExpanded(true);
                     }
                   }}
                   className={`p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors ${action.color}`}
@@ -469,9 +518,9 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
               onClick={() => {
                 if (showNotifications) {
                   setShowNotifications(false);
-                  setIsExpanded(false);
+                  setLocalIsExpanded(false);
                 } else {
-                  setIsExpanded(true);
+                  setLocalIsExpanded(true);
                   setShowNotifications(true);
                   if (showUploadForm) {
                     closeUploadForm();
@@ -481,14 +530,14 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
               className="p-2 rounded-full hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors relative"
             >
               <Bell className="h-6 w-6 text-gray-900 dark:text-white" />
-              {notificationCount > 0 && (
+              {unreadCount > 0 && (
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={scaleSpring}
                   className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
                 >
-                  {notificationCount}
+                  {unreadCount}
                 </motion.span>
               )}
             </motion.button>
@@ -497,7 +546,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
 
         {/* Expanded content */}
         <AnimatePresence mode="wait">
-          {isExpanded && (
+          {localIsExpanded && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
@@ -515,7 +564,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                 >
                   <EcuUploadForm onClose={() => {
                     closeUploadForm();
-                    setIsExpanded(false);
+                    setLocalIsExpanded(false);
                   }} />
                 </motion.div>
               ) : showNotifications ? (
@@ -528,7 +577,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                 >
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
-                    {notificationCount > 0 && (
+                    {unreadCount > 0 && (
                       <button
                         onClick={handleMarkAllAsRead}
                         className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
@@ -537,9 +586,9 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                       </button>
                     )}
                   </div>
-                  {notificationData && notificationData.length > 0 ? (
+                  {notifications && notifications.length > 0 ? (
                     <div className="space-y-4">
-                      {notificationData.map((notification: any) => (
+                      {notifications.map((notification: any) => (
                         <div
                           key={notification.id}
                           className={`p-3 rounded-lg ${
@@ -663,7 +712,7 @@ export default function DynamicIsland({ variant = "dashboard", children }: Dynam
                             onClick={() => {
                               action.action();
                               if (action.label === "New Upload") {
-                                setIsExpanded(true);
+                                setLocalIsExpanded(true);
                               }
                             }}
                             className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-gray-800/10 transition-colors w-full"

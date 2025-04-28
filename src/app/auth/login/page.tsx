@@ -3,42 +3,60 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFeedback } from "@/contexts/FeedbackContext";
+import { User, Mail, Lock, AlertCircle, Loader2, LogIn, Eye, EyeOff } from "lucide-react";
 import DynamicIsland from "@/components/DynamicIsland";
-import { User, Mail, Lock, AlertCircle, Loader2, LogIn } from "lucide-react";
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState({
-    email: "",
-    username: "",
-    password: "",
-  });
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   const { login } = useAuth();
   const { showFeedback } = useFeedback();
-  const router = useRouter();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    rememberMe: false
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [validationState, setValidationState] = useState({
+    email: false,
+    password: false
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+
+    // Update validation state
+    if (name === 'email') {
+      setValidationState(prev => ({
+        ...prev,
+        email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+      }));
+    } else if (name === 'password') {
+      setValidationState(prev => ({
+        ...prev,
+        password: value.length >= 8
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setIsLoading(true);
 
     try {
-      const loginIdentifier = formData.email || formData.username;
-      await login(loginIdentifier, formData.password);
-      showFeedback("Login successful! Welcome back.", "success");
+      await login(formData.email, formData.password);
+      showFeedback("Login successful!", "success");
       router.push("/dashboard");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
-      showFeedback("Login failed. Please check your credentials.", "error");
+    } catch (error) {
+      showFeedback("Invalid credentials. Please try again.", "error");
     } finally {
       setIsLoading(false);
     }
@@ -46,8 +64,15 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      <DynamicIsland variant="auth" />
-      
+      <DynamicIsland
+        variant="auth"
+        status={isLoading ? "loading" : "idle"}
+        progress={Object.values(validationState).filter(Boolean).length * 50}
+        message={isLoading ? "Authenticating..." : "Login to your account"}
+        onExpand={() => setIsExpanded(!isExpanded)}
+        isExpanded={isExpanded}
+      />
+
       {/* Animated background elements */}
       <motion.div
         className="absolute inset-0 overflow-hidden"
@@ -60,102 +85,103 @@ export default function LoginPage() {
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md bg-gray-800/50 backdrop-blur-md rounded-2xl shadow-xl p-8 relative z-10"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md bg-white/5 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/10"
       >
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-lg mb-4">
-            <LogIn className="w-8 h-8 text-white" />
-          </div>
           <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-white/70">Sign in to continue to Tuning Portal</p>
+          <p className="text-gray-400">Sign in to continue to your account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-white/70 mb-1">
-              Email or Username
-            </label>
+          <div className="space-y-4">
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail className="h-5 w-5 text-white/60" />
-              </div>
               <input
                 type="text"
-                id="email"
                 name="email"
                 value={formData.email}
-                onChange={handleChange}
+                onChange={handleInputChange}
+                placeholder="Email or Username"
+                className={`w-full px-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all
+                  ${validationState.email ? 'border-green-500 focus:ring-green-500' : 'border-gray-600 focus:ring-blue-500'}`}
                 required
-                className="w-full pl-10 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                placeholder="you@example.com or username"
               />
+              <Mail className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             </div>
-          </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-white/70 mb-1">
-              Password
-            </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-white/60" />
-              </div>
               <input
-                type="password"
-                id="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
-                onChange={handleChange}
+                onChange={handleInputChange}
+                placeholder="Password"
+                className={`w-full px-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all
+                  ${validationState.password ? 'border-green-500 focus:ring-green-500' : 'border-gray-600 focus:ring-blue-500'}`}
                 required
-                className="w-full pl-10 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                placeholder="••••••••"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
             </div>
           </div>
 
-          {error && (
-            <div className="text-red-500 text-sm text-center flex items-center justify-center">
-              <AlertCircle className="h-4 w-4 mr-1" />
-              {error}
-            </div>
-          )}
+          <div className="flex items-center justify-between">
+            <label className="flex items-center space-x-2 text-gray-400">
+              <input
+                type="checkbox"
+                name="rememberMe"
+                checked={formData.rememberMe}
+                onChange={handleInputChange}
+                className="w-4 h-4 rounded border-gray-600 bg-gray-700/50 text-blue-500 focus:ring-blue-500"
+              />
+              <span>Remember me</span>
+            </label>
+            <Link
+              href="/auth/forgot-password"
+              className="text-blue-500 hover:text-blue-400 transition-colors"
+            >
+              Forgot password?
+            </Link>
+          </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-all
+              ${isLoading
+                ? 'bg-blue-600/50 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-500'
+              }`}
           >
             {isLoading ? (
-              <>
-                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+              <div className="flex items-center justify-center">
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                 Signing in...
-              </>
+              </div>
             ) : (
-              "Sign In"
+              <div className="flex items-center justify-center">
+                <LogIn className="w-5 h-5 mr-2" />
+                Sign In
+              </div>
             )}
           </button>
-
-          <div className="text-center">
-            <Link
-              href="/auth/forgot-password"
-              className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-            >
-              Forgot your password?
-            </Link>
-          </div>
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-white/70">
+          <p className="text-gray-400">
             Don't have an account?{" "}
             <Link
               href="/auth/register"
-              className="text-blue-400 hover:text-blue-300 transition-colors"
+              className="text-blue-500 hover:text-blue-400 transition-colors"
             >
-              Create one
+              Sign up
             </Link>
           </p>
         </div>
