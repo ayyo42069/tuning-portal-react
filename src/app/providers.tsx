@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/lib/AuthProvider";
 import { FeedbackProvider } from "@/contexts/FeedbackContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
+import { DynamicIslandProvider } from "@/lib/context/DynamicIslandContext";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 // Create a client with proper configuration
@@ -32,7 +33,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         <AuthProvider>
           <NotificationProvider>
             <FeedbackProvider>
-              {children}
+              <DynamicIslandProvider>
+                {children}
+              </DynamicIslandProvider>
             </FeedbackProvider>
           </NotificationProvider>
         </AuthProvider>
