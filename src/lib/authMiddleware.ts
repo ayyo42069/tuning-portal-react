@@ -8,7 +8,6 @@ interface UserDB extends User {
   is_banned: boolean;
   ban_reason: string | null;
   ban_expires_at: string | null;
-  email_verified: boolean;
 }
 
 interface AuthResult {
