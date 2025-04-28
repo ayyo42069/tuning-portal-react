@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/lib/AuthProvider";
-import { useAuthDynamicIsland } from "@/contexts/AuthDynamicIslandContext";
+import { useFeedback } from "@/lib/FeedbackProvider";
 import { useRouter } from "next/navigation";
 
 interface EmailVerificationModalProps {
@@ -11,26 +11,27 @@ interface EmailVerificationModalProps {
 }
 
 export default function EmailVerificationModal({ email, onClose }: EmailVerificationModalProps) {
-  const [verificationCode, setVerificationCode] = useState("");
-  const { verifyEmail } = useAuth();
-  const { state, setStatus, setMessage } = useAuthDynamicIsland();
+  const { user, verifyEmail } = useAuth();
+  const { showFeedback } = useFeedback();
   const router = useRouter();
+  const [verificationCode, setVerificationCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus("loading");
-    setMessage("Verifying email...");
+    setIsLoading(true);
+    setError("");
 
     try {
       await verifyEmail(verificationCode);
-      setStatus("success");
-      setMessage("Email verified successfully!");
       setTimeout(() => {
         router.push("/auth/login");
       }, 1500);
-    } catch (error) {
-      setStatus("error");
-      setMessage(error instanceof Error ? error.message : "Verification failed");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Verification failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -68,21 +69,17 @@ export default function EmailVerificationModal({ email, onClose }: EmailVerifica
             </button>
             <button
               type="submit"
-              disabled={state.status === "loading"}
+              disabled={isLoading}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50"
             >
-              {state.status === "loading" ? "Verifying..." : "Verify"}
+              {isLoading ? "Verifying..." : "Verify"}
             </button>
           </div>
         </form>
 
-        {state.message && (
-          <p className={`mt-4 text-sm ${
-            state.status === "error" ? "text-red-600 dark:text-red-400" : 
-            state.status === "success" ? "text-green-600 dark:text-green-400" : 
-            "text-gray-600 dark:text-gray-300"
-          }`}>
-            {state.message}
+        {error && (
+          <p className="mt-4 text-sm text-red-600 dark:text-red-400">
+            {error}
           </p>
         )}
       </div>

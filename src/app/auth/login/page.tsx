@@ -1,75 +1,58 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthProvider";
-import { useAuthDynamicIsland } from "@/contexts/AuthDynamicIslandContext";
-import DynamicIsland from "@/components/DynamicIsland";
+import EmailVerificationModal from "@/components/EmailVerificationModal";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
-  const { state, setStatus, setProgress, setMessage, setValidationErrors, reset } = useAuthDynamicIsland();
   const [formData, setFormData] = useState({
     identifier: "",
     password: "",
   });
-
-  useEffect(() => {
-    reset();
-  }, []);
-
-  const validateForm = () => {
-    const errors: string[] = [];
-    if (!formData.identifier) {
-      errors.push("Email or username is required");
-    }
-    if (!formData.password) {
-      errors.push("Password is required");
-    }
-    setValidationErrors(errors);
-    return errors.length === 0;
-  };
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      setStatus("error");
-      setMessage("Please fix the validation errors");
-      return;
-    }
+    setError("");
+    setIsLoading(true);
 
     try {
-      setStatus("loading");
-      setProgress(0);
-      setMessage("Authenticating...");
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+        credentials: "include",
+      });
 
-      const success = await login(formData.identifier, formData.password);
-      
-      if (success) {
-        setProgress(100);
-        setStatus("success");
-        setMessage("Login successful! Redirecting...");
+      const data = await response.json();
+
+      if (data.success) {
         router.push("/dashboard");
+      } else if (data.emailVerificationRequired) {
+        setVerificationEmail(data.email);
+        setShowVerificationModal(true);
+      } else if (data.isBanned) {
+        setError(`Your account has been banned. Reason: ${data.banReason || "Violation of terms of service"}`);
       } else {
-        setStatus("error");
-        setMessage("Invalid credentials");
+        setError(data.error || "Invalid credentials");
       }
     } catch (error) {
-      setStatus("error");
-      setMessage("An error occurred during login");
+      setError("An error occurred during login");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <DynamicIsland
-        variant="auth"
-        status={state.status}
-        progress={state.progress}
-        message={state.message}
-      />
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -110,21 +93,19 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {state.validationErrors.length > 0 && (
-            <div className="text-red-500 text-sm">
-              {state.validationErrors.map((error, index) => (
-                <p key={index}>{error}</p>
-              ))}
+          {error && (
+            <div className="text-red-500 text-sm text-center">
+              {error}
             </div>
           )}
 
           <div>
             <button
               type="submit"
-              disabled={state.status === "loading"}
+              disabled={isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {state.status === "loading" ? (
+              {isLoading ? (
                 <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                   <svg
                     className="animate-spin h-5 w-5 text-white"
@@ -153,6 +134,13 @@ export default function LoginPage() {
           </div>
         </form>
       </div>
+
+      {showVerificationModal && (
+        <EmailVerificationModal
+          email={verificationEmail}
+          onClose={() => setShowVerificationModal(false)}
+        />
+      )}
     </div>
   );
 }

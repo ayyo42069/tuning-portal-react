@@ -43,7 +43,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { useFeedback } from "@/lib/FeedbackProvider";
 import { useRouter } from "next/navigation";
-import { useAuthDynamicIsland } from "@/contexts/AuthDynamicIslandContext";
 
 // Animation constants
 const spring = {
@@ -98,7 +97,6 @@ export default function DynamicIsland({
   const { showFeedback } = useFeedback();
   const { state, actions, showUploadForm, closeUploadForm } = useDynamicIsland();
   const router = useRouter();
-  const { state: authState } = useAuthDynamicIsland();
 
   // Update local state when prop changes
   useEffect(() => {

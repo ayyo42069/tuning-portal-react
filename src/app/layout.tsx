@@ -6,10 +6,7 @@ import AuthDebugger from "@/components/AuthDebugger";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/AuthProvider";
-import { FeedbackProvider } from "@/lib/FeedbackProvider";
-import { AuthDynamicIslandProvider } from "@/contexts/AuthDynamicIslandContext";
-import DynamicIslandWrapper from "@/components/DynamicIslandWrapper";
-import { DynamicIslandProvider } from "@/lib/context/DynamicIslandContext";
+import { FeedbackProvider } from "@/contexts/FeedbackContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -92,9 +89,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning className="transition-colors duration-300 ease-in-out">
       <head>
@@ -142,19 +139,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-all duration-300 ease-in-out`}
       >
-        <Providers>
-          <AuthProvider>
-            <FeedbackProvider>
-              <AuthDynamicIslandProvider>
-                <DynamicIslandProvider>
-                  <DynamicIslandWrapper />
-                  {children}
-                  <AuthDebugger />
-                </DynamicIslandProvider>
-              </AuthDynamicIslandProvider>
-            </FeedbackProvider>
-          </AuthProvider>
-        </Providers>
+        <AuthProvider>
+          <FeedbackProvider>
+            {children}
+          </FeedbackProvider>
+        </AuthProvider>
       </body>
     </html>
   );
