@@ -8,12 +8,14 @@ import {
   PlusSquare,
   Filter,
   SortAsc,
+  SortDesc,
   RefreshCw,
   Download,
   ExternalLink,
   Clock,
   AlertCircle,
   CheckCircle,
+  X,
 } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import RetryableErrorBoundary from "@/components/error-boundaries/RetryableErrorBoundary";
@@ -33,11 +35,18 @@ interface TuningHistoryClientProps {
   initialData: any;
 }
 
+type SortOrder = "newest" | "oldest" | "status";
+type FilterStatus = "all" | "pending" | "processing" | "completed" | "failed";
+
 export default function TuningHistoryClient({ initialData }: TuningHistoryClientProps) {
   const router = useRouter();
   const [tuningFiles, setTuningFiles] = useState<TuningFile[]>(initialData?.tuningFiles || []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [showSortMenu, setShowSortMenu] = useState(false);
 
   const fetchTuningHistory = async () => {
     setLoading(true);
@@ -65,7 +74,6 @@ export default function TuningHistoryClient({ initialData }: TuningHistoryClient
     }
   };
 
-  // Fetch data when component mounts
   useEffect(() => {
     fetchTuningHistory();
   }, []);
@@ -84,6 +92,21 @@ export default function TuningHistoryClient({ initialData }: TuningHistoryClient
         return "bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800 dark:from-gray-800/70 dark:to-slate-800/70 dark:text-gray-100";
     }
   };
+
+  const filteredAndSortedFiles = tuningFiles
+    .filter(file => filterStatus === "all" ? true : file.status === filterStatus)
+    .sort((a, b) => {
+      switch (sortOrder) {
+        case "newest":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "oldest":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "status":
+          return a.status.localeCompare(b.status);
+        default:
+          return 0;
+      }
+    });
 
   if (loading && tuningFiles.length === 0) {
     return (
@@ -140,23 +163,89 @@ export default function TuningHistoryClient({ initialData }: TuningHistoryClient
                 >
                   <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
                 </button>
-                <button
-                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200 bg-gray-100/80 dark:bg-gray-700/80 rounded-lg hover:bg-gray-200/80 dark:hover:bg-gray-600/80"
-                  title="Filter"
-                >
-                  <Filter className="w-5 h-5" />
-                </button>
-                <button
-                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200 bg-gray-100/80 dark:bg-gray-700/80 rounded-lg hover:bg-gray-200/80 dark:hover:bg-gray-600/80"
-                  title="Sort"
-                >
-                  <SortAsc className="w-5 h-5" />
-                </button>
+                
+                {/* Filter Button and Menu */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowFilterMenu(!showFilterMenu)}
+                    className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200 bg-gray-100/80 dark:bg-gray-700/80 rounded-lg hover:bg-gray-200/80 dark:hover:bg-gray-600/80"
+                    title="Filter"
+                  >
+                    <Filter className="w-5 h-5" />
+                  </button>
+                  {showFilterMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
+                      <div className="p-2">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by Status</span>
+                          <button onClick={() => setShowFilterMenu(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        {(["all", "pending", "processing", "completed", "failed"] as FilterStatus[]).map((status) => (
+                          <button
+                            key={status}
+                            onClick={() => {
+                              setFilterStatus(status);
+                              setShowFilterMenu(false);
+                            }}
+                            className={`w-full text-left px-3 py-2 text-sm rounded-md mb-1 ${
+                              filterStatus === status
+                                ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            }`}
+                          >
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Sort Button and Menu */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowSortMenu(!showSortMenu)}
+                    className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200 bg-gray-100/80 dark:bg-gray-700/80 rounded-lg hover:bg-gray-200/80 dark:hover:bg-gray-600/80"
+                    title="Sort"
+                  >
+                    {sortOrder === "newest" ? <SortDesc className="w-5 h-5" /> : <SortAsc className="w-5 h-5" />}
+                  </button>
+                  {showSortMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
+                      <div className="p-2">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort by</span>
+                          <button onClick={() => setShowSortMenu(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        {(["newest", "oldest", "status"] as SortOrder[]).map((order) => (
+                          <button
+                            key={order}
+                            onClick={() => {
+                              setSortOrder(order);
+                              setShowSortMenu(false);
+                            }}
+                            className={`w-full text-left px-3 py-2 text-sm rounded-md mb-1 ${
+                              sortOrder === order
+                                ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            }`}
+                          >
+                            {order.charAt(0).toUpperCase() + order.slice(1)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
-          {tuningFiles.length === 0 ? (
+          {filteredAndSortedFiles.length === 0 ? (
             <div className="px-6 py-12 text-center">
               <div className="p-4 bg-gray-100/50 dark:bg-gray-700/50 rounded-full inline-flex items-center justify-center mb-4">
                 <PlusSquare className="h-12 w-12 text-blue-500 dark:text-blue-400" />
@@ -165,7 +254,9 @@ export default function TuningHistoryClient({ initialData }: TuningHistoryClient
                 No tuning files
               </h3>
               <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-                Get started by uploading a new ECU file for tuning.
+                {filterStatus === "all" 
+                  ? "Get started by uploading a new ECU file for tuning."
+                  : `No ${filterStatus} tuning files found.`}
               </p>
               <div className="mt-6">
                 <Link
@@ -180,7 +271,7 @@ export default function TuningHistoryClient({ initialData }: TuningHistoryClient
           ) : (
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {tuningFiles.map((file) => (
+                {filteredAndSortedFiles.map((file) => (
                   <div
                     key={file.id}
                     className="relative bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl overflow-hidden shadow-md border border-gray-200/50 dark:border-gray-700/50 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] group"
