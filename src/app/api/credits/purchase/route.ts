@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { executeQuery, pool } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import Stripe from "stripe";
+import { RowDataPacket } from "mysql2";
 
 // Check if Stripe secret key is available
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -121,7 +122,7 @@ export async function POST(request: NextRequest) {
         console.log(`Credit update result:`, updateResult);
 
         // Get updated credit balance for confirmation
-        const [updatedCredits] = await connection.query(
+        const [updatedCredits] = await connection.query<RowDataPacket[]>(
           "SELECT credits FROM user_credits WHERE user_id = ?",
           [user.id]
         );
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           credits: amount,
-          totalCredits: updatedCredits?.credits || amount,
+          totalCredits: updatedCredits?.[0]?.credits || amount,
           message: "Credits purchased successfully",
         });
       } catch (error) {
