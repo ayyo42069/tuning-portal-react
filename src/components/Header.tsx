@@ -5,8 +5,14 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/AuthProvider";
+import NotificationBell from "@/components/NotificationBell";
+import { CreditCard, LogOut } from "lucide-react";
 
-export const Header = () => {
+interface HeaderProps {
+  variant?: 'landing' | 'dashboard' | 'admin';
+}
+
+export const Header = ({ variant = 'landing' }: HeaderProps) => {
   const { user, logout } = useAuth();
   const router = useRouter();
 
@@ -73,22 +79,35 @@ export const Header = () => {
 
       <div className="container mx-auto py-6 px-4 relative z-10">
         <div className="flex justify-between items-center">
-          <Link href="/" className="flex items-center space-x-2 group">
-            <img src="/images/logo.png" alt="Logo" className="h-12 w-12" />
-          </Link>
+          <div className="flex items-center space-x-4">
+            <span className="text-xl font-semibold text-white">Tuning Portal</span>
+          </div>
 
           <div className="flex items-center space-x-4">
-            <ThemeToggle />
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-white hidden md:inline">
-                  Welcome, {user.username}
+            {variant !== 'landing' && user && (
+              <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 px-3 py-1.5 rounded-lg flex items-center hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300">
+                <CreditCard className="h-4 w-4 text-blue-200 mr-1.5" />
+                <span className="text-sm font-medium text-blue-200">
+                  {user.credits || 0} Credits
                 </span>
+              </div>
+            )}
+            
+            {variant !== 'landing' && <NotificationBell />}
+            <ThemeToggle />
+            
+            {user ? (
+              <>
+                {variant === 'landing' && (
+                  <span className="text-white hidden md:inline">
+                    Welcome, {user.username}
+                  </span>
+                )}
                 <Link
-                  href="/dashboard"
+                  href={variant === 'admin' ? '/admin' : '/dashboard'}
                   className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300 font-medium"
                 >
-                  Dashboard
+                  {variant === 'admin' ? 'Admin' : 'Dashboard'}
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -96,7 +115,7 @@ export const Header = () => {
                 >
                   Logout
                 </button>
-              </div>
+              </>
             ) : (
               <>
                 <Link
@@ -118,4 +137,4 @@ export const Header = () => {
       </div>
     </header>
   );
-};
+}; 

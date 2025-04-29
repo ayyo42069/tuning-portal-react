@@ -21,6 +21,7 @@ import OpeningHours from "@/components/OpeningHours";
 import { useAuth } from "@/lib/AuthProvider";
 import FloatingTicketButton from "@/components/FloatingTicketButton";
 import DashboardDebug from "./components/DashboardDebug";
+import { Header } from "@/components/Header";
 
 interface User {
   id: number;
@@ -40,14 +41,6 @@ export default function DashboardLayout({
   const { user, logout, isLoading } = useAuth();
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  // Check if user is authenticated, redirect if not
-  useEffect(() => {
-    if (!isLoading && !user) {
-      console.log("[DashboardLayout] No user found, redirecting to login");
-      router.push("/auth/login");
-    }
-  }, [user, isLoading, router]);
-
   const handleLogout = async () => {
     try {
       await logout();
@@ -56,6 +49,14 @@ export default function DashboardLayout({
       console.error("Logout error:", error);
     }
   };
+
+  useEffect(() => {
+    // Check if user is logged in, redirect if not
+    if (!isLoading && !user) {
+      router.push("/auth/login");
+      return;
+    }
+  }, [user, isLoading, router]);
 
   // Close sidebar when clicking outside on mobile
   useEffect(() => {
@@ -76,16 +77,6 @@ export default function DashboardLayout({
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
-    
-    if (sidebarRef.current) {
-      if (sidebarOpen) {
-        sidebarRef.current.classList.add("sidebar-hidden");
-        sidebarRef.current.classList.remove("sidebar-visible");
-      } else {
-        sidebarRef.current.classList.remove("sidebar-hidden");
-        sidebarRef.current.classList.add("sidebar-visible");
-      }
-    }
   };
 
   return (
@@ -118,36 +109,7 @@ export default function DashboardLayout({
         </div>
 
         {/* Header */}
-        <header className="relative z-10 bg-transparent flex justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 border border-white/20 dark:border-gray-700/30 backdrop-blur-md">
-          {/* Left side - Logo and Tuning Portal text */}
-          <div className="flex items-center space-x-2">
-            <img src="/images/logo.png" alt="Logo" className="h-12 w-12" />
-            <span className="text-xl font-semibold text-purple-400">Tuning Portal</span>
-          </div>
-
-          {/* Right side - Controls */}
-          <div className="flex items-center space-x-4">
-            <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 px-3 py-1.5 rounded-lg flex items-center hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300">
-              <CreditCard className="h-4 w-4 text-blue-200 mr-1.5" />
-              <span className="text-sm font-medium text-blue-200">
-                {user?.credits || 0} Credits
-              </span>
-            </div>
-            <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 p-2 rounded-lg hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300">
-              <NotificationBell />
-            </div>
-            <div className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 p-2 rounded-lg hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300">
-              <ThemeToggle />
-            </div>
-            <button
-              onClick={handleLogout}
-              className="bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 p-2 rounded-lg hover:bg-white/15 dark:hover:bg-gray-700/30 transition-all duration-300"
-              aria-label="Logout"
-            >
-              <LogOut className="w-5 h-5 text-blue-200" />
-            </button>
-          </div>
-        </header>
+        <Header variant="dashboard" />
 
         {/* Animated elements */}
         <div className="absolute inset-0 z-0 overflow-hidden">
@@ -171,99 +133,98 @@ export default function DashboardLayout({
           />
         </div>
 
-        <div className="relative z-10 flex">
-          {/* Mobile menu button */}
-          <div className="md:hidden fixed top-4 left-4 z-50">
-            <button
-              onClick={toggleSidebar}
-              className="p-2 rounded-md bg-white dark:bg-gray-800 shadow-md"
-              aria-label="Toggle menu"
-            >
-              {sidebarOpen ? (
-                <X className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-              ) : (
-                <Menu className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-              )}
-            </button>
-          </div>
-
-          {/* Sidebar */}
-          <div
-            ref={sidebarRef}
-            id="sidebar"
-            className={`${
-              sidebarOpen ? "translate-x-0" : "-translate-x-full"
-            } md:translate-x-0 fixed md:static z-40 w-72 min-h-screen bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 shadow-lg transition-transform duration-300 ease-in-out`}
+        {/* Mobile menu button */}
+        <div className="md:hidden fixed top-4 left-4 z-50">
+          <button
+            onClick={toggleSidebar}
+            className="p-2 rounded-md bg-white dark:bg-gray-800 shadow-md"
+            aria-label="Toggle menu"
           >
-            <div className="flex flex-col h-full">
-              {/* User info */}
-              <div className="p-6 border-b border-white/10 dark:border-gray-700/30">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold">
-                    {user?.username?.charAt(0).toUpperCase() || "U"}
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="text-white font-medium">Hello, {user?.username || "User"}</h3>
-                    <p className={`text-sm ${user?.role === "admin" ? "text-red-500" : "text-green-500"} bg-white/10 dark:bg-gray-800/20 backdrop-blur-md px-2 py-1 rounded-lg`}>{user?.role}</p>
-                  </div>
+            {sidebarOpen ? (
+              <X className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+            ) : (
+              <Menu className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+            )}
+          </button>
+        </div>
+
+        {/* Sidebar */}
+        <div
+          ref={sidebarRef}
+          id="sidebar"
+          className={`${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0 fixed md:static z-40 w-72 min-h-screen bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 shadow-lg transition-transform duration-300 ease-in-out`}
+        >
+          <nav className="p-4 space-y-2">
+            {/* User info */}
+            <div className="p-6 border-b border-white/10 dark:border-gray-700/30">
+              <div className="flex items-center">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold">
+                  {user?.username?.charAt(0).toUpperCase() || "U"}
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-white font-medium">Hello, {user?.username || "User"}</h3>
+                  <p className={`text-sm ${user?.role === "admin" ? "text-red-500" : "text-green-500"} bg-white/10 dark:bg-gray-800/20 backdrop-blur-md px-2 py-1 rounded-lg`}>{user?.role}</p>
                 </div>
               </div>
-
-              {/* Navigation */}
-              <nav className="flex-1 space-y-1 p-4">
-                <Link
-                  href="/dashboard"
-                  className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-                  onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-                >
-                  <Home className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-                  Dashboard
-                </Link>
-                <Link
-                  href="/dashboard/tuning-history"
-                  className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-                  onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-                >
-                  <History className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-                  Tuning History
-                </Link>
-                <Link
-                  href="/dashboard/credits"
-                  className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-                  onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-                >
-                  <CreditCard className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-                  Credits
-                </Link>
-                {user?.role === "admin" && (
-                  <>
-                    <Link
-                      href="/admin"
-                      className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-                      onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-                    >
-                      <Settings className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-                      Admin Panel
-                    </Link>
-                    {/* Opening Hours moved under admin panel */}
-                    <div className="px-4 py-3">
-                      <OpeningHours />
-                    </div>
-                  </>
-                )}
-              </nav>
             </div>
-          </div>
 
-          {/* Main content */}
-          <div className="flex-1 p-4 md:p-8 overflow-auto">
-            {children}
-          </div>
+            {/* Navigation */}
+            <Link
+              href="/dashboard"
+              className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
+              onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+            >
+              <Home className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
+              Dashboard
+            </Link>
+            <Link
+              href="/dashboard/tuning-history"
+              className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
+              onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+            >
+              <History className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
+              Tuning History
+            </Link>
+            <Link
+              href="/dashboard/credits"
+              className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
+              onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+            >
+              <CreditCard className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
+              Credits
+            </Link>
+            <Link
+              href="/dashboard/upload"
+              className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
+              onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+            >
+              <Upload className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
+              Upload File
+            </Link>
+            <Link
+              href="/dashboard/settings"
+              className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
+              onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+            >
+              <Settings className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
+              Settings
+            </Link>
+          </nav>
+
+          {/* Opening Hours Component */}
+          <OpeningHours />
         </div>
+
+        {/* Main content */}
+        <main className="flex-1 p-4 md:p-6 md:ml-72">
+          {children}
+        </main>
+
+        {/* Floating ticket button */}
+        <FloatingTicketButton />
       </div>
-      
-      {/* Floating ticket button */}
-      <FloatingTicketButton />
     </div>
   );
 } 

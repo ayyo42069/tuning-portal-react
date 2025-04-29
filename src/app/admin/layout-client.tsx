@@ -18,6 +18,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 import { useAuth } from "@/lib/AuthProvider";
 import OpeningHours from "@/components/OpeningHours";
+import { Header } from "@/components/Header";
 
 export default function AdminLayoutClient({
   children,
@@ -98,7 +99,7 @@ export default function AdminLayoutClient({
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           } md:translate-x-0 fixed md:static z-40 w-72 min-h-screen bg-white dark:bg-gray-800 shadow-lg transition-transform duration-300 ease-in-out`}
         >
-          <div className="p-6 flex flex-col h-full">
+          <nav className="p-4 space-y-2">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Admin Portal
@@ -144,98 +145,59 @@ export default function AdminLayoutClient({
               Back to Dashboard
             </Link>
 
-            <nav className="space-y-2">
-              <Link
-                href="/admin"
-                className="flex items-center px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
-              >
-                <Home className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                Dashboard
-              </Link>
-              <Link
-                href="/admin/tuning-requests"
-                className="flex items-center px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
-              >
-                <FileText className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                Tuning Requests
-              </Link>
-              <Link
-                href="/admin/users"
-                className="flex items-center px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
-              >
-                <Users className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                Users
-              </Link>
-              <Link
-                href="/admin/credits"
-                className="flex items-center px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
-              >
-                <CreditCard className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                Credits
-              </Link>
-              <Link
-                href="/admin/notifications"
-                className="flex items-center px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
-              >
-                <Bell className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                Notifications
-              </Link>
-              <Link
-                href="/admin/security"
-                className="flex items-center px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
-              >
-                <Shield className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                Security
-              </Link>
-            </nav>
+            {/* Navigation */}
+            <Link
+              href="/admin"
+              className="flex items-center px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
+            >
+              <Home className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
+              Dashboard
+            </Link>
+            <Link
+              href="/admin/tuning-requests"
+              className="flex items-center px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
+            >
+              <FileText className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
+              Tuning Requests
+            </Link>
+            <Link
+              href="/admin/users"
+              className="flex items-center px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
+            >
+              <Users className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
+              Users
+            </Link>
+            <Link
+              href="/admin/credits"
+              className="flex items-center px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
+            >
+              <CreditCard className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
+              Credits
+            </Link>
+            <Link
+              href="/admin/notifications"
+              className="flex items-center px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
+            >
+              <Bell className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
+              Notifications
+            </Link>
+            <Link
+              href="/admin/security"
+              className="flex items-center px-4 py-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
+            >
+              <Shield className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-500 transition-colors" />
+              Security
+            </Link>
+          </nav>
 
-            {/* Opening Hours Component */}
-            <OpeningHours />
-          </div>
+          {/* Opening Hours Component */}
+          <OpeningHours />
         </div>
 
         {/* Main content */}
-        <div className="flex-1 md:ml-0 w-full">
+        <div className="flex-1">
           {/* Header */}
-          <header className="bg-white dark:bg-gray-800 shadow pt-16 md:pt-0">
-            <div className="max-w-7xl mx-auto py-4 md:py-6 px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-2">
-                  <div className="hidden md:flex items-center">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold mr-3">
-                      {user?.username?.charAt(0).toUpperCase() || "A"}
-                    </div>
-                    <div>
-                      <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                        Welcome,{" "}
-                        <span className="text-blue-600 dark:text-blue-400">
-                          {user?.username}
-                        </span>
-                      </h1>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg flex items-center">
-                    <CreditCard className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-1.5" />
-                    <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                      {user?.credits || 0} Credits
-                    </span>
-                  </div>
-                  <NotificationBell />
-                  <ThemeToggle />
-                  <button
-                    onClick={handleLogout}
-                    className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                    aria-label="Logout"
-                  >
-                    <LogOut className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </header>
+          <Header variant="admin" />
           <div className="p-6 md:p-8">{children}</div>
         </div>
       </div>
