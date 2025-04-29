@@ -133,94 +133,95 @@ export default function DashboardLayout({
           />
         </div>
 
-        {/* Mobile menu button */}
-        <div className="md:hidden fixed top-4 left-4 z-50">
-          <button
-            onClick={toggleSidebar}
-            className="p-2 rounded-md bg-white dark:bg-gray-800 shadow-md"
-            aria-label="Toggle menu"
-          >
-            {sidebarOpen ? (
-              <X className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-            ) : (
-              <Menu className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-            )}
-          </button>
-        </div>
+        <div className="flex relative z-10">
+          {/* Mobile menu button */}
+          <div className="md:hidden fixed top-4 left-4 z-50">
+            <button
+              onClick={toggleSidebar}
+              className="p-2 rounded-md bg-white dark:bg-gray-800 shadow-md"
+              aria-label="Toggle menu"
+            >
+              {sidebarOpen ? (
+                <X className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+              ) : (
+                <Menu className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+              )}
+            </button>
+          </div>
 
-        {/* Sidebar */}
-        <div
-          ref={sidebarRef}
-          id="sidebar"
-          className={`${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } md:translate-x-0 fixed md:static z-40 w-72 min-h-screen bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 shadow-lg transition-transform duration-300 ease-in-out`}
-        >
-          <nav className="p-4 space-y-2">
-            {/* User info */}
-            <div className="p-6 border-b border-white/10 dark:border-gray-700/30">
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold">
-                  {user?.username?.charAt(0).toUpperCase() || "U"}
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-white font-medium">Hello, {user?.username || "User"}</h3>
-                  <p className={`text-sm ${user?.role === "admin" ? "text-red-500" : "text-green-500"} bg-white/10 dark:bg-gray-800/20 backdrop-blur-md px-2 py-1 rounded-lg`}>{user?.role}</p>
+          {/* Sidebar */}
+          <div
+            ref={sidebarRef}
+            id="sidebar"
+            className={`${
+              sidebarOpen ? "translate-x-0" : "-translate-x-full"
+            } md:translate-x-0 fixed md:static z-40 w-72 min-h-screen bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/20 dark:border-gray-700/30 shadow-lg transition-transform duration-300 ease-in-out`}
+          >
+            <nav className="p-4 space-y-2">
+              {/* User info */}
+              <div className="p-6 border-b border-white/10 dark:border-gray-700/30">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold">
+                    {user?.username?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-white font-medium">Hello, {user?.username || "User"}</h3>
+                    <p className={`text-sm ${user?.role === "admin" ? "text-red-500" : "text-green-500"} bg-white/10 dark:bg-gray-800/20 backdrop-blur-md px-2 py-1 rounded-lg`}>{user?.role}</p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Navigation */}
-            <Link
-              href="/dashboard"
-              className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-              onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-            >
-              <Home className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-              Dashboard
-            </Link>
-            <Link
-              href="/dashboard/tuning-history"
-              className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-              onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-            >
-              <History className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-              Tuning History
-            </Link>
-            <Link
-              href="/dashboard/credits"
-              className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-              onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-            >
-              <CreditCard className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-              Credits
-            </Link>
-            <Link
-              href="/dashboard/upload"
-              className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-              onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-            >
-              <Upload className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-              Upload File
-            </Link>
-            <Link
-              href="/dashboard/settings"
-              className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
-              onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-            >
-              <Settings className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
-              Settings
-            </Link>
-          </nav>
+              {/* Navigation */}
+              <Link
+                href="/dashboard"
+                className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
+                onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+              >
+                <Home className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
+                Dashboard
+              </Link>
+              <Link
+                href="/dashboard/tuning-history"
+                className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
+                onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+              >
+                <History className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
+                Tuning History
+              </Link>
+              <Link
+                href="/dashboard/credits"
+                className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
+                onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+              >
+                <CreditCard className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
+                Credits
+              </Link>
 
-          {/* Opening Hours Component */}
-          <OpeningHours />
+              {/* Admin Menu - Only visible to admin users */}
+              {user?.role === "admin" && (
+                <div className="mt-4 pt-4 border-t border-white/10 dark:border-gray-700/30">
+                  <h3 className="px-4 text-sm font-semibold text-blue-300 mb-2">Admin Panel</h3>
+                  <Link
+                    href="/admin"
+                    className="flex items-center px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-blue-900/30 hover:text-cyan-300 dark:hover:text-blue-400 transition-all duration-200 group backdrop-blur-sm"
+                    onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+                  >
+                    <Settings className="h-5 w-5 mr-3 text-blue-300 group-hover:text-cyan-300 transition-colors" />
+                    Admin Dashboard
+                  </Link>
+                </div>
+              )}
+            </nav>
+
+            {/* Opening Hours Component */}
+            <OpeningHours />
+          </div>
+
+          {/* Main content */}
+          <main className="flex-1 p-4 md:p-6">
+            {children}
+          </main>
         </div>
-
-        {/* Main content */}
-        <main className="flex-1 p-4 md:p-6 md:ml-72">
-          {children}
-        </main>
 
         {/* Floating ticket button */}
         <FloatingTicketButton />
