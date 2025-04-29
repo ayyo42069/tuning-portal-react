@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 import {
   FileText,
   PlusSquare,
@@ -36,11 +35,13 @@ interface TuningHistoryClientProps {
 
 export default function TuningHistoryClient({ initialData }: TuningHistoryClientProps) {
   const router = useRouter();
+  const [tuningFiles, setTuningFiles] = useState<TuningFile[]>(initialData?.tuningFiles || []);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { data: tuningFiles = [], isLoading, refetch } = useQuery({
-    queryKey: ['tuningHistory'],
-    queryFn: async () => {
+  const fetchTuningHistory = async () => {
+    setLoading(true);
+    try {
       const response = await fetch("/api/tuning/history", {
         credentials: "include",
         cache: "no-store"
@@ -49,20 +50,25 @@ export default function TuningHistoryClient({ initialData }: TuningHistoryClient
       if (!response.ok) {
         if (response.status === 401) {
           router.push("/auth/login");
-          return [];
+          return;
         }
         throw new Error(`Failed to fetch tuning history: ${response.status}`);
       }
 
       const data = await response.json();
-      return data.tuningFiles;
-    },
-    initialData: initialData?.tuningFiles || [],
-    refetchInterval: 10000, // Refetch every 10 seconds
-    refetchOnWindowFocus: true, // Refetch when window regains focus
-    retry: 3, // Retry failed requests 3 times
-    retryDelay: 1000, // Wait 1 second between retries
-  });
+      setTuningFiles(data.tuningFiles);
+    } catch (error) {
+      console.error("Error fetching tuning history:", error);
+      setError("Failed to load tuning history. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch data when component mounts
+  useEffect(() => {
+    fetchTuningHistory();
+  }, []);
 
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
@@ -79,7 +85,7 @@ export default function TuningHistoryClient({ initialData }: TuningHistoryClient
     }
   };
 
-  if (isLoading && tuningFiles.length === 0) {
+  if (loading && tuningFiles.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" message="Loading tuning history..." />
@@ -128,11 +134,11 @@ export default function TuningHistoryClient({ initialData }: TuningHistoryClient
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => refetch()}
+                  onClick={fetchTuningHistory}
                   className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200 bg-gray-100/80 dark:bg-gray-700/80 rounded-lg hover:bg-gray-200/80 dark:hover:bg-gray-600/80"
                   title="Refresh"
                 >
-                  <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
                 </button>
                 <button
                   className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200 bg-gray-100/80 dark:bg-gray-700/80 rounded-lg hover:bg-gray-200/80 dark:hover:bg-gray-600/80"
@@ -271,4 +277,4 @@ export default function TuningHistoryClient({ initialData }: TuningHistoryClient
       </main>
     </RetryableErrorBoundary>
   );
-} 
+}
