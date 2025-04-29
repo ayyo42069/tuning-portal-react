@@ -18,7 +18,11 @@ const MapPinIcon = dynamic(
   { ssr: false }
 );
 
-export const Footer = () => {
+interface FooterProps {
+  inView: boolean;
+}
+
+export function Footer({ inView }: FooterProps) {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -215,4 +219,4 @@ export const Footer = () => {
       </div>
     </footer>
   );
-};
+}
