@@ -111,15 +111,26 @@ export async function POST(request: NextRequest) {
             "UPDATE user_credits SET credits = credits + ? WHERE user_id = ?",
             [amount, user.id]
           );
+          console.log(`Updated existing credits for user ${user.id}:`, updateResult);
         } else {
           // Create new credit record
           updateResult = await connection.query(
             "INSERT INTO user_credits (user_id, credits) VALUES (?, ?)",
             [user.id, amount]
           );
+          console.log(`Created new credits record for user ${user.id}:`, updateResult);
         }
 
-        console.log(`Credit update result:`, updateResult);
+        // Verify the update was successful
+        const [verifyUpdate] = await connection.query<RowDataPacket[]>(
+          "SELECT credits FROM user_credits WHERE user_id = ?",
+          [user.id]
+        );
+        
+        if (!verifyUpdate?.[0]?.credits) {
+          throw new Error("Failed to verify credit update");
+        }
+        console.log(`Verified updated credits:`, verifyUpdate[0].credits);
 
         // Get updated credit balance for confirmation
         const [updatedCredits] = await connection.query<RowDataPacket[]>(
@@ -129,6 +140,7 @@ export async function POST(request: NextRequest) {
 
         // Commit transaction
         await connection.query("COMMIT");
+        console.log(`Transaction committed successfully for user ${user.id}`);
 
         return NextResponse.json({
           success: true,
