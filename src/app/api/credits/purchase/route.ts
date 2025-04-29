@@ -69,32 +69,10 @@ export async function POST(request: NextRequest) {
         // Start transaction using direct query
         await connection.query("START TRANSACTION");
 
-        // Check if this payment has already been processed
-        const [existingTransaction] = await connection.query(
-          "SELECT id FROM credit_transactions WHERE stripe_payment_id = ?",
-          [paymentIntent.id]
-        );
-
-        if (existingTransaction) {
-          console.log(
-            `Payment ${paymentIntent.id} already processed, returning success`
-          );
-          await connection.query("COMMIT");
-          return NextResponse.json({
-            success: true,
-            credits: amount,
-            message: "Credits already added to your account",
-          });
-        }
-
-        console.log(
-          `Processing payment ${paymentIntent.id} for user ${user.id}, adding ${amount} credits`
-        );
-
-        // Add credits to user's account
+        // Record the transaction first
         await connection.query(
-          "INSERT INTO credit_transactions (user_id, amount, transaction_type, stripe_payment_id) VALUES (?, ?, ?, ?)",
-          [user.id, amount, "purchase", paymentIntent.id]
+          "INSERT INTO credit_transactions (user_id, amount, transaction_type, stripe_payment_id, created_at) VALUES (?, ?, 'purchase', ?, CURRENT_TIMESTAMP)",
+          [user.id, amount, paymentIntent.id]
         );
 
         // Update user's credit balance
@@ -108,14 +86,14 @@ export async function POST(request: NextRequest) {
         if (existingCredit) {
           // Update existing credit record
           updateResult = await connection.query(
-            "UPDATE user_credits SET credits = credits + ? WHERE user_id = ?",
+            "UPDATE user_credits SET credits = credits + ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?",
             [amount, user.id]
           );
           console.log(`Updated existing credits for user ${user.id}:`, updateResult);
         } else {
           // Create new credit record
           updateResult = await connection.query(
-            "INSERT INTO user_credits (user_id, credits) VALUES (?, ?)",
+            "INSERT INTO user_credits (user_id, credits, created_at, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
             [user.id, amount]
           );
           console.log(`Created new credits record for user ${user.id}:`, updateResult);
