@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { executeQuery, executeTransaction } from "@/lib/db";
+import { executeQuery, pool } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 import Stripe from "stripe";
 
@@ -18,6 +18,7 @@ interface PurchaseRequest {
 }
 
 export async function POST(request: NextRequest) {
+  let connection;
   try {
     // Verify authentication
     const token = request.cookies.get("auth_token")?.value;
@@ -60,12 +61,15 @@ export async function POST(request: NextRequest) {
     });
 
     if (paymentIntent.status === "succeeded") {
-      // Start transaction
-      await executeTransaction("START TRANSACTION");
+      // Get a connection from the pool
+      connection = await pool.getConnection();
 
       try {
+        // Start transaction using direct query
+        await connection.query("START TRANSACTION");
+
         // Check if this payment has already been processed
-        const [existingTransaction] = await executeQuery<any>(
+        const [existingTransaction] = await connection.query(
           "SELECT id FROM credit_transactions WHERE stripe_payment_id = ?",
           [paymentIntent.id]
         );
@@ -74,7 +78,7 @@ export async function POST(request: NextRequest) {
           console.log(
             `Payment ${paymentIntent.id} already processed, returning success`
           );
-          await executeTransaction("COMMIT");
+          await connection.query("COMMIT");
           return NextResponse.json({
             success: true,
             credits: amount,
@@ -87,14 +91,14 @@ export async function POST(request: NextRequest) {
         );
 
         // Add credits to user's account
-        await executeQuery(
+        await connection.query(
           "INSERT INTO credit_transactions (user_id, amount, transaction_type, stripe_payment_id) VALUES (?, ?, ?, ?)",
           [user.id, amount, "purchase", paymentIntent.id]
         );
 
         // Update user's credit balance
         // First check if the user already has a credit entry
-        const [existingCredit] = await executeQuery<any>(
+        const [existingCredit] = await connection.query(
           "SELECT id FROM user_credits WHERE user_id = ?",
           [user.id]
         );
@@ -102,13 +106,13 @@ export async function POST(request: NextRequest) {
         let updateResult;
         if (existingCredit) {
           // Update existing credit record
-          updateResult = await executeQuery(
+          updateResult = await connection.query(
             "UPDATE user_credits SET credits = credits + ? WHERE user_id = ?",
             [amount, user.id]
           );
         } else {
           // Create new credit record
-          updateResult = await executeQuery(
+          updateResult = await connection.query(
             "INSERT INTO user_credits (user_id, credits) VALUES (?, ?)",
             [user.id, amount]
           );
@@ -117,13 +121,13 @@ export async function POST(request: NextRequest) {
         console.log(`Credit update result:`, updateResult);
 
         // Get updated credit balance for confirmation
-        const [updatedCredits] = await executeQuery<any>(
+        const [updatedCredits] = await connection.query(
           "SELECT credits FROM user_credits WHERE user_id = ?",
           [user.id]
         );
 
         // Commit transaction
-        await executeTransaction("COMMIT");
+        await connection.query("COMMIT");
 
         return NextResponse.json({
           success: true,
@@ -133,8 +137,15 @@ export async function POST(request: NextRequest) {
         });
       } catch (error) {
         // Rollback on error
-        await executeTransaction("ROLLBACK");
+        if (connection) {
+          await connection.query("ROLLBACK");
+        }
         throw error;
+      } finally {
+        // Always release the connection back to the pool
+        if (connection) {
+          connection.release();
+        }
       }
     } else {
       return NextResponse.json(

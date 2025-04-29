@@ -17,7 +17,7 @@ const dbConfig = {
 };
 
 // Create a connection pool
-const pool = mysql.createPool(dbConfig);
+export const pool = mysql.createPool(dbConfig);
 
 // Export the pool as db for direct use in API routes
 export const db = {
