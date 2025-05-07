@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Apply rate limiting to prevent registration abuse
+    /*
     const rateLimitResult = await rateLimitByIpAndIdentifier(
       request,
       "registration",
@@ -67,6 +68,7 @@ export async function POST(request: NextRequest) {
         { status: 429 }
       );
     }
+    */
 
     const body: RegisterRequest = await request.json();
     // Assign to our top-level variables
