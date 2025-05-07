@@ -100,9 +100,6 @@ export async function sendVerificationEmail(
         <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.2); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); background-color: #0f172a; color: #f8fafc;">
           <!-- Header with gradient background -->
           <div style="text-align: center; margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); border-radius: 8px; box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);">
-            <div style="width: 60px; height: 60px; margin: 0 auto 12px; background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-              <img src="https://cdn-icons-png.flaticon.com/512/1828/1828640.png" width="36" height="36" style="filter: brightness(0) invert(1);" alt="Verify Icon">
-            </div>
             <h1 style="color: white; font-size: 24px; margin-bottom: 4px; font-weight: 700;">Tuning Portal</h1>
             <p style="color: rgba(255, 255, 255, 0.8); font-size: 14px;">Your one-stop solution for tuning services</p>
           </div>
