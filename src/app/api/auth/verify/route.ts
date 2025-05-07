@@ -19,48 +19,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Apply rate limiting (10 requests per hour per IP)
-    // This prevents brute force attempts on verification tokens
-    const rateLimitResult = await rateLimitByIpAndIdentifier(
-      request,
-      token, // Use token as identifier
-      {
-        limit: 10,
-        windowMs: 60 * 60 * 1000, // 1 hour
-        identifier: "verify-email",
-        useDatabase: true, // Use database for persistence
-      }
-    );
-
-    // Log rate limit event for monitoring
-    await logRateLimitEvent(
-      request.headers.get("x-forwarded-for") || "unknown",
-      "verify-email",
-      rateLimitResult.success,
-      rateLimitResult.remaining
-    );
-
-    // If rate limit is exceeded, return error
-    if (!rateLimitResult.success) {
-      const minutes = Math.ceil(rateLimitResult.msBeforeNext / 60000);
-      return NextResponse.json(
-        {
-          error: `Too many verification attempts. Please try again in ${minutes} minute${
-            minutes === 1 ? "" : "s"
-          }.`,
-          retryAfter: rateLimitResult.resetTime,
-        },
-        {
-          status: 429,
-          headers: {
-            "Retry-After": Math.ceil(
-              rateLimitResult.msBeforeNext / 1000
-            ).toString(),
-          },
-        }
-      );
-    }
-
     // Verify the token
     const result = await verifyEmailToken(token);
 
